@@ -9,6 +9,7 @@ class PageRegistro extends StatefulWidget {
 }
 
 // jorge
+// comentario nuevo
 class _PageRegistroState extends State<PageRegistro> {
   @override
   Widget build(BuildContext context) {
