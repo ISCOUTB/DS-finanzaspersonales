@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'pages/icon_user.dart'; // Importa el archivo del menú lateral
+import 'pages/icon_user.dart';
 import 'pages/registro_pages.dart';
+import 'pages/TransferHistory.dart'; 
 
 void main() {
   runApp(const MyApp());
@@ -40,19 +41,27 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(); // Clave para controlar el Scaffold
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
+
+  // Lista de páginas para el cuerpo dinámico
+  final List<Widget> _pages = [
+    Center(child: Text('Página Principal')), // Página principal
+    Center(child: Text('Estadísticas')), // Página de estadísticas
+    const Transferhistory(), // Página de registros (TransferHistory)
+    Center(child: Text('Más opciones')), // Página de más opciones
+  ];
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index; // Cambia el índice seleccionado
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Asigna la clave al Scaffold
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: const Color(0xFFBEC6A0),
         leading: IconButton(
@@ -70,26 +79,15 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.person),
             color: const Color(0xFF708871),
             onPressed: () {
-              _scaffoldKey.currentState?.openEndDrawer(); // Abre el menú lateral
+              _scaffoldKey.currentState?.openEndDrawer();
             },
           ),
         ],
       ),
-      endDrawer: const UserMenu(), // Usa el widget del menú lateral
-      body: Container(
-        color: const Color(0xFF98D4AF),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text(''),
-              Text(
-                '',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            ],
-          ),
-        ),
+      endDrawer: const UserMenu(),
+      body: IndexedStack(
+        index: _selectedIndex, // Muestra la página correspondiente al índice seleccionado
+        children: _pages,
       ),
       floatingActionButton: SizedBox(
         width: 130,
