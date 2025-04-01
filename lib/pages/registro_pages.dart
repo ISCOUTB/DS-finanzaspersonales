@@ -129,7 +129,7 @@ class _PageRegistroState extends State<PageRegistro> {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.pushNamed(context, '/Principal');
+                            Navigator.pushNamed(context, '/home');
                           },
                           child: const Text(
                             'Iniciar sesión',

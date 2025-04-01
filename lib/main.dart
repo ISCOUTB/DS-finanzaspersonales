@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'pages/icon_user.dart'; // Importa el archivo del menú lateral
 import 'pages/registro_pages.dart';
+
 void main() {
   runApp(const MyApp());
 }
 
-// comentario jorge
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,15 +16,13 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const PageRegistro(),
-        //'/home': (context) => const HomePage(),
+        '/home': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
       },
       theme: ThemeData(
-        // Configuración del tema global
-        //colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF708871), // Color de fondo de la barra
-          selectedItemColor: Color(0xFFBEC6A0), // Color del ítem seleccionado
-          unselectedItemColor: Colors.white, // Color de los ítems no seleccionados
+          backgroundColor: Color(0xFF708871),
+          selectedItemColor: Color(0xFFBEC6A0),
+          unselectedItemColor: Colors.white,
         ),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -35,15 +33,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -51,43 +40,44 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0; // Índice de la pestaña seleccionada
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(); // Clave para controlar el Scaffold
+  int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // Cambiar el índice seleccionado
+      _selectedIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey, // Asigna la clave al Scaffold
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBEC6A0), // Color de fondo de la barra
+        backgroundColor: const Color(0xFFBEC6A0),
         leading: IconButton(
-          icon: const Icon(Icons.menu), // Botón de navegación en la izquierda
+          icon: const Icon(Icons.menu),
           color: const Color(0xFF708871),
-          onPressed: () {
-            //print('Botón de navegación presionado');
-          },
+          onPressed: () {},
         ),
         title: const Text(
           'Finanse Tracker',
           style: TextStyle(color: Color(0xFF708871)),
         ),
-        centerTitle: false, // Centrar el título
+        centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.person), // Icono de persona en la derecha
+            icon: const Icon(Icons.person),
             color: const Color(0xFF708871),
             onPressed: () {
-              //print('Icono de persona presionado');
+              _scaffoldKey.currentState?.openEndDrawer(); // Abre el menú lateral
             },
           ),
         ],
       ),
+      endDrawer: const UserMenu(), // Usa el widget del menú lateral
       body: Container(
-        color: const Color(0xFF98D4AF), // Color de fondo personalizado
+        color: const Color(0xFF98D4AF),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -102,39 +92,39 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: SizedBox(
-        width: 130, // Ancho personalizado
-        height: 65, // Alto personalizado
+        width: 130,
+        height: 65,
         child: FloatingActionButton(
-          backgroundColor: const Color(0xFFBEC6A0), // Color de fondo
-          onPressed: (){},
+          backgroundColor: const Color(0xFFBEC6A0),
+          onPressed: () {},
           tooltip: 'Increment',
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15), // Esquinas redondeadas
+            borderRadius: BorderRadius.circular(15),
           ),
-          child: const Icon(Icons.add, color: Color(0xFF708871), size: 40), // Botón flotante con el icono de más (+)
+          child: const Icon(Icons.add, color: Color(0xFF708871), size: 40),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color.fromARGB(255, 59, 145, 103), // Color de fondo de la barra
-        selectedItemColor: const Color.fromARGB(255, 59, 145, 103), // Color del ítem seleccionado
-        unselectedItemColor: const Color(0xFFBEC6A0), // Color de los ítems no seleccionados
-        currentIndex: _selectedIndex, // Índice del ítem seleccionado
-        onTap: _onItemTapped, // Manejar el cambio de pestaña
+        backgroundColor: const Color.fromARGB(255, 59, 145, 103),
+        selectedItemColor: const Color.fromARGB(255, 59, 145, 103),
+        unselectedItemColor: const Color(0xFFBEC6A0),
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home), // Ícono de "Principal"
+            icon: Icon(Icons.home),
             label: 'Principal',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart), // Ícono de "Estadísticas"
+            icon: Icon(Icons.bar_chart),
             label: 'Estadísticas',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list), // Ícono de "Registros"
+            icon: Icon(Icons.list),
             label: 'Registros',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.more_horiz), // Ícono de "Más"
+            icon: Icon(Icons.more_horiz),
             label: 'Más',
           ),
         ],
