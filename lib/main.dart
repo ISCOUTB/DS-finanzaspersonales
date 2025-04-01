@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'pages/icon_user.dart';
 import 'pages/registro_pages.dart';
-import 'pages/TransferHistory.dart'; 
+import 'pages/TransferHistory.dart';
+import 'pages/principal_pages.dart'; 
 
 void main() {
   runApp(const MyApp());
@@ -46,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Lista de páginas para el cuerpo dinámico
   final List<Widget> _pages = [
-    Center(child: Text('Página Principal')), // Página principal
+    const PrincipalPage(), // Página principal
     Center(child: Text('Estadísticas')), // Página de estadísticas
     const Transferhistory(), // Página de registros (TransferHistory)
     Center(child: Text('Más opciones')), // Página de más opciones
