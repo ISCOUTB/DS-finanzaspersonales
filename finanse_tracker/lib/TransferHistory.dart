@@ -4,6 +4,8 @@ class Home extends StatelessWidget{
   const Home({Key?key}):super(key: key);
 
   @override
+
+
   Widget build(BuildContext context) {
     
     return Scaffold(
@@ -39,10 +41,21 @@ class Home extends StatelessWidget{
         SliverList(delegate: SliverChildBuilderDelegate(
           (context,index){
             return ListTile(leading: ClipRRect(borderRadius: BorderRadius.circular(5),
-            child:Image.asset('images/cre.png'),
+            child:Image.asset('images/crrdt.png',height: 40,),
             ),
+            title: Text('transfer',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
+            ),
+            trailing: Text('\$ 56',style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 19,
+              color: Colors.green
+            ),),
             );
-
+           
           },
         ) )
       ],
@@ -68,7 +81,7 @@ class Home extends StatelessWidget{
                   children: [
                     Positioned(
                       top: 5,
-                      left: 1550,
+                      left: 1480,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(7),
                         child: Container(
