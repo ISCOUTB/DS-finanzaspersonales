@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+
+import 'package:finanse_tracker/data/listdata.dart';
+
 class Home extends StatelessWidget{
   const Home({Key?key}):super(key: key);
 
@@ -25,7 +28,7 @@ class Home extends StatelessWidget{
                   style: TextStyle(fontWeight:
                           FontWeight.w600,
                           fontSize: 19, 
-                          color: Colors.black,
+                          color: const Color.fromARGB(255, 27, 26, 26),
                           ),
                           ),
                           Text('sell all',style: TextStyle(fontWeight:
@@ -40,23 +43,33 @@ class Home extends StatelessWidget{
         ),
         SliverList(delegate: SliverChildBuilderDelegate(
           (context,index){
+            
             return ListTile(leading: ClipRRect(borderRadius: BorderRadius.circular(5),
-            child:Image.asset('images/crrdt.png',height: 40,),
+            child:Image.asset('images/${geter()[index].image}',
+            height: 40,),
             ),
-            title: Text('transfer',
+            title: Text(geter()[index].name!,
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w600,
             ),
             ),
-            trailing: Text('\$ 56',style: TextStyle(
+         subtitle: Text(
+          geter()[index].time!,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+          ),
+         ),
+            trailing: Text( '\$${geter()[index].fee!}',style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 19,
-              color: Colors.green
-            ),),
+              color: geter()[index].buy! ? Colors.red : Colors.green,
+            ),
+            ),
             );
            
           },
+          childCount: geter().length,
         ) )
       ],
       ),
@@ -147,7 +160,7 @@ class Home extends StatelessWidget{
                           color: Colors.white,
                           ),
                       ),
-                      Icon(Icons.more_horiz,color: Colors.white ,
+                      Icon(Icons.arrow_downward,color: Colors.white ,
                       ),
                 ],
               ),
@@ -178,7 +191,7 @@ class Home extends StatelessWidget{
                       CircleAvatar(
                         radius: 13,
                         backgroundColor: Color.fromARGB(255, 85, 145, 141),
-                        child: Icon(Icons.arrow_upward,color: Colors.white,size: 19,
+                        child: Icon(Icons.arrow_downward,color: Colors.white,size: 19,
                         ),
                       ),
                       SizedBox(width:  7,),
