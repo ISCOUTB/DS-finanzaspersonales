@@ -97,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: FloatingActionButton(
           backgroundColor: const Color(0xFFBEC6A0),
           onPressed: () {},
-          tooltip: 'Increment',
+          tooltip: '',
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
