@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 class PrincipalPage extends StatelessWidget {
   const PrincipalPage({Key? key}) : super(key: key);
@@ -8,7 +7,7 @@ class PrincipalPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: const Color(0xFF98D4AF), // Fondo verde claro
+        color: const Color(0xff368983), // Fondo verde claro
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -52,42 +51,49 @@ class PrincipalPage extends StatelessWidget {
               ),
               const SizedBox(height: 30),
               Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: PieChart(
-                        PieChartData(
-                          sections: _buildPieChartSections(),
-                          centerSpaceRadius: 50,
-                          sectionsSpace: 2,
+                child: Center(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 200,
+                        height: 200,
+                        decoration: const BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: BarChart(
-                        BarChartData(
-                          barGroups: _buildBarChartGroups(),
-                          titlesData: FlTitlesData(
-                            leftTitles: SideTitles(showTitles: true),
-                            bottomTitles: SideTitles(
-                              showTitles: true,
-                              getTitles: (value) {
-                                switch (value.toInt()) {
-                                  case 0:
-                                    return 'Ingresos';
-                                  case 1:
-                                    return 'Gastos';
-                                  default:
-                                    return '';
-                                }
-                              },
+                      Container(
+                        width: 150,
+                        height: 150,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFDFF6E4),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Text(
+                              '2.000.000,00 cop',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
+                            Text(
+                              '500.000,00 cop',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -146,57 +152,5 @@ class PrincipalPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  List<PieChartSectionData> _buildPieChartSections() {
-    return [
-      PieChartSectionData(
-        color: Colors.green,
-        value: 80, // Porcentaje de ingresos
-        title: '80%',
-        radius: 50,
-        titleStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-      PieChartSectionData(
-        color: Colors.red,
-        value: 20, // Porcentaje de gastos
-        title: '20%',
-        radius: 50,
-        titleStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-    ];
-  }
-
-  List<BarChartGroupData> _buildBarChartGroups() {
-    return [
-      BarChartGroupData(
-        x: 0,
-        barRods: [
-          BarChartRodData(
-            y: 2000, // Valor de ingresos
-            colors: [Colors.green],
-            width: 20,
-          ),
-        ],
-      ),
-      BarChartGroupData(
-        x: 1,
-        barRods: [
-          BarChartRodData(
-            y: 500, // Valor de gastos
-            colors: [Colors.red],
-            width: 20,
-          ),
-        ],
-      ),
-    ];
   }
 }

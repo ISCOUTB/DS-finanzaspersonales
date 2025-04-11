@@ -3,6 +3,7 @@ import 'pages/icon_user.dart';
 import 'pages/registro_pages.dart';
 import 'pages/TransferHistory.dart';
 import 'pages/principal_pages.dart'; 
+import 'pages/statistics.dart';
 
 void main() {
   runApp(const MyApp());
@@ -48,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Lista de páginas para el cuerpo dinámico
   final List<Widget> _pages = [
     const PrincipalPage(), // Página principal
-    Center(child: Text('Estadísticas')), // Página de estadísticas
+    Statistics(), // Página de estadísticas
     const Transferhistory(), // Página de registros (TransferHistory)
     Center(child: Text('Más opciones')), // Página de más opciones
   ];
@@ -64,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFBEC6A0),
+        backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.menu),
           color: const Color(0xFF708871),
