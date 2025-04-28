@@ -9,23 +9,38 @@ class PrincipalPage extends StatefulWidget {
   State<PrincipalPage> createState() => _PrincipalPageState();
 }
 
-class _PrincipalPageState extends State<PrincipalPage> {
+class _PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserver {
   String _selectedFilter = 'día';
   List<Transaccion> _transacciones = [];
-
   final _gestorFinanzas = GestorFinanzas();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _cargarTransacciones();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _cargarTransacciones();
+    }
   }
 
   Future<void> _cargarTransacciones() async {
     await _gestorFinanzas.cargarTransacciones();
-    setState(() {
-      _transacciones = _gestorFinanzas.transacciones;
-    });
+    if (mounted) {
+      setState(() {
+        _transacciones = _gestorFinanzas.transacciones;
+      });
+    }
   }
 
   Map<String, double> _calculateBalance() {
@@ -77,6 +92,14 @@ class _PrincipalPageState extends State<PrincipalPage> {
     final balance = _calculateBalance();
 
     return Scaffold(
+        appBar: AppBar(  // Add 'appBar:' here
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _cargarTransacciones,
+          ),
+        ],
+      ),
       body: Container(
         color: const Color(0xff368983),
         child: Column(

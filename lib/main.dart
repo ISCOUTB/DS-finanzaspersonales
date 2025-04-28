@@ -6,6 +6,7 @@ import 'pages/TransferHistory.dart';
 import 'pages/principal_pages2.dart';  
 import 'pages/statistics.dart';
 import 'pages/form_ingresos.dart';
+import 'pages/form_gastos.dart';
 
 void main() {
   runApp(const MyApp());
@@ -85,9 +86,18 @@ void _showTransactionDialog() {
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
-              onPressed: () {
-                // Aquí irá la lógica para agregar gastos
+              onPressed: () async {
                 Navigator.pop(context);
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FormGastos()),
+                );
+                if (result != null) {
+                  // Forzar actualización de PrincipalPage
+                  if (mounted) {
+                    setState(() {});
+                  }
+                }
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -111,20 +121,18 @@ void _showTransactionDialog() {
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
-              onPressed: () {
-                Navigator.pop(context); // Cierra el modal
-                Navigator.push(
+              onPressed: () async {
+                Navigator.pop(context);
+                final result = await Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const FormIngresos(),
-                  ),
-                ).then((transaccion) {
-                  // Aquí puedes manejar la transacción creada
-                  if (transaccion != null) {
-                    // Implementa la lógica para guardar la transacción
-                    print('Nueva transacción creada: ${transaccion.descripcion}');
+                  MaterialPageRoute(builder: (context) => const FormIngresos()),
+                );
+                if (result != null) {
+                  // Forzar actualización de PrincipalPage
+                  if (mounted) {
+                    setState(() {});
                   }
-                });
+                }
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
