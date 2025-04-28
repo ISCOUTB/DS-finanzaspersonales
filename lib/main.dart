@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'pages/icon_user.dart';
 import 'pages/registro_pages.dart';
 import 'pages/TransferHistory.dart';
-import 'pages/principal_pages.dart'; 
+//import 'pages/principal_pages.dart';
+import 'pages/principal_pages2.dart';  
 import 'pages/statistics.dart';
+import 'pages/form_ingresos.dart';
 
 void main() {
   runApp(const MyApp());
@@ -60,6 +62,118 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  // Agrega esta función dentro de la clase _MyHomePageState
+// Agrega esta función dentro de la clase _MyHomePageState
+void _showTransactionDialog() {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (BuildContext context) {
+      return Container(
+        height: 280,
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            // Botón de Gastos
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3D59),
+                minimumSize: const Size(double.infinity, 70),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              onPressed: () {
+                // Aquí irá la lógica para agregar gastos
+                Navigator.pop(context);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: const [
+                  Icon(Icons.trending_down, color: Colors.red, size: 30),
+                  SizedBox(width: 20),
+                  Text(
+                    'Gastos',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Botón de Ingresos
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3D59),
+                minimumSize: const Size(double.infinity, 70),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(context); // Cierra el modal
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FormIngresos(),
+                  ),
+                ).then((transaccion) {
+                  // Aquí puedes manejar la transacción creada
+                  if (transaccion != null) {
+                    // Implementa la lógica para guardar la transacción
+                    print('Nueva transacción creada: ${transaccion.descripcion}');
+                  }
+                });
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: const [
+                  Icon(Icons.trending_up, color: Colors.green, size: 30),
+                  SizedBox(width: 20),
+                  Text(
+                    'Ingresos',
+                    style: TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Fila de botones circulares
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: const Color(0xFF1E3D59),
+                  child: IconButton(
+                    icon: const Icon(Icons.account_balance, color: Colors.white),
+                    onPressed: () {
+                      // Aquí irá la lógica para transferencias bancarias
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.blue,
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
         height: 65,
         child: FloatingActionButton(
           backgroundColor: const Color(0xFFBEC6A0),
-          onPressed: () {},
+          onPressed: _showTransactionDialog,
           tooltip: '',
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),

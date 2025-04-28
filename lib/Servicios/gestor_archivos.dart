@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import '../modelos/transaccion.dart';
+import '../Modelos/transaccion.dart';
 
 class GestorArchivos {
   final String pathArchivo;
