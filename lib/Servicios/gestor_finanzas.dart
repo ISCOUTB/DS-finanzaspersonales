@@ -3,9 +3,12 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import '../Modelos/transaccion.dart';
 import '../Modelos/categoria.dart';
+import '../Servicios/gestor_archivos.dart';
+import 'database_helper.dart';
 
 class GestorFinanzas {
   static final GestorFinanzas _instance = GestorFinanzas._internal();
+  final _dbHelper = DatabaseHelper();
   List<Transaccion> transacciones = [];
   List<Categoria> categorias = [];
 
@@ -15,58 +18,41 @@ class GestorFinanzas {
 
   GestorFinanzas._internal();
 
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<File> get _transaccionesFile async {
-    final path = await _localPath;
-    return File('$path/transacciones.json');
-  }
-
-  // Cargar transacciones desde el archivo
   Future<void> cargarTransacciones() async {
     try {
-      final file = await _transaccionesFile;
-      if (await file.exists()) {
-        final contenido = await file.readAsString();
-        final List<dynamic> jsonList = json.decode(contenido);
-        transacciones = jsonList.map((json) => Transaccion.fromJson(json)).toList();
-      }
+      transacciones = await _dbHelper.getTransacciones();
     } catch (e) {
       print('Error al cargar transacciones: $e');
     }
   }
 
-  // Guardar transacciones en el archivo
-  Future<void> guardarTransacciones() async {
+  Future<void> agregarTransaccion(Transaccion t) async {
     try {
-      final file = await _transaccionesFile;
-      final List<Map<String, dynamic>> jsonList = 
-          transacciones.map((t) => t.toJson()).toList();
-      await file.writeAsString(json.encode(jsonList));
+      await _dbHelper.insertTransaccion(t);
+      transacciones.add(t);
     } catch (e) {
-      print('Error al guardar transacciones: $e');
+      print('Error al agregar transacción: $e');
     }
   }
 
-  // Modificar métodos existentes para que guarden los cambios
-  Future<void> agregarTransaccion(Transaccion t) async {
-    transacciones.add(t);
-    await guardarTransacciones();
-  }
-
   Future<void> eliminarTransaccion(String id) async {
-    transacciones.removeWhere((t) => t.id == id);
-    await guardarTransacciones();
+    try {
+      await _dbHelper.deleteTransaccion(id);
+      transacciones.removeWhere((t) => t.id == id);
+    } catch (e) {
+      print('Error al eliminar transacción: $e');
+    }
   }
 
   Future<void> editarTransaccion(String id, Transaccion nueva) async {
-    final index = transacciones.indexWhere((t) => t.id == id);
-    if (index != -1) {
-      transacciones[index] = nueva;
-      await guardarTransacciones();
+    try {
+      await _dbHelper.updateTransaccion(nueva);
+      final index = transacciones.indexWhere((t) => t.id == id);
+      if (index != -1) {
+        transacciones[index] = nueva;
+      }
+    } catch (e) {
+      print('Error al editar transacción: $e');
     }
   }
 

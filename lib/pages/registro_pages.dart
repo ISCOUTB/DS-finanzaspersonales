@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PageRegistro extends StatefulWidget {
   const PageRegistro({super.key});
@@ -8,167 +9,120 @@ class PageRegistro extends StatefulWidget {
   State<PageRegistro> createState() => _PageRegistroState();
 }
 
-// jorge
-// comentario nuevo
 class _PageRegistroState extends State<PageRegistro> {
+  final _nameController = TextEditingController();
+  bool _canContinue = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Añadir listener para detectar cambios en el texto
+    _nameController.addListener(() {
+      setState(() {
+        _canContinue = _nameController.text.isNotEmpty;
+      });
+    });
+  }
+
+  Future<void> _saveNameAndNavigate() async {
+    if (_nameController.text.isNotEmpty) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userName', _nameController.text);
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: <Color>[
-                Color(0xFFEEF1DA),
-                Color(0xFFD5E5D5),
-                Color(0xFF6A9C89),
-                Color(0xFF1F7D53),
-                Color(0xFF255F38),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    //logo
-                    Icon(
-                      Icons.account_circle, 
-                      size: 200, 
-                      color: const Color(0xFF255F38)
-                      ),
-                    const SizedBox(width: 20),
-                    
-                    //hello
-                    Text(
-                      'Hola de nuevo',
-                      style: GoogleFonts.bebasNeue(
-                        fontSize: 48,
-                        color: const Color(0xFF255F38),
-                      ), 
-                    ),
-                    const SizedBox(width: 10),
-                    const Text(
-                      'Bienvenido de vuelta',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.blueGrey,
-                        fontWeight: FontWeight.bold
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                      
-                    // Email TextField
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                      child: Container(
-                        width: 300, // Ajusta el ancho según necesites
-                        height: 50, // Ajusta la altura según necesites
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1F7D53),
-                          border: Border.all(
-                            color: Colors.white,
-                          ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20.0),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Correo electrónico',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                      
-                      
-                    //password textfield
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                      child: Container(
-                        width: 300, // Ajusta el ancho según necesites
-                        height: 50, // Ajusta la altura según necesites
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1F7D53),
-                          border: Border.all(
-                            color: Colors.white,
-                            ),
-                          borderRadius: BorderRadius.circular(15)
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20.0),
-                          child: TextField(
-                            obscureText: true,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Contraseña',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                      
-                      
-                    //sign in button
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                      child: SizedBox(
-                        width: 300, // Ajusta el ancho del botón
-                        height: 50, // Ajusta la altura del botón
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0E5A33), // Color de fondo
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/home');
-                          },
-                          child: const Text(
-                            'Iniciar sesión',
-                            style: TextStyle(color: Colors.white, fontSize: 18),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                      
-                      
-                    //not remember password
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: const [
-                        Text(
-                          '¿Aún no tiene una cuenta?',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF255F38),
-                          ),
-                        ),
-                        Text(
-                          'Regístrate aquí',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.greenAccent,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                  ],
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                // Imagen principal
+                Center(
+                  child: Image.asset(
+                    'images/inicio.jpg',
+                    height: 300,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Text('Error al cargar la imagen: $error');
+                    },
+                  ),
                 ),
-              ),
+                const SizedBox(height: 40),
+                // Título principal
+                Text(
+                  'Spend Smarter\nSave More',
+                  style: GoogleFonts.poppins(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: const Color.fromARGB(225, 47, 125, 121),
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                // Solo el campo de nombre
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    hintText: '¿Cómo te llamas?',
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.person_outline,
+                      color: Color.fromARGB(225, 47, 125, 121),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                // Botón de siguiente
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _canContinue ? _saveNameAndNavigate : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+                      disabledBackgroundColor: Colors.grey[300],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Siguiente',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+        ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.removeListener(() {}); // Remover el listener
+    _nameController.dispose();
+    super.dispose();
   }
 }

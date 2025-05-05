@@ -31,35 +31,39 @@ class _FormIngresosState extends State<FormIngresos> {
   }
 
   void _saveTransaction() async {
-  if (_formKey.currentState!.validate()) {
-    final transaction = Transaccion(
-      id: const Uuid().v4(),
-      tipo: 'ingreso',
-      monto: double.parse(_amountController.text),
-      fecha: _selectedDate,
-      categoria: _selectedCategory,
-      descripcion: _nameController.text,
-    );
+    if (_formKey.currentState!.validate()) {
+      final transaction = Transaccion(
+        id: const Uuid().v4(),
+        tipo: 'ingreso',
+        monto: double.parse(_amountController.text),
+        fecha: _selectedDate,
+        categoria: _selectedCategory,
+        descripcion: _nameController.text,
+      );
 
-    await GestorFinanzas().agregarTransaccion(transaction);
-    Navigator.pop(context, transaction);
+      await GestorFinanzas().agregarTransaccion(transaction);
+      
+      // Notificar a la página principal
+      if (mounted) {
+        Navigator.pop(context, true); // Envía true para indicar que se agregó una transacción
+      }
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: const Color(0xFF1E1E1E),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Planificar un ingreso',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF1E1E1E)),
         ),
       ),
       body: Stack(
