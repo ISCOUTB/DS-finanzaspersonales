@@ -17,7 +17,7 @@ void main() async {
   
   // Verificar si existe un usuario registrado
   final prefs = await SharedPreferences.getInstance();
-  final hasUser = prefs.getString('userName') != null;
+  final hasUser = prefs.getString('userName') != null; //mirar si existe un usuario registrado
 
   runApp(MyApp(initialRoute: hasUser ? '/home' : '/login'));
 }
