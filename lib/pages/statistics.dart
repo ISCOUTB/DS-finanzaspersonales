@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../graficos/graficos.dart';
 
 class Statistics extends StatefulWidget {
   const Statistics({Key? key}) : super(key: key);
@@ -7,93 +8,159 @@ class Statistics extends StatefulWidget {
   State<Statistics> createState() => _StatisticsState();
 }
 
-class _StatisticsState extends State<Statistics> {
-  List day = ['Day', 'Week', 'Month', 'Year'];
-  int index_color = 0;
+class _StatisticsState extends State<Statistics> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  List<String> filters = ['Día', 'Semana', 'Mes', 'Año'];
+  int selectedFilter = 2;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // Encabezado con título
-            SliverToBoxAdapter(
+        child: Column(
+          children: [
+            // Header con título y filtros
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(225, 47, 125, 121),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+              ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 20),
                   const Text(
-                    'Statistics',
+                    'Estadísticas',
                     style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 20),
-
-                  // Botones de filtro
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                  const SizedBox(height: 16),
+                  // Filtros mejorados
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(day.length, (index) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              index_color = index;
-                            });
-                          },
-                          child: Container(
-                            height: 40,
-                            width: 80,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: index_color == index
-                                  ? const Color.fromARGB(255, 47, 125, 121)
-                                  : Colors.white,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              day[index],
+                      children: filters.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final filter = entry.value;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            label: Text(
+                              filter,
                               style: TextStyle(
-                                color: index_color == index
-                                    ? Colors.white
-                                    : Colors.black,
+                                color: selectedFilter == index 
+                                    ? const Color.fromARGB(225, 47, 125, 121)
+                                    : Colors.white,
                                 fontSize: 16,
-                                fontWeight: FontWeight.w700,
                               ),
                             ),
+                            selected: selectedFilter == index,
+                            selectedColor: Colors.white,
+                            backgroundColor: Colors.white.withOpacity(0.2),
+                            onSelected: (bool selected) {
+                              if (selected) {
+                                setState(() {
+                                  selectedFilter = index;
+                                });
+                              }
+                            },
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           ),
                         );
-                      }),
+                      }).toList(),
                     ),
                   ),
-
-                  const SizedBox(height: 30),
-
-                  // Aquí va el contenido de estadísticas según el filtro
-                  getStatisticsContent(),
+                ],
+              ),
+            ),
+            // TabBar mejorado
+            Container(
+              color: Colors.white,
+              child: TabBar(
+                controller: _tabController,
+                labelColor: const Color.fromARGB(225, 47, 125, 121),
+                unselectedLabelColor: Colors.grey,
+                indicatorColor: const Color.fromARGB(225, 47, 125, 121),
+                tabs: const [
+                  Tab(
+                    icon: Icon(Icons.pie_chart),
+                    text: 'Distribución',
+                  ),
+                  Tab(
+                    icon: Icon(Icons.bar_chart),
+                    text: 'Comparativa',
+                  ),
+                ],
+              ),
+            ),
+            // Contenido de las pestañas
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // Vista del gráfico circular
+                  SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: SizedBox(
+                        height: 400, // Altura fija para el gráfico
+                        child: Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Placeholder(), // Replace with your actual PieChartSample widget implementation or import
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Vista del gráfico de barras
+                  SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: SizedBox(
+                        height: 400, // Altura fija para el gráfico
+                        child: Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: IncomeExpenses(filterIndex: selectedFilter),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // Contenido adaptado del diseño básico que compartiste
-  Widget getStatisticsContent() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 30),
-      child: Column(
-        children: [
-          Text(
-            'Here goes the statistic content',
-            style: TextStyle(fontSize: 16),
-          ),
-        ],
       ),
     );
   }

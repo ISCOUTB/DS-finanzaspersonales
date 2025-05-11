@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../Servicios/gestor_finanzas.dart';
 import '../Modelos/transaccion.dart';
-import './DetalleTransfer.dart';
+import 'detalle_transfer.dart';
 
 class Transferhistory extends StatefulWidget {
-  const Transferhistory({Key? key}) : super(key: key);
+  const Transferhistory({super.key});
 
   @override
   State<Transferhistory> createState() => _TransferhistoryState();
@@ -64,7 +64,6 @@ class _TransferhistoryState extends State<Transferhistory> {
                       color: Colors.white,
                     ),
                   ),
-                  Icon(Icons.notifications, color: Colors.white),
                 ],
               ),
             ),

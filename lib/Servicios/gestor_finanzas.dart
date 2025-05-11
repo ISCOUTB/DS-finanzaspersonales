@@ -1,14 +1,12 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+import 'package:logging/logging.dart';
 import '../Modelos/transaccion.dart';
 import '../Modelos/categoria.dart';
-import '../Servicios/gestor_archivos.dart';
 import 'database_helper.dart';
 
 class GestorFinanzas {
   static final GestorFinanzas _instance = GestorFinanzas._internal();
   final _dbHelper = DatabaseHelper();
+  final _logger = Logger('GestorFinanzas');
   List<Transaccion> transacciones = [];
   List<Categoria> categorias = [];
 
@@ -22,7 +20,7 @@ class GestorFinanzas {
     try {
       transacciones = await _dbHelper.getTransacciones();
     } catch (e) {
-      print('Error al cargar transacciones: $e');
+      _logger.severe('Error al cargar transacciones: $e');
     }
   }
 
@@ -31,7 +29,7 @@ class GestorFinanzas {
       await _dbHelper.insertTransaccion(t);
       transacciones.add(t);
     } catch (e) {
-      print('Error al agregar transacción: $e');
+      _logger.severe('Error al agregar transacción: $e');
     }
   }
 
@@ -40,7 +38,7 @@ class GestorFinanzas {
       await _dbHelper.deleteTransaccion(id);
       transacciones.removeWhere((t) => t.id == id);
     } catch (e) {
-      print('Error al eliminar transacción: $e');
+      _logger.severe('Error al eliminar transacción: $e');
     }
   }
 
@@ -52,7 +50,7 @@ class GestorFinanzas {
         transacciones[index] = nueva;
       }
     } catch (e) {
-      print('Error al editar transacción: $e');
+      _logger.severe('Error al editar transacción: $e');
     }
   }
 

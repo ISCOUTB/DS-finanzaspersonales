@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:logging/logging.dart';
 import '../Modelos/transaccion.dart';
 
 class GestorArchivos {
   static const String fileName = 'transacciones.json';
+  final _logger = Logger('GestorArchivos');
 
   Future<String> get _externalPath async {
     // Obtener el directorio de documentos externo
@@ -53,7 +55,7 @@ class GestorArchivos {
 
       return _parseTransacciones(await file.readAsString());
     } catch (e) {
-      print('Error al cargar transacciones: $e');
+      _logger.severe('Error al cargar transacciones: $e');
       return [];
     }
   }
