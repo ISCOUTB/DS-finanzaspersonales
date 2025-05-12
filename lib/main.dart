@@ -3,17 +3,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/side_menu.dart';
 import 'pages/registro_pages.dart';
 import 'pages/transfer_history.dart';
-import 'pages/principal_pages.dart'; 
+import 'pages/principal_pages.dart';
 import 'pages/statistics.dart';
 //import 'prueba/stats.dart';
 import 'pages/form_ingresos.dart';
 import 'pages/form_gastos.dart';
 import 'Servicios/database_helper.dart';
+import 'pages/user_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseHelper().database;
-  
+
   // Verificar si existe un usuario registrado
   final prefs = await SharedPreferences.getInstance();
   final hasUser = prefs.getString('userName') != null;
@@ -23,7 +24,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final String initialRoute;
-  
+
   const MyApp({super.key, required this.initialRoute});
 
   @override
@@ -131,7 +132,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   Navigator.pop(context);
                   final result = await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const FormIngresos()),
+                    MaterialPageRoute(
+                      builder: (context) => const FormIngresos(),
+                    ),
                   );
                   if (result == true) {
                     // Actualizar usando la key global
@@ -197,7 +200,12 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.person),
             color: const Color(0xFF708871),
             onPressed: () {
-              
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const UserProfilePage(),
+                ),
+              );
             },
           ),
         ],
@@ -205,21 +213,9 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer: const SideMenu(),
       endDrawer: const SideMenu(),
       body: IndexedStack(
-        index: _selectedIndex, // Muestra la página correspondiente al índice seleccionado
+        index:
+            _selectedIndex, // Muestra la página correspondiente al índice seleccionado
         children: _pages,
-      ),
-      floatingActionButton: SizedBox(
-        width: 130,
-        height: 65,
-        child: FloatingActionButton(
-          backgroundColor: const Color.fromARGB(225, 47, 125, 121),
-          onPressed: _showTransactionDialog,
-          tooltip: '',
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: const Icon(Icons.add, color: Color.fromARGB(255, 246, 253, 250), size: 40),
-        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color.fromARGB(225, 47, 125, 121),
@@ -228,18 +224,12 @@ class _MyHomePageState extends State<MyHomePage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Principal',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Principal'),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
             label: 'Estadísticas',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Registros',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Registros'),
         ],
       ),
     );

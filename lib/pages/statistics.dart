@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../graficos/graficos.dart';
+import '../graficos/graf_pastel.dart'; // Importa el gráfico pastel
 import '../Servicios/gestor_finanzas.dart';
-import '../Modelos/transaccion.dart';
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -10,136 +9,133 @@ class StatisticsPage extends StatefulWidget {
   State<StatisticsPage> createState() => _StatisticsPageState();
 }
 
-class _StatisticsPageState extends State<StatisticsPage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _StatisticsPageState extends State<StatisticsPage> {
   final List<String> filters = ['Día', 'Semana', 'Mes', 'Año'];
-  int selectedFilter = 2; // Mes por defecto
+  int selectedFilter = 2; // Por defecto, "Mes"
   final GestorFinanzas _gestorFinanzas = GestorFinanzas();
-  List<Transaccion> transacciones = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _cargarDatos();
-  }
-
-  Future<void> _cargarDatos() async {
-    await _gestorFinanzas.cargarTransacciones();
-    if (mounted) {
-      setState(() {
-        transacciones = _gestorFinanzas.transacciones;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header con título y filtros
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(225, 47, 125, 121),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Análisis por Categorías',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+        title: const Text(
+          'Estadísticas',
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          // Filtros
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: const Color.fromARGB(225, 47, 125, 121),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: filters.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final filter = entry.value;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: Text(
+                        filter,
+                        style: TextStyle(
+                          color: selectedFilter == index
+                              ? const Color.fromARGB(225, 47, 125, 121)
+                              : Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                      selected: selectedFilter == index,
+                      selectedColor: Colors.white,
+                      backgroundColor: Colors.white.withOpacity(0.2),
+                      onSelected: (bool selected) {
+                        if (selected) {
+                          setState(() {
+                            selectedFilter = index;
+                          });
+                        }
+                      },
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: filters.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final filter = entry.value;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: FilterChip(
-                            label: Text(
-                              filter,
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Gráficos pastel
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Gráfico de ingresos
+                    Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Ingresos por Categoría',
                               style: TextStyle(
-                                color: selectedFilter == index 
-                                    ? const Color.fromARGB(225, 47, 125, 121)
-                                    : Colors.white,
-                                fontSize: 16,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            selected: selectedFilter == index,
-                            selectedColor: Colors.white,
-                            backgroundColor: Colors.white.withValues(alpha: 51),
-                            onSelected: (bool selected) {
-                              if (selected) {
-                                setState(() {
-                                  selectedFilter = index;
-                                });
-                              }
-                            },
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          ),
-                        );
-                      }).toList(),
+                            const SizedBox(height: 16),
+                            CategoryPieChart(
+                              selectedFilter: selectedFilter,
+                              tipo: 'ingreso', // Especifica que es para ingresos
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    // Gráfico de egresos
+                    Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Gastos por Categoría',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            CategoryPieChart(
+                              selectedFilter: selectedFilter,
+                              tipo: 'gasto', // Especifica que es para egresos
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            // TabBar
-            Container(
-              color: Colors.white,
-              child: TabBar(
-                controller: _tabController,
-                labelColor: const Color.fromARGB(225, 47, 125, 121),
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: const Color.fromARGB(225, 47, 125, 121),
-                tabs: const [
-                  Tab(
-                    icon: Icon(Icons.pie_chart),
-                    text: 'Distribución',
-                  ),
-                  Tab(
-                    icon: Icon(Icons.bar_chart),
-                    text: 'Comparativa',
-                  ),
-                ],
-              ),
-            ),
-            // Contenido
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  // Vista del gráfico circular
-                  CategoryPieChart(selectedFilter: selectedFilter),
-                  // Vista del gráfico de barras
-                  CategoryBarChart(selectedFilter: selectedFilter),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

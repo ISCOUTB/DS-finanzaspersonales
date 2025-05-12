@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Añade esta línea al inicio
+import 'package:shared_preferences/shared_preferences.dart';
+import 'form_ingresos.dart';
+import 'form_gastos.dart';
 import '../Modelos/transaccion.dart';
 import '../Servicios/gestor_finanzas.dart';
+import 'user_page.dart';
 
 class PrincipalPage extends StatefulWidget {
   static final GlobalKey<PrincipalPageState> globalKey = GlobalKey<PrincipalPageState>();
-  
+
   const PrincipalPage({super.key});
 
   @override
@@ -17,14 +20,14 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
   String _selectedFilter = 'día';
   List<Transaccion> _transacciones = [];
   final _gestorFinanzas = GestorFinanzas();
-  String _userName = ''; // Añade esta línea después de la declaración de la clase
+  String _userName = 'Usuario';
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     cargarTransacciones();
-    _loadUserName(); // Añade esta línea
+    _loadUserName();
   }
 
   Future<void> _loadUserName() async {
@@ -32,6 +35,15 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     setState(() {
       _userName = prefs.getString('userName') ?? 'Usuario';
     });
+  }
+
+  void _navigateToUserProfile() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const UserProfilePage()),
+    );
+    // Recarga el nombre del usuario al regresar
+    _loadUserName();
   }
 
   @override
@@ -122,7 +134,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
       centerSpaceRadius: 50,
       sections: [
         PieChartSectionData(
-          color: const Color.fromARGB(255, 113, 180, 116), // Verde más suave
+          color: const Color.fromARGB(255, 113, 180, 116),
           value: ingresos,
           title: '${(ingresos / total * 100).toStringAsFixed(1)}%',
           radius: 60,
@@ -133,7 +145,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
           ),
         ),
         PieChartSectionData(
-          color: Color.fromARGB(255, 195, 105, 104), // Rojo más suave
+          color: Color.fromARGB(255, 195, 105, 104),
           value: gastos,
           title: '${(gastos / total * 100).toStringAsFixed(1)}%',
           radius: 60,
@@ -147,16 +159,122 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     );
   }
 
+  void _showTransactionDialog() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          height: 280,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+                  minimumSize: const Size(double.infinity, 70),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const FormGastos()),
+                  );
+                  if (result == true) {
+                    cargarTransacciones();
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: const [
+                    Icon(Icons.trending_down, color: Colors.red, size: 30),
+                    SizedBox(width: 20),
+                    Text(
+                      'Gastos',
+                      style: TextStyle(fontSize: 24, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+                  minimumSize: const Size(double.infinity, 70),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FormIngresos(),
+                    ),
+                  );
+                  if (result == true) {
+                    cargarTransacciones();
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: const [
+                    Icon(Icons.trending_up, color: Colors.green, size: 30),
+                    SizedBox(width: 20),
+                    Text(
+                      'Ingresos',
+                      style: TextStyle(fontSize: 24, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final balance = _calculateBalance();
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Principal Page'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: _navigateToUserProfile,
+          ),
+        ],
+      ),
       backgroundColor: Color.fromARGB(0, 128, 171, 218),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header container con el fondo verde
             Container(
               width: double.infinity,
               height: 240,
@@ -169,7 +287,6 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
               ),
               child: Stack(
                 children: [
-                  // Saludo y nombre
                   Padding(
                     padding: const EdgeInsets.only(top: 35, left: 10),
                     child: Column(
@@ -197,8 +314,6 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                 ],
               ),
             ),
-
-            // Tarjeta de balance superpuesta
             Transform.translate(
               offset: const Offset(0, -130),
               child: Container(
@@ -225,9 +340,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {
-                              // Aquí puedes agregar la acción al tocar la flecha
-                            },
+                            onTap: () {},
                             child: const Icon(Icons.arrow_downward, color: Colors.white),
                           ),
                         ],
@@ -274,8 +387,6 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                 ),
               ),
             ),
-
-            // Filtros
             Transform.translate(
               offset: const Offset(0, -110),
               child: Padding(
@@ -309,8 +420,6 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                 ),
               ),
             ),
-
-            // Gráfico de Pastel
             Transform.translate(
               offset: const Offset(0, -90),
               child: Container(
@@ -322,6 +431,12 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+        onPressed: _showTransactionDialog,
+        tooltip: 'Agregar Transacción',
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
