@@ -98,7 +98,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                               decoration: BoxDecoration(
                                 color: _filtroActual == filtro
                                     ? const Color.fromARGB(225, 47, 125, 121)
-                                    : Colors.grey.withOpacity(0.1),
+                                    : Colors.grey.withValues(alpha: 26),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -147,7 +147,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                                 height: 50,
                                 decoration: BoxDecoration(
                                   color: const Color.fromARGB(225, 47, 125, 121)
-                                      .withOpacity(0.2),
+                                      .withValues(alpha: 51),
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                                 child: Center(

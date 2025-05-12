@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../Modelos/categoria.dart';
 import '../Modelos/transaccion.dart';
-import '../Modelos/CategoriaService.dart';
+import '../Modelos/categoria_service.dart';
 import '../Servicios/gestor_finanzas.dart';
 import 'package:uuid/uuid.dart';
 
 class FormIngresos extends StatefulWidget {
-  const FormIngresos({Key? key}) : super(key: key);
+  const FormIngresos({super.key});
 
   @override
   State<FormIngresos> createState() => _FormIngresosState();

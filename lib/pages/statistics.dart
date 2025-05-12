@@ -1,22 +1,36 @@
 import 'package:flutter/material.dart';
 import '../graficos/graficos.dart';
+import '../Servicios/gestor_finanzas.dart';
+import '../Modelos/transaccion.dart';
 
-class Statistics extends StatefulWidget {
-  const Statistics({Key? key}) : super(key: key);
+class StatisticsPage extends StatefulWidget {
+  const StatisticsPage({super.key});
 
   @override
-  State<Statistics> createState() => _StatisticsState();
+  State<StatisticsPage> createState() => _StatisticsPageState();
 }
 
-class _StatisticsState extends State<Statistics> with SingleTickerProviderStateMixin {
+class _StatisticsPageState extends State<StatisticsPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<String> filters = ['Día', 'Semana', 'Mes', 'Año'];
-  int selectedFilter = 2;
+  final List<String> filters = ['Día', 'Semana', 'Mes', 'Año'];
+  int selectedFilter = 2; // Mes por defecto
+  final GestorFinanzas _gestorFinanzas = GestorFinanzas();
+  List<Transaccion> transacciones = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _cargarDatos();
+  }
+
+  Future<void> _cargarDatos() async {
+    await _gestorFinanzas.cargarTransacciones();
+    if (mounted) {
+      setState(() {
+        transacciones = _gestorFinanzas.transacciones;
+      });
+    }
   }
 
   @override
@@ -47,7 +61,7 @@ class _StatisticsState extends State<Statistics> with SingleTickerProviderStateM
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Estadísticas',
+                    'Análisis por Categorías',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -55,7 +69,6 @@ class _StatisticsState extends State<Statistics> with SingleTickerProviderStateM
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Filtros mejorados
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -76,7 +89,7 @@ class _StatisticsState extends State<Statistics> with SingleTickerProviderStateM
                             ),
                             selected: selectedFilter == index,
                             selectedColor: Colors.white,
-                            backgroundColor: Colors.white.withOpacity(0.2),
+                            backgroundColor: Colors.white.withValues(alpha: 51),
                             onSelected: (bool selected) {
                               if (selected) {
                                 setState(() {
@@ -93,7 +106,7 @@ class _StatisticsState extends State<Statistics> with SingleTickerProviderStateM
                 ],
               ),
             ),
-            // TabBar mejorado
+            // TabBar
             Container(
               color: Colors.white,
               child: TabBar(
@@ -113,49 +126,15 @@ class _StatisticsState extends State<Statistics> with SingleTickerProviderStateM
                 ],
               ),
             ),
-            // Contenido de las pestañas
+            // Contenido
             Expanded(
               child: TabBarView(
                 controller: _tabController,
                 children: [
                   // Vista del gráfico circular
-                  SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: SizedBox(
-                        height: 400, // Altura fija para el gráfico
-                        child: Card(
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Placeholder(), // Replace with your actual PieChartSample widget implementation or import
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  CategoryPieChart(selectedFilter: selectedFilter),
                   // Vista del gráfico de barras
-                  SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: SizedBox(
-                        height: 400, // Altura fija para el gráfico
-                        child: Card(
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: IncomeExpenses(filterIndex: selectedFilter),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  CategoryBarChart(selectedFilter: selectedFilter),
                 ],
               ),
             ),

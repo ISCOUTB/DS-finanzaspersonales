@@ -3,17 +3,16 @@ import 'package:fl_chart/fl_chart.dart';
 import '../Servicios/gestor_finanzas.dart';
 import '../Modelos/transaccion.dart';
 
-class IncomeExpenses extends StatefulWidget {
-  final int filterIndex;
+class CategoryBarChart extends StatefulWidget {
+  final int selectedFilter;
 
-  const IncomeExpenses({super.key, required this.filterIndex});
+  const CategoryBarChart({super.key, required this.selectedFilter});
 
   @override
-  State<IncomeExpenses> createState() => _IncomeExpensesState();
+  State<CategoryBarChart> createState() => _CategoryBarChartState();
 }
 
-class _IncomeExpensesState extends State<IncomeExpenses> {
-  final List<String> filters = ['día', 'semana', 'mes', 'año'];
+class _CategoryBarChartState extends State<CategoryBarChart> {
   final GestorFinanzas _gestorFinanzas = GestorFinanzas();
   List<Transaccion> transacciones = [];
 
@@ -25,369 +24,143 @@ class _IncomeExpensesState extends State<IncomeExpenses> {
 
   Future<void> _cargarDatos() async {
     await _gestorFinanzas.cargarTransacciones();
-    setState(() {
-      transacciones = _gestorFinanzas.transacciones;
-    });
+    if (mounted) {
+      setState(() {
+        transacciones = _gestorFinanzas.transacciones;
+      });
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text(
-                'Ingresos y Egresos',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: Wrap(
-                  spacing: 8,
-                  children: List.generate(filters.length, (index) {
-                    final bool isSelected = widget.filterIndex == index;
-                    return ChoiceChip(
-                      label: Text(filters[index]),
-                      selected: isSelected,
-                      selectedColor: Colors.teal,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : Colors.teal[800],
-                      ),
-                      onSelected: (_) {
-                        setState(() {
-                          // No se actualiza el filtro aquí porque ahora es un parámetro
-                        });
-                      },
-                    );
-                  }),
-                ),
-              ),
-              const SizedBox(height: 25),
-              AspectRatio(
-                aspectRatio: 1.5,
-                child: BarChart(
-                  generateGroupedBarChartData(widget.filterIndex),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Período: ${filters[widget.filterIndex]}',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    'Historial de transacciones',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Icon(Icons.swap_vert),
-                ],
-              ),
-              const SizedBox(height: 10),
-              ...transacciones.map(
-                (transaccion) => transactionItem(
-                  transaccion.descripcion ?? 'Sin descripción',
-                  transaccion.fecha.toString(),
-                  transaccion.monto,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  BarChartData generateGroupedBarChartData(int filterIndex) {
-    final filteredTransactions = _gestorFinanzas.obtenerTransaccionesFiltradas(
-      filters[filterIndex],
-    );
-
-    List<String> labels = [];
-    List<double> ingresos = [];
-    List<double> egresos = [];
-
-    switch (filters[filterIndex]) {
-      case 'día':
-        // Agrupar por horas del día
-        labels = ['Mañana', 'Tarde', 'Noche'];
-        var ingresosMap = _agruparTransaccionesPorPeriodo(
-          filteredTransactions.where((t) => t.tipo == 'ingreso').toList(),
-          'día',
-        );
-        var egresosMap = _agruparTransaccionesPorPeriodo(
-          filteredTransactions.where((t) => t.tipo == 'gasto').toList(),
-          'día',
-        );
-
-        for (final periodo in labels) {
-          ingresos.add(ingresosMap[periodo] ?? 0);
-          egresos.add(egresosMap[periodo] ?? 0);
-        }
-        break;
-
-      case 'semana':
-        // Agrupar por días de la semana
-        labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-        var ingresosMap = _agruparTransaccionesPorPeriodo(
-          filteredTransactions.where((t) => t.tipo == 'ingreso').toList(),
-          'semana',
-        );
-        var egresosMap = _agruparTransaccionesPorPeriodo(
-          filteredTransactions.where((t) => t.tipo == 'gasto').toList(),
-          'semana',
-        );
-
-        for (final dia in labels) {
-          ingresos.add(ingresosMap[dia] ?? 0);
-          egresos.add(egresosMap[dia] ?? 0);
-        }
-        break;
-
-      case 'mes':
-        // Agrupar por semanas del mes
-        labels = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
-        var ingresosMap = _agruparTransaccionesPorPeriodo(
-          filteredTransactions.where((t) => t.tipo == 'ingreso').toList(),
-          'mes',
-        );
-        var egresosMap = _agruparTransaccionesPorPeriodo(
-          filteredTransactions.where((t) => t.tipo == 'gasto').toList(),
-          'mes',
-        );
-
-        for (final semana in labels) {
-          ingresos.add(ingresosMap[semana] ?? 0);
-          egresos.add(egresosMap[semana] ?? 0);
-        }
-        break;
-
-      case 'año':
-        // Agrupar por meses
-        labels = [
-          'Ene',
-          'Feb',
-          'Mar',
-          'Abr',
-          'May',
-          'Jun',
-          'Jul',
-          'Ago',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dic',
-        ];
-        var ingresosMap = _agruparTransaccionesPorPeriodo(
-          filteredTransactions.where((t) => t.tipo == 'ingreso').toList(),
-          'año',
-        );
-        var egresosMap = _agruparTransaccionesPorPeriodo(
-          filteredTransactions.where((t) => t.tipo == 'gasto').toList(),
-          'año',
-        );
-
-        for (final mes in labels) {
-          ingresos.add(ingresosMap[mes] ?? 0);
-          egresos.add(egresosMap[mes] ?? 0);
-        }
-        break;
+  BarChartData _generateBarData() {
+    final filtro = ['día', 'semana', 'mes', 'año'][widget.selectedFilter].toLowerCase();
+    final transaccionesFiltradas = _gestorFinanzas.obtenerTransaccionesFiltradas(filtro);
+    
+    // Agrupar por categoría y tipo
+    final Map<String, Map<String, double>> datos = {};
+    for (var t in transaccionesFiltradas) {
+      datos[t.categoria.nombre] = datos[t.categoria.nombre] ?? {'ingreso': 0, 'gasto': 0};
+      datos[t.categoria.nombre]![t.tipo] = (datos[t.categoria.nombre]![t.tipo] ?? 0) + t.monto;
     }
 
-    // Crear grupos de barras
-    final barGroups = List.generate(labels.length, (i) {
-      return BarChartGroupData(
-        x: i,
-        barsSpace: 6,
-        barRods: [
-          BarChartRodData(
-            toY: ingresos[i],
-            width: 18,
-            color: Colors.green,
-            borderRadius: BorderRadius.zero,
-          ),
-          BarChartRodData(
-            toY: egresos[i],
-            width: 18,
-            color: Colors.red,
-            borderRadius: BorderRadius.zero,
-          ),
-        ],
+    final List<BarChartGroupData> barGroups = [];
+    var index = 0;
+
+    datos.forEach((categoria, valores) {
+      barGroups.add(
+        BarChartGroupData(
+          x: index++,
+          barRods: [
+            BarChartRodData(
+              toY: valores['ingreso'] ?? 0,
+              color: Colors.green,
+              width: 16,
+            ),
+            BarChartRodData(
+              toY: valores['gasto'] ?? 0,
+              color: Colors.red,
+              width: 16,
+            ),
+          ],
+        ),
       );
     });
 
     return BarChartData(
-      maxY: ([...ingresos, ...egresos].reduce((a, b) => a > b ? a : b)) + 100,
-      barGroups: barGroups,
-      barTouchData: BarTouchData(enabled: true),
-      gridData: FlGridData(show: true),
-      borderData: FlBorderData(show: false),
+      alignment: BarChartAlignment.spaceAround,
+      maxY: datos.values
+          .expand((map) => map.values)
+          .reduce((max, value) => value > max ? value : max) * 1.2,
       titlesData: FlTitlesData(
+        show: true,
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            reservedSize: 42,
             getTitlesWidget: (value, meta) {
-              if (value.toInt() < labels.length) {
-                return SideTitleWidget(
-                  axisSide: meta.axisSide,
-                  space: 6,
+              if (value >= 0 && value < datos.length) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    labels[value.toInt()],
-                    style: const TextStyle(fontSize: 11),
+                    datos.keys.elementAt(value.toInt()),
+                    style: const TextStyle(fontSize: 12),
                   ),
                 );
               }
-              return const SizedBox.shrink();
+              return const Text('');
             },
           ),
         ),
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            reservedSize: 36,
+            reservedSize: 60,
             getTitlesWidget: (value, meta) {
               return Text(
                 '\$${value.toInt()}',
-                style: const TextStyle(fontSize: 10),
+                style: const TextStyle(fontSize: 12),
               );
             },
           ),
         ),
-        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        topTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+      ),
+      gridData: const FlGridData(show: false),
+      borderData: FlBorderData(show: false),
+      barGroups: barGroups,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 400,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: BarChart(_generateBarData()),
+            ),
+          ),
+          // Leyenda
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildLegendItem('Ingresos', Colors.green),
+                const SizedBox(width: 20),
+                _buildLegendItem('Gastos', Colors.red),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Map<String, double> _agruparTransaccionesPorPeriodo(
-    List<Transaccion> trans,
-    String periodo,
-  ) {
-    Map<String, double> resultado = {};
-
-    for (var t in trans) {
-      String key;
-      switch (periodo) {
-        case 'día':
-          // Agrupar por período del día
-          int hora = t.fecha.hour;
-          if (hora >= 6 && hora < 12){
-            key = 'Mañana';
-          }
-          else if (hora >= 12 && hora < 18){
-            key = 'Tarde';
-          }
-          else{
-            key = 'Noche';
-          }
-          break;
-
-        case 'semana':
-          // Agrupar por día de la semana
-          final dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-          key = dias[t.fecha.weekday - 1];
-          break;
-
-        case 'mes':
-          // Agrupar por semana del mes
-          int semana = ((t.fecha.day - 1) / 7).floor() + 1;
-          key = 'Semana $semana';
-          break;
-
-        case 'año':
-          // Agrupar por mes
-          final meses = [
-            'Ene',
-            'Feb',
-            'Mar',
-            'Abr',
-            'May',
-            'Jun',
-            'Jul',
-            'Ago',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dic',
-          ];
-          key = meses[t.fecha.month - 1];
-          break;
-
-        default:
-          key = 'Otros';
-      }
-
-      resultado[key] = (resultado[key] ?? 0) + t.monto;
-    }
-
-    return resultado;
-  }
-
-  Widget transactionItem(String title, String date, double amount) {
-    final bool isPositive = amount > 0;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(15),
-          splashColor: Colors.teal.withAlpha(51), // 0.2 * 255 ≈ 51
-          onTap: () {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Transacción: $title')));
-          },
-          child: Ink(
-            decoration: BoxDecoration(
-              color: isPositive ? Colors.teal[50] : Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12.withAlpha(13), // 0.05 * 255 ≈ 13
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(date, style: const TextStyle(color: Colors.grey)),
-                    ],
-                  ),
-                ),
-                Text(
-                  '${isPositive ? '+' : '-'} \$${amount.abs().toStringAsFixed(2)}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isPositive ? Colors.green : Colors.red,
-                  ),
-                ),
-              ],
-            ),
+  Widget _buildLegendItem(String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
           ),
         ),
-      ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14),
+        ),
+      ],
     );
   }
 }

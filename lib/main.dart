@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/side_menu.dart';
 import 'pages/registro_pages.dart';
-import 'pages/TransferHistory.dart';
-//import 'pages/principal_pages.dart';
-import 'pages/principal_pages2.dart';  
+import 'pages/transfer_history.dart';
+import 'pages/principal_pages.dart'; 
 import 'pages/statistics.dart';
 //import 'prueba/stats.dart';
 import 'pages/form_ingresos.dart';
@@ -64,8 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Modifica la lista de páginas
   final List<Widget> _pages = [
     PrincipalPage(key: PrincipalPage.globalKey), // Usar la key global
-    Statistics(),
-    //Statistics(),
+    const StatisticsPage(),
     Transferhistory(),
   ];
 

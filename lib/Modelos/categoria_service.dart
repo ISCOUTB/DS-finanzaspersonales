@@ -191,7 +191,7 @@ class CategoriaService {
 
 
   // Lista para almacenar las categorías personalizadas
-  static List<Categoria> _categoriasPersonalizadas = [];
+  static final List<Categoria> _categoriasPersonalizadas = [];
 
   // Obtener todas las categorías de ingresos 
   static List<Categoria> getCategoriasIngresos() {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SideMenu extends StatelessWidget {
-  const SideMenu({Key? key}) : super(key: key);
+  const SideMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class SideMenu extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(225, 47, 125, 121).withOpacity(0.2),
+                  color: const Color.fromARGB(225, 47, 125, 121).withValues(alpha: 51),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -64,7 +64,7 @@ class SideMenu extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(225, 47, 125, 121).withOpacity(0.2),
+                  color: const Color.fromARGB(225, 47, 125, 121).withValues(alpha: 51),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(

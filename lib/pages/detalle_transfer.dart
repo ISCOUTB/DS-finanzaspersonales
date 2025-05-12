@@ -4,7 +4,7 @@ import '../Modelos/transaccion.dart';
 class TransactionDetail extends StatelessWidget {
   final Transaccion transaccion;
 
-  const TransactionDetail({Key? key, required this.transaccion}) : super(key: key);
+  const TransactionDetail({super.key, required this.transaccion});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class TransactionDetail extends StatelessWidget {
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: const Color(0xff368983).withOpacity(0.2),
+                        color: const Color(0xff368983).withValues(alpha: 51),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
