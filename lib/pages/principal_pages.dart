@@ -27,10 +27,17 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     cargarTransacciones();
-    _loadUserName();
+    loadUserName();
   }
 
-  Future<void> _loadUserName() async {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    loadUserName(); // Recargar el nombre cuando la dependencia cambie
+  }
+
+  Future<void> loadUserName() async {
+    if (!mounted) return;
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _userName = prefs.getString('userName') ?? 'Usuario';
@@ -43,7 +50,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
       MaterialPageRoute(builder: (context) => const UserProfilePage()),
     );
     // Recarga el nombre del usuario al regresar
-    _loadUserName();
+    loadUserName();
   }
 
   @override
@@ -262,16 +269,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     final balance = _calculateBalance();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Principal Page'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: _navigateToUserProfile,
-          ),
-        ],
-      ),
-      backgroundColor: Color.fromARGB(0, 128, 171, 218),
+      
       body: SingleChildScrollView(
         child: Column(
           children: [

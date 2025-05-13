@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'principal_pages.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -37,6 +38,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
     setState(() {
       userName = newName;
     });
+    
+    // Notificar a PrincipalPage que debe actualizar el nombre
+    if (PrincipalPage.globalKey.currentState != null) {
+      PrincipalPage.globalKey.currentState!.loadUserName();
+    }
+    
+    Navigator.pop(context); // Cerrar el diálogo
   }
 
   Future<void> _updateProfileImage(File newImage) async {
@@ -133,7 +141,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
             TextButton(
               onPressed: () {
                 _updateUserName(nameController.text);
-                Navigator.pop(context);
               },
               child: const Text('Guardar'),
             ),

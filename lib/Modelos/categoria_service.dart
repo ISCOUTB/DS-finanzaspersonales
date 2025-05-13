@@ -188,8 +188,6 @@ class CategoriaService {
     ),
   ];
 
-
-
   // Lista para almacenar las categorías personalizadas
   static final List<Categoria> _categoriasPersonalizadas = [];
 
@@ -198,8 +196,22 @@ class CategoriaService {
     return [...categoriasPredefinidasIngresos, ..._categoriasPersonalizadas.where((c) => c.tipo == 'ingreso')];
   }
 
-   static List<Categoria> getCategoriasGastos() {
+  static List<Categoria> getCategoriasGastos() {
     return [...categoriasPredefinidasGastos, ..._categoriasPersonalizadas.where((c) => c.tipo == 'gastos')];
+  }
+
+  // Obtener todas las categorías (tanto predefinidas como personalizadas)
+  static List<Categoria> getCategorias() {
+    return [...categoriasPredefinidasIngresos, ...categoriasPredefinidasGastos, ..._categoriasPersonalizadas];
+  }
+
+  // Obtener categorías por tipo
+  static List<Categoria> getCategoriasPorTipo(String tipo) {
+    if (tipo == 'ingreso') {
+      return getCategoriasIngresos();
+    } else {
+      return getCategoriasGastos();
+    }
   }
 
   // Agregar una nueva categoría personalizada
@@ -207,8 +219,29 @@ class CategoriaService {
     _categoriasPersonalizadas.add(categoria);
   }
 
+  // Actualizar una categoría personalizada existente
+  static bool actualizarCategoria(Categoria oldCategoria, Categoria newCategoria) {
+    // No permitir modificar categorías predefinidas
+    if (categoriasPredefinidasIngresos.any((c) => c.nombre == oldCategoria.nombre) ||
+        categoriasPredefinidasGastos.any((c) => c.nombre == oldCategoria.nombre)) {
+      return false;
+    }
+
+    // Buscar en categorías personalizadas por nombre
+    final index = _categoriasPersonalizadas.indexWhere((c) => c.nombre == oldCategoria.nombre);
+    if (index != -1) {
+      _categoriasPersonalizadas[index] = newCategoria;
+      return true;
+    }
+    return false;
+  }
+
   // Eliminar una categoría personalizada
   static bool eliminarCategoria(String nombre) {
+    if (esCategoriaPredefinda(nombre)) {
+      return false; // No se pueden eliminar categorías predefinidas
+    }
+    
     int initialLength = _categoriasPersonalizadas.length;
     _categoriasPersonalizadas.removeWhere((c) => c.nombre == nombre);
     return _categoriasPersonalizadas.length < initialLength;
@@ -216,6 +249,7 @@ class CategoriaService {
 
   // Verificar si una categoría es predefinida
   static bool esCategoriaPredefinda(String nombre) {
-    return categoriasPredefinidasIngresos.any((c) => c.nombre == nombre);
+    return categoriasPredefinidasIngresos.any((c) => c.nombre == nombre) ||
+           categoriasPredefinidasGastos.any((c) => c.nombre == nombre);
   }
 }

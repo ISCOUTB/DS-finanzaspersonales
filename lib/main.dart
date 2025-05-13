@@ -6,10 +6,9 @@ import 'pages/transfer_history.dart';
 import 'pages/principal_pages.dart';
 import 'pages/statistics.dart';
 //import 'prueba/stats.dart';
-import 'pages/form_ingresos.dart';
-import 'pages/form_gastos.dart';
 import 'Servicios/database_helper.dart';
 import 'pages/user_page.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +35,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const PageRegistro(),
         '/home': (context) => const MyHomePage(title: 'Finanse Tracker'),
+        
       },
       theme: ThemeData(
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
@@ -72,109 +72,6 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _selectedIndex = index; // Cambia el índice seleccionado
     });
-  }
-
-  void _showTransactionDialog() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (BuildContext context) {
-        return Container(
-          height: 280,
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              // Botón de Gastos
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(225, 47, 125, 121),
-                  minimumSize: const Size(double.infinity, 70),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                onPressed: () async {
-                  Navigator.pop(context);
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const FormGastos()),
-                  );
-                  if (result == true) {
-                    // Actualizar usando la key global
-                    PrincipalPage.globalKey.currentState?.cargarTransacciones();
-                  }
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: const [
-                    Icon(Icons.trending_down, color: Colors.red, size: 30),
-                    SizedBox(width: 20),
-                    Text(
-                      'Gastos',
-                      style: TextStyle(fontSize: 24, color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Botón de Ingresos
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(225, 47, 125, 121),
-                  minimumSize: const Size(double.infinity, 70),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                onPressed: () async {
-                  Navigator.pop(context);
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const FormIngresos(),
-                    ),
-                  );
-                  if (result == true) {
-                    // Actualizar usando la key global
-                    PrincipalPage.globalKey.currentState?.cargarTransacciones();
-                  }
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: const [
-                    Icon(Icons.trending_up, color: Colors.green, size: 30),
-                    SizedBox(width: 20),
-                    Text(
-                      'Ingresos',
-                      style: TextStyle(fontSize: 24, color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Fila de botones circulares
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: const Color.fromARGB(225, 47, 125, 121),
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override
