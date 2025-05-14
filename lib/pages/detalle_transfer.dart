@@ -64,7 +64,7 @@ class TransactionDetail extends StatelessWidget {
                     ),
                     const SizedBox(height: 15),
                     Text(
-                      transaccion.tipo == 'ingreso' ? 'Income' : 'Expense',
+                      transaccion.tipo == 'ingreso' ? 'Ingreso' : 'Gasto',
                       style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 16,
@@ -84,31 +84,19 @@ class TransactionDetail extends StatelessWidget {
                     const SizedBox(height: 30),
 
                     // Detalles de la transacción
-                    _buildDetailRow('Status', 
-                      transaccion.tipo == 'ingreso' ? 'Income' : 'Expense'),
-                    _buildDetailRow('From', transaccion.categoria.nombre),
-                    _buildDetailRow('Time', 
+                    _buildDetailRow('Estado', 
+                      transaccion.tipo == 'ingreso' ? 'Ingreso' : 'Gasto'),
+                    _buildDetailRow('De', transaccion.categoria.nombre),
+                    _buildDetailRow('Hora', 
                       '${transaccion.fecha.hour}:${transaccion.fecha.minute.toString().padLeft(2, '0')}'),
-                    _buildDetailRow('Date', 
+                    _buildDetailRow('Fecha', 
                       '${transaccion.fecha.day}/${transaccion.fecha.month}/${transaccion.fecha.year}'),
                     if (transaccion.descripcion != null)
-                      _buildDetailRow('Description', transaccion.descripcion!),
+                      _buildDetailRow('Descripción', transaccion.descripcion!),
                     
                     const Spacer(),
                     // Botón de descargar recibo
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xff368983),
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () {
-                        // Implementar descarga de recibo
-                      },
-                      child: const Text('Download Receipt'),
-                    ),
+                    
                   ],
                 ),
               ),

@@ -4,7 +4,7 @@ import 'pages/side_menu.dart';
 import 'pages/registro_pages.dart';
 import 'pages/transfer_history.dart';
 import 'pages/principal_pages.dart';
-import 'pages/statistics.dart';
+import 'pages/estadisticas.dart';
 //import 'prueba/stats.dart';
 import 'Servicios/database_helper.dart';
 import 'pages/user_page.dart';
@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Modifica la lista de páginas
   final List<Widget> _pages = [
     PrincipalPage(key: PrincipalPage.globalKey), // Usar la key global
-    const StatisticsPage(),
+    EstadisticasPage(),
     Transferhistory(),
   ];
 
