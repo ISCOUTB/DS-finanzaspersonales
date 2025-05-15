@@ -36,7 +36,7 @@ class _TransferhistoryState extends State<Transferhistory> {
             .toList();
       case 'Gastos':
         return _gestorFinanzas.transacciones
-            .where((t) => t.tipo == 'gastos')
+            .where((t) => t.tipo == 'egreso')
             .toList();
       default:
         return _gestorFinanzas.transacciones;

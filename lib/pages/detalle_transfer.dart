@@ -64,7 +64,7 @@ class TransactionDetail extends StatelessWidget {
                     ),
                     const SizedBox(height: 15),
                     Text(
-                      transaccion.tipo == 'ingreso' ? 'Ingreso' : 'Gasto',
+                      transaccion.tipo == 'ingreso' ? 'Ingreso' : 'egreso',
                       style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 16,
@@ -85,7 +85,7 @@ class TransactionDetail extends StatelessWidget {
 
                     // Detalles de la transacción
                     _buildDetailRow('Estado', 
-                      transaccion.tipo == 'ingreso' ? 'Ingreso' : 'Gasto'),
+                      transaccion.tipo == 'ingreso' ? 'Ingreso' : 'egreso'),
                     _buildDetailRow('De', transaccion.categoria.nombre),
                     _buildDetailRow('Hora', 
                       '${transaccion.fecha.hour}:${transaccion.fecha.minute.toString().padLeft(2, '0')}'),

@@ -33,7 +33,7 @@ class _FormGastosState extends State<FormGastos> {
     if (_formKey.currentState!.validate()) {
       final transaction = Transaccion(
         id: const Uuid().v4(),
-        tipo: 'gastos',
+        tipo: 'egreso',
         monto: double.parse(_amountController.text),
         fecha: _selectedDate,
         categoria: _selectedCategory,

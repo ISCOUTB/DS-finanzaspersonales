@@ -44,15 +44,6 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     });
   }
 
-  void _navigateToUserProfile() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const UserProfilePage()),
-    );
-    // Recarga el nombre del usuario al regresar
-    loadUserName();
-  }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -68,11 +59,10 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
 
   Future<void> cargarTransacciones() async {
     await _gestorFinanzas.cargarTransacciones();
-    if (mounted) {
-      setState(() {
-        _transacciones = _gestorFinanzas.transacciones;
-      });
-    }
+    if (!mounted) return;
+    setState(() {
+      _transacciones = _gestorFinanzas.transacciones;
+    });
   }
 
   String _getGreeting() {
@@ -90,10 +80,10 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     double ingresos = 0;
     double gastos = 0;
     DateTime now = DateTime.now();
-    
+
     for (var transaccion in _transacciones) {
       bool includeTransaction = false;
-      
+
       switch (_selectedFilter) {
         case 'día':
           includeTransaction = transaccion.fecha.year == now.year &&
@@ -143,7 +133,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
         PieChartSectionData(
           color: const Color.fromARGB(255, 113, 180, 116),
           value: ingresos,
-          title: '${(ingresos / total * 100).toStringAsFixed(1)}%',
+          title: total == 0 ? '' : '${(ingresos / total * 100).toStringAsFixed(1)}%',
           radius: 60,
           titleStyle: const TextStyle(
             fontSize: 16,
@@ -152,9 +142,9 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
           ),
         ),
         PieChartSectionData(
-          color: Color.fromARGB(255, 195, 105, 104),
+          color: const Color.fromARGB(255, 195, 105, 104),
           value: gastos,
-          title: '${(gastos / total * 100).toStringAsFixed(1)}%',
+          title: total == 0 ? '' : '${(gastos / total * 100).toStringAsFixed(1)}%',
           radius: 60,
           titleStyle: const TextStyle(
             fontSize: 16,
@@ -193,7 +183,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                     MaterialPageRoute(builder: (context) => const FormGastos()),
                   );
                   if (result == true) {
-                    cargarTransacciones();
+                    await cargarTransacciones();
                   }
                 },
                 child: Row(
@@ -221,12 +211,10 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                   Navigator.pop(context);
                   final result = await Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const FormIngresos(),
-                    ),
+                    MaterialPageRoute(builder: (context) => const FormIngresos()),
                   );
                   if (result == true) {
-                    cargarTransacciones();
+                    await cargarTransacciones();
                   }
                 },
                 child: Row(
@@ -269,7 +257,6 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     final balance = _calculateBalance();
 
     return Scaffold(
-      
       body: SingleChildScrollView(
         child: Column(
           children: [

@@ -5,16 +5,13 @@ import 'pages/registro_pages.dart';
 import 'pages/transfer_history.dart';
 import 'pages/principal_pages.dart';
 import 'pages/estadisticas.dart';
-//import 'prueba/stats.dart';
 import 'Servicios/database_helper.dart';
 import 'pages/user_page.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseHelper().database;
 
-  // Verificar si existe un usuario registrado
   final prefs = await SharedPreferences.getInstance();
   final hasUser = prefs.getString('userName') != null;
 
@@ -35,7 +32,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const PageRegistro(),
         '/home': (context) => const MyHomePage(title: 'Finanse Tracker'),
-        
       },
       theme: ThemeData(
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
@@ -58,33 +54,44 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<PrincipalPageState> _principalKey = PrincipalPage.globalKey;
+  final GlobalKey<EstadisticasPageState> _estadisticasKey = EstadisticasPage.globalKey;
+
   int _selectedIndex = 0;
 
-  // Modifica la lista de páginas
-  final List<Widget> _pages = [
-    PrincipalPage(key: PrincipalPage.globalKey), // Usar la key global
-    EstadisticasPage(),
-    Transferhistory(),
-  ];
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      PrincipalPage(key: _principalKey), // Pasa el GlobalKey aquí
+      EstadisticasPage(key: _estadisticasKey),
+      Transferhistory(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // Cambia el índice seleccionado
+      _selectedIndex = index;
     });
+  }
+
+  // Función para recargar PrincipalPage desde aquí
+  Future<void> _refreshPrincipalPage() async {
+    _principalKey.currentState?.cargarTransacciones();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.menu),
           color: const Color(0xFF708871),
           onPressed: () {
-            _scaffoldKey.currentState?.openDrawer();
+            Scaffold.of(context).openDrawer();
           },
         ),
         title: const Text(
@@ -110,8 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer: const SideMenu(),
       endDrawer: const SideMenu(),
       body: IndexedStack(
-        index:
-            _selectedIndex, // Muestra la página correspondiente al índice seleccionado
+        index: _selectedIndex,
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -122,10 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Principal'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Estadísticas',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Estadísticas'),
           BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Registros'),
         ],
       ),
