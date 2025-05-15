@@ -1,14 +1,12 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+import 'package:logging/logging.dart';
 import '../Modelos/transaccion.dart';
 import '../Modelos/categoria.dart';
-import '../Servicios/gestor_archivos.dart';
 import 'database_helper.dart';
 
 class GestorFinanzas {
   static final GestorFinanzas _instance = GestorFinanzas._internal();
   final _dbHelper = DatabaseHelper();
+  final _logger = Logger('GestorFinanzas');
   List<Transaccion> transacciones = [];
   List<Categoria> categorias = [];
 
@@ -22,7 +20,7 @@ class GestorFinanzas {
     try {
       transacciones = await _dbHelper.getTransacciones();
     } catch (e) {
-      print('Error al cargar transacciones: $e');
+      _logger.severe('Error al cargar transacciones: $e');
     }
   }
 
@@ -31,7 +29,7 @@ class GestorFinanzas {
       await _dbHelper.insertTransaccion(t);
       transacciones.add(t);
     } catch (e) {
-      print('Error al agregar transacción: $e');
+      _logger.severe('Error al agregar transacción: $e');
     }
   }
 
@@ -40,7 +38,7 @@ class GestorFinanzas {
       await _dbHelper.deleteTransaccion(id);
       transacciones.removeWhere((t) => t.id == id);
     } catch (e) {
-      print('Error al eliminar transacción: $e');
+      _logger.severe('Error al eliminar transacción: $e');
     }
   }
 
@@ -52,7 +50,7 @@ class GestorFinanzas {
         transacciones[index] = nueva;
       }
     } catch (e) {
-      print('Error al editar transacción: $e');
+      _logger.severe('Error al editar transacción: $e');
     }
   }
 
@@ -62,7 +60,9 @@ class GestorFinanzas {
   }
 
   List<Transaccion> filtrarPorCategoria(String nombreCategoria) {
-    return transacciones.where((t) => t.categoria.nombre == nombreCategoria).toList();
+    return transacciones
+        .where((t) => t.categoria.nombre == nombreCategoria)
+        .toList();
   }
 
   double calcularTotal(String tipo) {
@@ -74,7 +74,8 @@ class GestorFinanzas {
   Map<String, double> desglosePorCategoria(String tipo) {
     Map<String, double> resultado = {};
     for (var t in transacciones.where((t) => t.tipo == tipo)) {
-      resultado[t.categoria.nombre] = (resultado[t.categoria.nombre] ?? 0) + t.monto;
+      resultado[t.categoria.nombre] =
+          (resultado[t.categoria.nombre] ?? 0) + t.monto;
     }
     return resultado;
   }
@@ -84,28 +85,43 @@ class GestorFinanzas {
     final now = DateTime.now();
     switch (filtro) {
       case 'día':
-        return transacciones.where((t) => 
-          t.fecha.year == now.year &&
-          t.fecha.month == now.month &&
-          t.fecha.day == now.day
-        ).toList();
+        return transacciones
+            .where(
+              (t) =>
+                  t.fecha.year == now.year &&
+                  t.fecha.month == now.month &&
+                  t.fecha.day == now.day,
+            )
+            .toList();
       case 'semana':
         final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-        return transacciones.where((t) => 
-          t.fecha.isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
-          t.fecha.isBefore(startOfWeek.add(const Duration(days: 7)))
-        ).toList();
+        return transacciones
+            .where(
+              (t) =>
+                  t.fecha.isAfter(
+                    startOfWeek.subtract(const Duration(days: 1)),
+                  ) &&
+                  t.fecha.isBefore(startOfWeek.add(const Duration(days: 7))),
+            )
+            .toList();
       case 'mes':
-        return transacciones.where((t) => 
-          t.fecha.year == now.year &&
-          t.fecha.month == now.month
-        ).toList();
+        return transacciones
+            .where(
+              (t) => t.fecha.year == now.year && t.fecha.month == now.month,
+            )
+            .toList();
       case 'año':
-        return transacciones.where((t) => 
-          t.fecha.year == now.year
-        ).toList();
+        return transacciones.where((t) => t.fecha.year == now.year).toList();
       default:
         return transacciones;
+    }
+  }
+
+  Future<void> cargarTransaccionesPorAnio(int anio) async {
+    try {
+      transacciones = await _dbHelper.getTransaccionesPorAnio(anio);
+    } catch (e) {
+      _logger.severe('Error al cargar transacciones por año: $e');
     }
   }
 }

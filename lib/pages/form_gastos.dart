@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../Modelos/categoria.dart';
 import '../Modelos/transaccion.dart';
-import '../Modelos/CategoriaService.dart';
+import '../Modelos/categoria_service.dart';
 import '../Servicios/gestor_finanzas.dart';
 import 'package:uuid/uuid.dart';
 
 class FormGastos extends StatefulWidget {
-  const FormGastos({Key? key}) : super(key: key);
+  const FormGastos({super.key});
 
   @override
   State<FormGastos> createState() => _FormGastosState();
@@ -17,7 +17,6 @@ class _FormGastosState extends State<FormGastos> {
   final _amountController = TextEditingController();
   final _nameController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  bool _isPaid = false;
   
   List<Categoria> _categorias = [];
   
@@ -34,7 +33,7 @@ class _FormGastosState extends State<FormGastos> {
     if (_formKey.currentState!.validate()) {
       final transaction = Transaccion(
         id: const Uuid().v4(),
-        tipo: 'gastos',
+        tipo: 'egreso',
         monto: double.parse(_amountController.text),
         fecha: _selectedDate,
         categoria: _selectedCategory,

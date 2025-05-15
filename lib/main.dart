@@ -2,20 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/side_menu.dart';
 import 'pages/registro_pages.dart';
-import 'pages/TransferHistory.dart';
-//import 'pages/principal_pages.dart';
-import 'pages/principal_pages2.dart';  
-//import 'pages/statistics.dart';
-import 'prueba/stats.dart';
-import 'pages/form_ingresos.dart';
-import 'pages/form_gastos.dart';
+import 'pages/transfer_history.dart';
+import 'pages/principal_pages.dart';
+import 'pages/estadisticas.dart';
 import 'Servicios/database_helper.dart';
+import 'pages/user_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseHelper().database;
-  
-  // Verificar si existe un usuario registrado
+
   final prefs = await SharedPreferences.getInstance();
   final hasUser = prefs.getString('userName') != null; //mirar si existe un usuario registrado
 
@@ -24,7 +20,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final String initialRoute;
-  
+
   const MyApp({super.key, required this.initialRoute});
 
   @override
@@ -58,135 +54,44 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<PrincipalPageState> _principalKey = PrincipalPage.globalKey;
+  final GlobalKey<EstadisticasPageState> _estadisticasKey = EstadisticasPage.globalKey;
+
   int _selectedIndex = 0;
 
-  // Modifica la lista de páginas
-  final List<Widget> _pages = [
-    PrincipalPage(key: PrincipalPage.globalKey), // Usar la key global
-    Statistics(),
-    //Statistics(),
-    Transferhistory(),
-  ];
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      PrincipalPage(key: _principalKey), // Pasa el GlobalKey aquí
+      EstadisticasPage(key: _estadisticasKey),
+      Transferhistory(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // Cambia el índice seleccionado
+      _selectedIndex = index;
     });
   }
 
-  void _showTransactionDialog() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (BuildContext context) {
-        return Container(
-          height: 280,
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              // Botón de Gastos
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(225, 47, 125, 121),
-                  minimumSize: const Size(double.infinity, 70),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                onPressed: () async {
-                  Navigator.pop(context);
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const FormGastos()),
-                  );
-                  if (result == true) {
-                    // Actualizar usando la key global
-                    PrincipalPage.globalKey.currentState?.cargarTransacciones();
-                  }
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: const [
-                    Icon(Icons.trending_down, color: Colors.red, size: 30),
-                    SizedBox(width: 20),
-                    Text(
-                      'Gastos',
-                      style: TextStyle(fontSize: 24, color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Botón de Ingresos
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(225, 47, 125, 121),
-                  minimumSize: const Size(double.infinity, 70),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                onPressed: () async {
-                  Navigator.pop(context);
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const FormIngresos()),
-                  );
-                  if (result == true) {
-                    // Actualizar usando la key global
-                    PrincipalPage.globalKey.currentState?.cargarTransacciones();
-                  }
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: const [
-                    Icon(Icons.trending_up, color: Colors.green, size: 30),
-                    SizedBox(width: 20),
-                    Text(
-                      'Ingresos',
-                      style: TextStyle(fontSize: 24, color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Fila de botones circulares
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: const Color.fromARGB(225, 47, 125, 121),
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  // Función para recargar PrincipalPage desde aquí
+  Future<void> _refreshPrincipalPage() async {
+    _principalKey.currentState?.cargarTransacciones();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.menu),
           color: const Color(0xFF708871),
           onPressed: () {
-            _scaffoldKey.currentState?.openDrawer();
+            Scaffold.of(context).openDrawer();
           },
         ),
         title: const Text(
@@ -199,7 +104,12 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.person),
             color: const Color(0xFF708871),
             onPressed: () {
-              
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const UserProfilePage(),
+                ),
+              );
             },
           ),
         ],
@@ -207,21 +117,8 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer: const SideMenu(),
       endDrawer: const SideMenu(),
       body: IndexedStack(
-        index: _selectedIndex, // Muestra la página correspondiente al índice seleccionado
+        index: _selectedIndex,
         children: _pages,
-      ),
-      floatingActionButton: SizedBox(
-        width: 130,
-        height: 65,
-        child: FloatingActionButton(
-          backgroundColor: const Color.fromARGB(225, 47, 125, 121),
-          onPressed: _showTransactionDialog,
-          tooltip: '',
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: const Icon(Icons.add, color: Color.fromARGB(255, 246, 253, 250), size: 40),
-        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color.fromARGB(225, 47, 125, 121),
@@ -230,18 +127,9 @@ class _MyHomePageState extends State<MyHomePage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Principal',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Estadísticas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Registros',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Principal'),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Estadísticas'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Registros'),
         ],
       ),
     );

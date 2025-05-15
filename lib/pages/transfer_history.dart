@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../Servicios/gestor_finanzas.dart';
 import '../Modelos/transaccion.dart';
-import './DetalleTransfer.dart';
+import 'detalle_transfer.dart';
 
 class Transferhistory extends StatefulWidget {
-  const Transferhistory({Key? key}) : super(key: key);
+  const Transferhistory({super.key});
 
   @override
   State<Transferhistory> createState() => _TransferhistoryState();
@@ -36,7 +36,7 @@ class _TransferhistoryState extends State<Transferhistory> {
             .toList();
       case 'Gastos':
         return _gestorFinanzas.transacciones
-            .where((t) => t.tipo == 'gastos')
+            .where((t) => t.tipo == 'egreso')
             .toList();
       default:
         return _gestorFinanzas.transacciones;
@@ -64,7 +64,6 @@ class _TransferhistoryState extends State<Transferhistory> {
                       color: Colors.white,
                     ),
                   ),
-                  Icon(Icons.notifications, color: Colors.white),
                 ],
               ),
             ),
@@ -99,7 +98,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                               decoration: BoxDecoration(
                                 color: _filtroActual == filtro
                                     ? const Color.fromARGB(225, 47, 125, 121)
-                                    : Colors.grey.withOpacity(0.1),
+                                    : Colors.grey.withValues(alpha: 26),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -148,7 +147,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                                 height: 50,
                                 decoration: BoxDecoration(
                                   color: const Color.fromARGB(225, 47, 125, 121)
-                                      .withOpacity(0.2),
+                                      .withValues(alpha: 51),
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                                 child: Center(

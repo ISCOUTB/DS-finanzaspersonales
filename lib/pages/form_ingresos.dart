@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../Modelos/categoria.dart';
 import '../Modelos/transaccion.dart';
-import '../Modelos/CategoriaService.dart';
+import '../Modelos/categoria_service.dart';
 import '../Servicios/gestor_finanzas.dart';
 import 'package:uuid/uuid.dart';
 
 class FormIngresos extends StatefulWidget {
-  const FormIngresos({Key? key}) : super(key: key);
+  const FormIngresos({super.key});
 
   @override
   State<FormIngresos> createState() => _FormIngresosState();
@@ -17,10 +17,8 @@ class _FormIngresosState extends State<FormIngresos> {
   final _amountController = TextEditingController();
   final _nameController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  bool _isPaid = false;
-  
+
   List<Categoria> _categorias = [];
-  
   late Categoria _selectedCategory;
 
   @override
@@ -42,7 +40,7 @@ class _FormIngresosState extends State<FormIngresos> {
       );
 
       await GestorFinanzas().agregarTransaccion(transaction);
-      
+
       // Notificar a la página principal
       if (mounted) {
         Navigator.pop(context, true); // Envía true para indicar que se agregó una transacción
@@ -54,40 +52,49 @@ class _FormIngresosState extends State<FormIngresos> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(225, 47, 125, 121),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Planificar un ingreso',
-          style: TextStyle(color: Color(0xFF1E1E1E)),
+          style: TextStyle(color: Colors.white),
         ),
       ),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildLabel('Categoría'),
-                  _buildCategoryDropdown(),
-                  const SizedBox(height: 20),
-                  _buildLabel('Cantidad'),
-                  _buildAmountRow(),
-                  const SizedBox(height: 20),
-                  _buildLabel('Fecha'),
-                  _buildDatePicker(),
-                  const SizedBox(height: 20),
-                  _buildLabel('Nombre'),
-                  _buildNameField(),
-                  const SizedBox(height: 150), // Espacio para los botones
-                ],
+          Container(
+            margin: const EdgeInsets.only(top: 20),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(30)),
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10),
+                    _buildLabel('Categoría'),
+                    _buildCategoryDropdown(),
+                    const SizedBox(height: 20),
+                    _buildLabel('Cantidad'),
+                    _buildAmountRow(),
+                    const SizedBox(height: 20),
+                    _buildLabel('Fecha'),
+                    _buildDatePicker(),
+                    const SizedBox(height: 20),
+                    _buildLabel('Nombre'),
+                    _buildNameField(),
+                    const SizedBox(height: 150),
+                  ],
+                ),
               ),
             ),
           ),
@@ -107,12 +114,15 @@ class _FormIngresosState extends State<FormIngresos> {
                     child: ElevatedButton(
                       onPressed: _saveTransaction,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
                       ),
-                      child: const Text('Crear'),
+                      child: const Text(
+                        'Crear',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -123,7 +133,7 @@ class _FormIngresosState extends State<FormIngresos> {
                       onPressed: () => Navigator.pop(context),
                       child: const Text(
                         'Cancelar',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: Color.fromARGB(225, 47, 125, 121)),
                       ),
                     ),
                   ),
@@ -140,13 +150,14 @@ class _FormIngresosState extends State<FormIngresos> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey[300]!),
       ),
       child: DropdownButtonFormField<Categoria>(
         value: _selectedCategory,
-        dropdownColor: const Color(0xFF2A2A2A),
-        style: const TextStyle(color: Colors.white),
+        dropdownColor: Colors.white,
+        style: const TextStyle(color: Colors.black87),
         decoration: const InputDecoration(border: InputBorder.none),
         items: _categorias.map((categoria) {
           return DropdownMenuItem<Categoria>(
@@ -175,14 +186,18 @@ class _FormIngresosState extends State<FormIngresos> {
         Expanded(
           child: TextFormField(
             controller: _amountController,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.black87),
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               filled: true,
-              fillColor: const Color(0xFF2A2A2A),
+              fillColor: Colors.grey[100],
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey[300]!),
               ),
             ),
             validator: (value) {
@@ -195,56 +210,52 @@ class _FormIngresosState extends State<FormIngresos> {
         ),
         const SizedBox(width: 10),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF2A2A2A),
+            color: Colors.grey[100],
             borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.grey[300]!),
           ),
           child: const Text(
             'COP',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.black87),
           ),
-        ),
-        const SizedBox(width: 10),
-        Switch(
-          value: _isPaid,
-          onChanged: (bool value) {
-            setState(() => _isPaid = value);
-          },
-          activeColor: Colors.purple,
         ),
       ],
     );
   }
 
   Widget _buildDatePicker() {
-    return InkWell(
-      onTap: () async {
-        final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _selectedDate,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2100),
-        );
-        if (picked != null) {
-          setState(() => _selectedDate = picked);
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
-              style: const TextStyle(color: Colors.white),
-            ),
-            const Icon(Icons.calendar_today, color: Colors.white),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: InkWell(
+        onTap: () async {
+          final DateTime? picked = await showDatePicker(
+            context: context,
+            initialDate: _selectedDate,
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2100),
+          );
+          if (picked != null) {
+            setState(() => _selectedDate = picked);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
+                style: const TextStyle(color: Colors.black87),
+              ),
+              Icon(Icons.calendar_today, color: Colors.grey[600]),
+            ],
+          ),
         ),
       ),
     );
@@ -253,13 +264,17 @@ class _FormIngresosState extends State<FormIngresos> {
   Widget _buildNameField() {
     return TextFormField(
       controller: _nameController,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.black87),
       decoration: InputDecoration(
         filled: true,
-        fillColor: const Color(0xFF2A2A2A),
+        fillColor: Colors.grey[100],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
       ),
       validator: (value) {
@@ -276,7 +291,11 @@ class _FormIngresosState extends State<FormIngresos> {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(
         text,
-        style: const TextStyle(color: Colors.grey, fontSize: 16),
+        style: TextStyle(
+          color: Colors.grey[800],
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
