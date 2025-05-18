@@ -29,18 +29,29 @@ class _TransferhistoryState extends State<Transferhistory> {
   }
 
   List<Transaccion> _filtrarTransacciones() {
+    List<Transaccion> transaccionesFiltradas;
+
     switch (_filtroActual) {
       case 'Ingresos':
-        return _gestorFinanzas.transacciones
-            .where((t) => t.tipo == 'ingreso')
-            .toList();
+        transaccionesFiltradas =
+            _gestorFinanzas.transacciones
+                .where((t) => t.tipo == 'ingreso')
+                .toList();
+        break;
       case 'Gastos':
-        return _gestorFinanzas.transacciones
-            .where((t) => t.tipo == 'egreso')
-            .toList();
+        transaccionesFiltradas =
+            _gestorFinanzas.transacciones
+                .where((t) => t.tipo == 'egreso')
+                .toList();
+        break;
       default:
-        return _gestorFinanzas.transacciones;
+        transaccionesFiltradas = _gestorFinanzas.transacciones;
     }
+
+    // Ordenar las transacciones por fecha en orden descendente
+    transaccionesFiltradas.sort((a, b) => b.fecha.compareTo(a.fecha));
+
+    return transaccionesFiltradas;
   }
 
   @override
@@ -82,37 +93,45 @@ class _TransferhistoryState extends State<Transferhistory> {
                       padding: const EdgeInsets.all(20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: ['Todas', 'Ingresos', 'Gastos'].map((filtro) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _filtroActual = filtro;
-                                _transacciones = _filtrarTransacciones();
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _filtroActual == filtro
-                                    ? const Color.fromARGB(225, 47, 125, 121)
-                                    : Colors.grey.withValues(alpha: 26),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                filtro,
-                                style: TextStyle(
-                                  color: _filtroActual == filtro
-                                      ? Colors.white
-                                      : Colors.grey[800],
-                                  fontWeight: FontWeight.w500,
+                        children:
+                            ['Todas', 'Ingresos', 'Gastos'].map((filtro) {
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _filtroActual = filtro;
+                                    _transacciones = _filtrarTransacciones();
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        _filtroActual == filtro
+                                            ? const Color.fromARGB(
+                                              225,
+                                              47,
+                                              125,
+                                              121,
+                                            )
+                                            : Colors.grey.withValues(alpha: 26),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    filtro,
+                                    style: TextStyle(
+                                      color:
+                                          _filtroActual == filtro
+                                              ? Colors.white
+                                              : Colors.grey[800],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                              );
+                            }).toList(),
                       ),
                     ),
 
@@ -128,7 +147,10 @@ class _TransferhistoryState extends State<Transferhistory> {
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade100, // Cambiado a gris muy claro
+                              color:
+                                  Colors
+                                      .grey
+                                      .shade100, // Cambiado a gris muy claro
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: ListTile(
@@ -136,9 +158,10 @@ class _TransferhistoryState extends State<Transferhistory> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => TransactionDetail(
-                                      transaccion: transaccion,
-                                    ),
+                                    builder:
+                                        (context) => TransactionDetail(
+                                          transaccion: transaccion,
+                                        ),
                                   ),
                                 );
                               },
@@ -146,8 +169,12 @@ class _TransferhistoryState extends State<Transferhistory> {
                                 width: 50,
                                 height: 50,
                                 decoration: BoxDecoration(
-                                  color: const Color.fromARGB(225, 47, 125, 121)
-                                      .withValues(alpha: 51),
+                                  color: const Color.fromARGB(
+                                    225,
+                                    47,
+                                    125,
+                                    121,
+                                  ).withValues(alpha: 51),
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                                 child: Center(
@@ -173,9 +200,10 @@ class _TransferhistoryState extends State<Transferhistory> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
-                                  color: transaccion.tipo == 'ingreso'
-                                      ? Colors.green
-                                      : Colors.red,
+                                  color:
+                                      transaccion.tipo == 'ingreso'
+                                          ? Colors.green
+                                          : Colors.red,
                                 ),
                               ),
                             ),

@@ -56,6 +56,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey<PrincipalPageState> _principalKey = PrincipalPage.globalKey;
   final GlobalKey<EstadisticasPageState> _estadisticasKey = EstadisticasPage.globalKey;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int _selectedIndex = 0;
 
@@ -75,6 +76,12 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _selectedIndex = index;
     });
+
+    // Forzar recarga de datos en la página de estadísticas
+    if (index == 1) {
+      // Índice de la página de estadísticas
+      EstadisticasPage.globalKey.currentState?.cargarDatos();
+    }
   }
 
   // Función para recargar PrincipalPage desde aquí
@@ -85,13 +92,14 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey, // Asigna el GlobalKey aquí
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.menu),
           color: const Color(0xFF708871),
           onPressed: () {
-            Scaffold.of(context).openDrawer();
+            _scaffoldKey.currentState?.openDrawer(); // Usa el GlobalKey para abrir el Drawer
           },
         ),
         title: const Text(
@@ -116,10 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       drawer: const SideMenu(),
       endDrawer: const SideMenu(),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color.fromARGB(225, 47, 125, 121),
         selectedItemColor: const Color.fromARGB(255, 246, 253, 250),
@@ -128,7 +133,10 @@ class _MyHomePageState extends State<MyHomePage> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Principal'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Estadísticas'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: 'Estadísticas',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Registros'),
         ],
       ),

@@ -7,7 +7,8 @@ import '../Servicios/gestor_finanzas.dart';
 enum FiltroTiempo { dia, semana, mes, anio }
 
 class EstadisticasPage extends StatefulWidget {
-  static final GlobalKey<EstadisticasPageState> globalKey = GlobalKey<EstadisticasPageState>();
+  static final GlobalKey<EstadisticasPageState> globalKey =
+      GlobalKey<EstadisticasPageState>();
 
   const EstadisticasPage({super.key});
 
@@ -16,7 +17,7 @@ class EstadisticasPage extends StatefulWidget {
 }
 
 class EstadisticasPageState extends State<EstadisticasPage>
-    with SingleTickerProviderStateMixin {       
+    with SingleTickerProviderStateMixin {
   final GestorFinanzas _gestor = GestorFinanzas();
   int _anioSeleccionado = DateTime.now().year;
   List<Transaccion> _transacciones = [];
@@ -33,10 +34,16 @@ class EstadisticasPageState extends State<EstadisticasPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _cargarDatos();
+    cargarDatos();
   }
 
-  Future<void> _cargarDatos() async {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    cargarDatos(); // Recargar datos al navegar a la página
+  }
+
+  Future<void> cargarDatos() async {
     await _gestor.cargarTransacciones();
     setState(() {
       _transacciones = _gestor.transacciones;
@@ -47,24 +54,36 @@ class EstadisticasPageState extends State<EstadisticasPage>
     final now = DateTime.now();
     switch (filtro) {
       case FiltroTiempo.dia:
-        return _transacciones.where((t) =>
-            t.fecha.year == now.year &&
-            t.fecha.month == now.month &&
-            t.fecha.day == now.day).toList();
+        return _transacciones
+            .where(
+              (t) =>
+                  t.fecha.year == now.year &&
+                  t.fecha.month == now.month &&
+                  t.fecha.day == now.day,
+            )
+            .toList();
       case FiltroTiempo.semana:
         final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
         final endOfWeek = startOfWeek.add(const Duration(days: 6));
-        return _transacciones.where((t) =>
-            !t.fecha.isBefore(startOfWeek) && !t.fecha.isAfter(endOfWeek)).toList();
+        return _transacciones
+            .where(
+              (t) =>
+                  !t.fecha.isBefore(startOfWeek) && !t.fecha.isAfter(endOfWeek),
+            )
+            .toList();
       case FiltroTiempo.mes:
-        return _transacciones.where((t) =>
-            t.fecha.year == now.year).toList(); // <- Filtramos solo por año para sumar meses
+        return _transacciones
+            .where((t) => t.fecha.year == now.year)
+            .toList(); // <- Filtramos solo por año para sumar meses
       case FiltroTiempo.anio:
         return _transacciones.where((t) => t.fecha.year == now.year).toList();
     }
   }
 
-  Map<String, double> _calcularDesglosePorCategoria(List<Transaccion> lista, String tipo) {
+  Map<String, double> _calcularDesglosePorCategoria(
+    List<Transaccion> lista,
+    String tipo,
+  ) {
     final filtrada = lista.where((t) => t.tipo == tipo).toList();
     Map<String, double> map = {};
     for (var t in filtrada) {
@@ -111,8 +130,18 @@ class EstadisticasPageState extends State<EstadisticasPage>
       case FiltroTiempo.mes:
         // Aquí 12 meses con sumas por mes (solo año actual)
         _etiquetasBarras = const [
-          'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-          'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+          'Ene',
+          'Feb',
+          'Mar',
+          'Abr',
+          'May',
+          'Jun',
+          'Jul',
+          'Ago',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dic',
         ];
         List<double> ingresos = List.filled(12, 0);
         List<double> egresos = List.filled(12, 0);
@@ -130,8 +159,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
 
       case FiltroTiempo.anio:
         int currentYear = now.year;
-        _etiquetasBarras =
-            List.generate(5, (i) => (currentYear - (4 - i)).toString());
+        _etiquetasBarras = List.generate(
+          5,
+          (i) => (currentYear - (4 - i)).toString(),
+        );
         List<double> ingresos = List.filled(5, 0);
         List<double> egresos = List.filled(5, 0);
         for (var t in lista) {
@@ -211,41 +242,51 @@ class EstadisticasPageState extends State<EstadisticasPage>
 
   Widget _buildLegend(Map<String, double> data) {
     final total = data.values.fold(0.0, (a, b) => a + b);
-    if (total == 0) return const Center(child: Text('No hay datos para mostrar.'));
+    if (total == 0)
+      return const Center(child: Text('No hay datos para mostrar.'));
 
     int i = 0;
     return Wrap(
       spacing: 10,
       runSpacing: 8,
-      children: data.entries.map((entry) {
-        final color = colores[i % colores.length];
-        i++;
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(width: 16, height: 16, color: color),
-            const SizedBox(width: 6),
-            Text('${entry.key}: \$${entry.value.toStringAsFixed(2)}'),
-          ],
-        );
-      }).toList(),
+      children:
+          data.entries.map((entry) {
+            final color = colores[i % colores.length];
+            i++;
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(width: 16, height: 16, color: color),
+                const SizedBox(width: 6),
+                Text('${entry.key}: \$${entry.value.toStringAsFixed(2)}'),
+              ],
+            );
+          }).toList(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final filtradas = _filtrarTransacciones(_filtroSeleccionado);
-    final ingresosPorCategoria = _calcularDesglosePorCategoria(filtradas, 'ingreso');
-    final egresosPorCategoria = _calcularDesglosePorCategoria(filtradas, 'egreso');
+    final ingresosPorCategoria = _calcularDesglosePorCategoria(
+      filtradas,
+      'ingreso',
+    );
+    final egresosPorCategoria = _calcularDesglosePorCategoria(
+      filtradas,
+      'egreso',
+    );
 
     _calcularTotalesBarras(filtradas);
 
-    final maxIngreso = _totalesIngresos.isNotEmpty
-        ? _totalesIngresos.reduce((a, b) => a > b ? a : b)
-        : 0.0;
-    final maxEgreso = _totalesEgresos.isNotEmpty
-        ? _totalesEgresos.reduce((a, b) => a > b ? a : b)
-        : 0.0;
+    final maxIngreso =
+        _totalesIngresos.isNotEmpty
+            ? _totalesIngresos.reduce((a, b) => a > b ? a : b)
+            : 0.0;
+    final maxEgreso =
+        _totalesEgresos.isNotEmpty
+            ? _totalesEgresos.reduce((a, b) => a > b ? a : b)
+            : 0.0;
     final maxY = (maxIngreso > maxEgreso ? maxIngreso : maxEgreso) * 1.2;
 
     return DefaultTabController(
@@ -269,25 +310,27 @@ class EstadisticasPageState extends State<EstadisticasPage>
                 setState(() {
                   _filtroSeleccionado = seleccion;
                 });
+                cargarDatos(); // Recargar datos al cambiar el filtro
               },
-              itemBuilder: (context) => <PopupMenuEntry<FiltroTiempo>>[
-                const PopupMenuItem(
-                  value: FiltroTiempo.dia,
-                  child: Text('Día'),
-                ),
-                const PopupMenuItem(
-                  value: FiltroTiempo.semana,
-                  child: Text('Semana'),
-                ),
-                const PopupMenuItem(
-                  value: FiltroTiempo.mes,
-                  child: Text('Mes'),
-                ),
-                const PopupMenuItem(
-                  value: FiltroTiempo.anio,
-                  child: Text('Año'),
-                ),
-              ],
+              itemBuilder:
+                  (context) => <PopupMenuEntry<FiltroTiempo>>[
+                    const PopupMenuItem(
+                      value: FiltroTiempo.dia,
+                      child: Text('Día'),
+                    ),
+                    const PopupMenuItem(
+                      value: FiltroTiempo.semana,
+                      child: Text('Semana'),
+                    ),
+                    const PopupMenuItem(
+                      value: FiltroTiempo.mes,
+                      child: Text('Mes'),
+                    ),
+                    const PopupMenuItem(
+                      value: FiltroTiempo.anio,
+                      child: Text('Año'),
+                    ),
+                  ],
             ),
           ],
         ),
@@ -307,15 +350,20 @@ class EstadisticasPageState extends State<EstadisticasPage>
                   const SizedBox(height: 10),
                   SizedBox(
                     height: 220,
-                    child: ingresosPorCategoria.isEmpty
-                        ? const Center(child: Text('No hay ingresos registrados'))
-                        : PieChart(
-                            PieChartData(
-                              sections: _generarSeccionesPie(ingresosPorCategoria),
-                              sectionsSpace: 2,
-                              centerSpaceRadius: 40,
+                    child:
+                        ingresosPorCategoria.isEmpty
+                            ? const Center(
+                              child: Text('No hay ingresos registrados'),
+                            )
+                            : PieChart(
+                              PieChartData(
+                                sections: _generarSeccionesPie(
+                                  ingresosPorCategoria,
+                                ),
+                                sectionsSpace: 2,
+                                centerSpaceRadius: 40,
+                              ),
                             ),
-                          ),
                   ),
                   const SizedBox(height: 8),
                   _buildLegend(ingresosPorCategoria),
@@ -330,15 +378,20 @@ class EstadisticasPageState extends State<EstadisticasPage>
                   const SizedBox(height: 10),
                   SizedBox(
                     height: 220,
-                    child: egresosPorCategoria.isEmpty
-                        ? const Center(child: Text('No hay gastos registrados'))
-                        : PieChart(
-                            PieChartData(
-                              sections: _generarSeccionesPie(egresosPorCategoria),
-                              sectionsSpace: 2,
-                              centerSpaceRadius: 40,
+                    child:
+                        egresosPorCategoria.isEmpty
+                            ? const Center(
+                              child: Text('No hay gastos registrados'),
+                            )
+                            : PieChart(
+                              PieChartData(
+                                sections: _generarSeccionesPie(
+                                  egresosPorCategoria,
+                                ),
+                                sectionsSpace: 2,
+                                centerSpaceRadius: 40,
+                              ),
                             ),
-                          ),
                   ),
                   const SizedBox(height: 8),
                   _buildLegend(egresosPorCategoria),
@@ -380,14 +433,18 @@ class EstadisticasPageState extends State<EstadisticasPage>
                           barTouchData: BarTouchData(enabled: true),
                           titlesData: FlTitlesData(
                             leftTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 40,
+                              ),
                             ),
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 getTitlesWidget: (value, meta) {
                                   final index = value.toInt();
-                                  if (index < 0 || index >= _etiquetasBarras.length) {
+                                  if (index < 0 ||
+                                      index >= _etiquetasBarras.length) {
                                     return const SizedBox.shrink();
                                   }
                                   return Padding(
