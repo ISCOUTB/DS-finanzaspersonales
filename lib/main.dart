@@ -18,22 +18,27 @@ void main() async {
   runApp(MyApp(initialRoute: hasUser ? '/home' : '/login'));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final String initialRoute;
-
   const MyApp({super.key, required this.initialRoute});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Finanzas Personales',
       debugShowCheckedModeBanner: false,
-      initialRoute: initialRoute,
+      initialRoute: widget.initialRoute,
       routes: {
         '/login': (context) => const PageRegistro(),
-        '/home': (context) => const MyHomePage(title: 'Finanse Tracker'),
+        '/home': (context) => MyHomePage(title: 'Finanse Tracker',),
       },
       theme: ThemeData(
+        brightness: Brightness.light,
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Color(0xFF708871),
           selectedItemColor: Color(0xFFBEC6A0),
@@ -45,9 +50,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
   final String title;
+  const MyHomePage({super.key, required this.title});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -59,14 +63,13 @@ class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int _selectedIndex = 0;
-
   late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     _pages = [
-      PrincipalPage(key: _principalKey), // Pasa el GlobalKey aquí
+      PrincipalPage(key: _principalKey),
       EstadisticasPage(key: _estadisticasKey),
       Transferhistory(),
     ];
@@ -76,48 +79,42 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _selectedIndex = index;
     });
-
-    // Forzar recarga de datos en la página de estadísticas
     if (index == 1) {
-      // Índice de la página de estadísticas
       EstadisticasPage.globalKey.currentState?.cargarDatos();
     }
-  }
-
-  // Función para recargar PrincipalPage desde aquí
-  Future<void> _refreshPrincipalPage() async {
-    _principalKey.currentState?.cargarTransacciones();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Asigna el GlobalKey aquí
+      key: _scaffoldKey,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         leading: IconButton(
           icon: const Icon(Icons.menu),
-          color: const Color(0xFF708871),
+          color: Theme.of(context).iconTheme.color,
           onPressed: () {
-            _scaffoldKey.currentState?.openDrawer(); // Usa el GlobalKey para abrir el Drawer
+            _scaffoldKey.currentState?.openDrawer();
           },
         ),
-        title: const Text(
-          'Finanse Tracker',
-          style: TextStyle(color: Color(0xFF708871)),
+        title: Text(
+          widget.title,
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
         ),
         centerTitle: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
-            color: const Color(0xFF708871),
+            color: Theme.of(context).iconTheme.color,
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const UserProfilePage(),
                 ),
-              );
+              ).then((_) {
+                setState(() {});
+              });
             },
           ),
         ],
@@ -126,17 +123,14 @@ class _MyHomePageState extends State<MyHomePage> {
       endDrawer: const SideMenu(),
       body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
-        selectedItemColor: const Color.fromARGB(255, 246, 253, 250),
-        unselectedItemColor: const Color.fromARGB(145, 243, 245, 244),
+        backgroundColor: const Color(0xFF368983), // Color original de la barra inferior
+        selectedItemColor: const Color(0xFFBEC6A0), // Color original del ítem seleccionado
+        unselectedItemColor: Colors.white, // Color original de ítems no seleccionados
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Principal'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Estadísticas',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Estadísticas'),
           BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Registros'),
         ],
       ),

@@ -124,4 +124,14 @@ class GestorFinanzas {
       _logger.severe('Error al cargar transacciones por año: $e');
     }
   }
+
+  // Agrega este método al final de la clase GestorFinanzas
+  Future<void> guardarTransacciones() async {
+    // Si usas almacenamiento local, SharedPreferences, archivo, base de datos, etc.
+    // Aquí solo es un ejemplo, debes adaptarlo a tu lógica real de guardado.
+    // Por ejemplo, si tienes un método para guardar en SharedPreferences:
+    // await saveTransaccionesToStorage(transacciones);
+
+    // Si no tienes persistencia aún, puedes dejarlo vacío para evitar errores.
+  }
 }

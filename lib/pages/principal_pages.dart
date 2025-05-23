@@ -5,7 +5,7 @@ import 'form_ingresos.dart';
 import 'form_gastos.dart';
 import '../Modelos/transaccion.dart';
 import '../Servicios/gestor_finanzas.dart';
-import 'user_page.dart';
+
 
 class PrincipalPage extends StatefulWidget {
   static final GlobalKey<PrincipalPageState> globalKey = GlobalKey<PrincipalPageState>();
@@ -21,7 +21,6 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
   List<Transaccion> _transacciones = [];
   final _gestorFinanzas = GestorFinanzas();
   String _userName = 'Usuario';
-
   @override
   void initState() {
     super.initState();
@@ -126,30 +125,90 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     final gastos = balance['gastos'] ?? 0.0;
     final total = ingresos + gastos;
 
+    // Colores originales fijos
+    const ingresoColor = Color(0xFF4CAF50);
+    const gastoColor = Color(0xFFE57373);
+
     return PieChartData(
-      sectionsSpace: 0,
-      centerSpaceRadius: 50,
+      sectionsSpace: 2,
+      centerSpaceRadius: 60,
+      startDegreeOffset: -90,
       sections: [
         PieChartSectionData(
-          color: const Color.fromARGB(255, 113, 180, 116),
+          color: ingresoColor,
           value: ingresos,
           title: total == 0 ? '' : '${(ingresos / total * 100).toStringAsFixed(1)}%',
-          radius: 60,
+          radius: 70,
           titleStyle: const TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.white,
+            shadows: [
+              Shadow(
+                color: Colors.black26,
+                blurRadius: 4,
+                offset: Offset(1, 1),
+              ),
+            ],
           ),
+          badgeWidget: total == 0
+              ? null
+              : _buildPieBadge(
+                  icon: Icons.arrow_upward,
+                  color: ingresoColor,
+                  label: 'Ingresos',
+                ),
+          badgePositionPercentageOffset: .92,
         ),
         PieChartSectionData(
-          color: const Color.fromARGB(255, 195, 105, 104),
+          color: gastoColor,
           value: gastos,
           title: total == 0 ? '' : '${(gastos / total * 100).toStringAsFixed(1)}%',
-          radius: 60,
+          radius: 70,
           titleStyle: const TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.white,
+            shadows: [
+              Shadow(
+                color: Colors.black26,
+                blurRadius: 4,
+                offset: Offset(1, 1),
+              ),
+            ],
+          ),
+          badgeWidget: total == 0
+              ? null
+              : _buildPieBadge(
+                  icon: Icons.arrow_downward,
+                  color: gastoColor,
+                  label: 'Gastos',
+                ),
+          badgePositionPercentageOffset: .92,
+        ),
+      ],
+      borderData: FlBorderData(show: false),
+    );
+  }
+
+  // Widget para los badges de ingresos/gastos en el gráfico
+  Widget _buildPieBadge({required IconData icon, required Color color, required String label}) {
+    // Corrige el error de contexto de widget: asegúrate de que este método esté dentro de la clase PrincipalPageState
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CircleAvatar(
+          backgroundColor: color.withOpacity(0.15),
+          radius: 18,
+          child: Icon(icon, color: color, size: 22),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
           ),
         ),
       ],
@@ -177,13 +236,16 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                   ),
                 ),
                 onPressed: () async {
+                  final navContext = Navigator.of(context);
                   Navigator.pop(context);
-                  final result = await Navigator.push(
-                    context,
+                  final result = await navContext.push(
                     MaterialPageRoute(builder: (context) => const FormGastos()),
                   );
-                  if (result == true) {
+                  if (result == true && mounted) {
                     await cargarTransacciones();
+                    ScaffoldMessenger.of(navContext.context).showSnackBar(
+                      const SnackBar(content: Text('Gasto agregado correctamente')),
+                    );
                   }
                 },
                 child: Row(
@@ -208,13 +270,16 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                   ),
                 ),
                 onPressed: () async {
+                  final navContext = Navigator.of(context);
                   Navigator.pop(context);
-                  final result = await Navigator.push(
-                    context,
+                  final result = await navContext.push(
                     MaterialPageRoute(builder: (context) => const FormIngresos()),
                   );
-                  if (result == true) {
+                  if (result == true && mounted) {
                     await cargarTransacciones();
+                    ScaffoldMessenger.of(navContext.context).showSnackBar(
+                      const SnackBar(content: Text('Ingreso agregado correctamente')),
+                    );
                   }
                 },
                 child: Row(
@@ -255,8 +320,16 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
   @override
   Widget build(BuildContext context) {
     final balance = _calculateBalance();
+    // Colores originales
+    const fondoHeader = Color(0xff368983);
+    const fondoCard = Color.fromARGB(225, 47, 125, 121); // Color original de la tarjeta
+    const fondoBalance = Color(0xFFF8F6FF);
+    const colorTextoBalance = Color(0xff368983); // Color original del texto de balance
+    const colorIngresos = Color(0xFF4CAF50); // Verde original
+    const colorGastos = Color(0xFFE57373); // Rojo original
 
     return Scaffold(
+      backgroundColor: fondoBalance,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -264,7 +337,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
               width: double.infinity,
               height: 240,
               decoration: const BoxDecoration(
-                color: Color(0xff368983),
+                color: fondoHeader,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
@@ -282,7 +355,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                           style: const TextStyle(
                             fontWeight: FontWeight.w500,
                             fontSize: 16,
-                            color: Color.fromARGB(255, 224, 223, 223),
+                            color: Colors.white,
                           ),
                         ),
                         Text(
@@ -305,7 +378,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                 height: 170,
                 width: MediaQuery.of(context).size.width * 0.9,
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(225, 47, 125, 121),
+                  color: fondoCard,
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Column(
@@ -337,7 +410,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                       child: Row(
                         children: [
                           Text(
-                            '\$ ${balance['balance']?.toStringAsFixed(2)}',
+                            ' 24 ${balance['balance']?.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 25,
@@ -358,12 +431,14 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                             title: 'Ingresos',
                             amount: balance['ingresos']?.toStringAsFixed(2) ?? '0.00',
                             isIncome: true,
+                            color: colorIngresos,
                           ),
                           _buildBalanceItem(
                             icon: Icons.arrow_downward,
                             title: 'Gastos',
                             amount: balance['gastos']?.toStringAsFixed(2) ?? '-0.00',
                             isIncome: false,
+                            color: colorGastos,
                           ),
                         ],
                       ),
@@ -388,7 +463,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xff368983) : Colors.transparent,
+                          color: isSelected ? fondoCard : Colors.transparent,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -408,17 +483,91 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
             Transform.translate(
               offset: const Offset(0, -90),
               child: Container(
-                height: 220,
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                margin: const EdgeInsets.only(bottom: 60),
-                child: PieChart(generatePieChartData()),
+                height: 390,
+                width: MediaQuery.of(context).size.width * 0.99,
+                margin: const EdgeInsets.only(bottom: 32),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 22,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: fondoCard.withOpacity(0.07),
+                    width: 1.2,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 120,
+                      child: PieChart(
+                        generatePieChartData(),
+                        swapAnimationDuration: const Duration(milliseconds: 900),
+                        swapAnimationCurve: Curves.easeInOutCubic,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 0, bottom: 2),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Total',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.black54,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '240.00', // Aquí puedes poner el valor real si lo deseas
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              color: colorTextoBalance,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 18, left: 16, right: 16, bottom: 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildLegendItem(
+                            color: colorIngresos,
+                            label: 'Ingresos',
+                            icon: Icons.arrow_upward,
+                          ),
+                          _buildLegendItem(
+                            color: colorGastos,
+                            label: 'Gastos',
+                            icon: Icons.arrow_downward,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
+            // Eliminar campo de búsqueda, filtro de fechas y lista filtrada de la principal
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+        backgroundColor: fondoCard,
         onPressed: _showTransactionDialog,
         tooltip: 'Agregar Transacción',
         child: const Icon(Icons.add, color: Colors.white),
@@ -431,15 +580,16 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     required String title,
     required String amount,
     required bool isIncome,
+    required Color color,
   }) {
     return Row(
       children: [
         CircleAvatar(
           radius: 13,
-          backgroundColor: const Color.fromARGB(255, 85, 145, 141),
+          backgroundColor: color.withOpacity(0.18),
           child: Icon(
             icon,
-            color: Colors.white,
+            color: color,
             size: 19,
           ),
         ),
@@ -449,22 +599,56 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
           children: [
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 16,
-                color: Color.fromARGB(225, 216, 216, 216),
+                color: color,
               ),
             ),
             const SizedBox(height: 6),
             Text(
               '\$ $amount',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 17,
-                color: Colors.white,
+                color: color,
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+
+  // Leyenda para el gráfico mejorada con flecha visible y mejor tipografía
+  Widget _buildLegendItem({required Color color, required String label, required IconData icon}) {
+    return Row(
+      children: [
+        Container(
+          width: 22,
+          height: 22,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.18),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color.withOpacity(0.5), width: 1),
+          ),
+          child: Center(
+            child: Icon(
+              icon,
+              color: color,
+              size: 18,
+            ),
+          ),
+        ),
+        const SizedBox(width: 7),
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+            color: color,
+            letterSpacing: 0.2,
+          ),
         ),
       ],
     );

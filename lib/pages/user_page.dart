@@ -309,6 +309,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
