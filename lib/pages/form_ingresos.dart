@@ -4,6 +4,7 @@ import '../Modelos/transaccion.dart';
 import '../Modelos/categoria_service.dart';
 import '../Servicios/gestor_finanzas.dart';
 import 'package:uuid/uuid.dart';
+import '../Servicios/database_helper.dart';
 
 class FormIngresos extends StatefulWidget {
   final Transaccion? transaccion;
@@ -48,34 +49,27 @@ class _FormIngresosState extends State<FormIngresos> {
   }
 
   void _saveTransaction() async {
-    if (_formKey.currentState!.validate()) {
-      final nuevaTransaccion = Transaccion(
-        id:
-            widget.transaccion?.id ??
-            const Uuid()
-                .v4(), // Usa el ID existente o genera uno nuevo si es null
-        tipo: 'ingreso',
-        monto: double.parse(_amountController.text),
-        descripcion: _nameController.text,
-        fecha: _selectedDate,
-        categoria: _selectedCategory,
-      );
+  if (_formKey.currentState!.validate()) {
+    final nuevaTransaccion = Transaccion(
+      id: widget.transaccion?.id ?? const Uuid().v4(),
+      tipo: 'ingreso',
+      monto: double.parse(_amountController.text),
+      descripcion: _nameController.text,
+      fecha: _selectedDate,
+      categoria: _selectedCategory,
+    );
 
-      final gestorFinanzas =
-          GestorFinanzas(); // Crea una instancia de GestorFinanzas
+    if (widget.transaccion != null) {
+      await DatabaseHelper().updateTransaccion(nuevaTransaccion);
+    } else {
+      await DatabaseHelper().insertTransaccion(nuevaTransaccion); // <--- AQUÍ EL CAMBIO
+    }
 
-      if (widget.transaccion != null) {
-        // Actualizar transacción existente
-        await gestorFinanzas.actualizarTransaccion(nuevaTransaccion);
-      } else {
-        // Crear nueva transacción
-        await gestorFinanzas.agregarTransaccion(nuevaTransaccion);
-      }
-
-      Navigator.pop(context, true); // Retorna `true` para indicar que se guardó
+    if (mounted) {
+      Navigator.pop(context, true);
     }
   }
-
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(

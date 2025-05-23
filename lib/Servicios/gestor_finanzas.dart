@@ -1,4 +1,5 @@
 import 'package:logging/logging.dart';
+import 'package:sqflite/sqflite.dart';
 import '../Modelos/transaccion.dart';
 import '../Modelos/categoria.dart';
 import 'database_helper.dart';
@@ -25,11 +26,11 @@ class GestorFinanzas {
   }
 
   Future<void> agregarTransaccion(Transaccion transaccion) async {
-    final db = await _dbHelper.database;
-
+    final db = await DatabaseHelper().database;
     await db.insert(
-      'transacciones', // Nombre de la tabla
-      transaccion.toMap(), // Convierte la transacción a un mapa
+      'transacciones',
+      transaccion.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 

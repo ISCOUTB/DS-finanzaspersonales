@@ -3,6 +3,7 @@ import '../Modelos/categoria.dart';
 import '../Modelos/transaccion.dart';
 import '../Modelos/categoria_service.dart';
 import '../Servicios/gestor_finanzas.dart';
+import '../Servicios/database_helper.dart';
 import 'package:uuid/uuid.dart';
 
 class FormGastos extends StatefulWidget {
@@ -49,27 +50,27 @@ class _FormGastosState extends State<FormGastos> {
   }
 
   void _saveTransaction() async {
-    if (_formKey.currentState!.validate()) {
-      final transaction = Transaccion(
-        id: const Uuid().v4(),
-        tipo: 'egreso',
-        monto: double.parse(_amountController.text),
-        fecha: _selectedDate,
-        categoria: _selectedCategory,
-        descripcion: _nameController.text,
-      );
+  if (_formKey.currentState!.validate()) {
+    final nuevaTransaccion = Transaccion(
+      id: widget.transaccion?.id ?? const Uuid().v4(),
+      tipo: 'egreso',
+      monto: double.parse(_amountController.text),
+      descripcion: _nameController.text,
+      fecha: _selectedDate,
+      categoria: _selectedCategory,
+    );
 
-      await GestorFinanzas().agregarTransaccion(transaction);
+    if (widget.transaccion != null) {
+      await DatabaseHelper().updateTransaccion(nuevaTransaccion);
+    } else {
+      await DatabaseHelper().insertTransaccion(nuevaTransaccion); // <--- AQUÍ EL CAMBIO
+    }
 
-      // Notificar a la página principal
-      if (mounted) {
-        Navigator.pop(
-          context,
-          true,
-        ); // Envía true para indicar que se agregó una transacción
-      }
+    if (mounted) {
+      Navigator.pop(context, true);
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
