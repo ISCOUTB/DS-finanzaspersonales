@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../Modelos/transaccion.dart';
+import 'form_gastos.dart';
+import 'form_ingresos.dart';
+import '../Servicios/gestor_finanzas.dart';
 
 class TransactionDetail extends StatelessWidget {
   final Transaccion transaccion;
@@ -13,6 +16,36 @@ class TransactionDetail extends StatelessWidget {
     this.onDelete,
   }) : super(key: key);
 
+  Future<bool> _editarTransaccion(
+    BuildContext context,
+    Transaccion transaccion,
+  ) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          if (transaccion.tipo == 'ingreso') {
+            return FormIngresos(
+              transaccion: transaccion,
+            ); // Navega al formulario de ingresos
+          } else {
+            return FormGastos(
+              transaccion: transaccion,
+            ); // Navega al formulario de gastos
+          }
+        },
+      ),
+    );
+
+    if (result == true) {
+      // Actualizar directamente la transacción existente
+      final gestorFinanzas = GestorFinanzas();
+      await gestorFinanzas.actualizarTransaccion(transaccion);
+      return true;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,10 +56,16 @@ class TransactionDetail extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () async {
-                // Espera a que termine la edición y si retorna true, cierra el detalle
-                final result = await onEdit!();
+                final result = await _editarTransaccion(context, transaccion);
                 if (result == true) {
-                  Navigator.of(context).pop(true);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Transacción actualizada exitosamente'),
+                    ),
+                  );
+                  Navigator.of(
+                    context,
+                  ).pop(true); // Cierra la página de detalles si se actualizó
                 }
               },
             ),
@@ -62,10 +101,7 @@ class TransactionDetail extends StatelessWidget {
             const SizedBox(height: 15),
             Text(
               transaccion.tipo == 'ingreso' ? 'Ingreso' : 'Egreso',
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
-              ),
+              style: const TextStyle(color: Colors.grey, fontSize: 16),
             ),
             const SizedBox(height: 10),
             Text(
@@ -73,17 +109,22 @@ class TransactionDetail extends StatelessWidget {
               style: TextStyle(
                 fontSize: 40,
                 fontWeight: FontWeight.bold,
-                color: transaccion.tipo == 'ingreso'
-                    ? Colors.green
-                    : Colors.red,
+                color:
+                    transaccion.tipo == 'ingreso' ? Colors.green : Colors.red,
               ),
             ),
             const SizedBox(height: 30),
-            _buildDetailRow('Estado', transaccion.tipo == 'ingreso' ? 'Ingreso' : 'Egreso'),
+            _buildDetailRow(
+              'Estado',
+              transaccion.tipo == 'ingreso' ? 'Ingreso' : 'Egreso',
+            ),
             _buildDetailRow('De', transaccion.categoria.nombre),
-            _buildDetailRow('Fecha',
-                '${transaccion.fecha.day.toString().padLeft(2, '0')}/${transaccion.fecha.month.toString().padLeft(2, '0')}/${transaccion.fecha.year}'),
-            if (transaccion.descripcion != null && transaccion.descripcion!.isNotEmpty)
+            _buildDetailRow(
+              'Fecha',
+              '${transaccion.fecha.day.toString().padLeft(2, '0')}/${transaccion.fecha.month.toString().padLeft(2, '0')}/${transaccion.fecha.year}',
+            ),
+            if (transaccion.descripcion != null &&
+                transaccion.descripcion!.isNotEmpty)
               _buildDetailRow('Descripción', transaccion.descripcion!),
             const Spacer(),
             // ...existing code for any buttons or actions...
@@ -99,10 +140,7 @@ class TransactionDetail extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: const TextStyle(color: Colors.grey),
-          ),
+          Text(label, style: const TextStyle(color: Colors.grey)),
           Flexible(
             child: Text(
               value,

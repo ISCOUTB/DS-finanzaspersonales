@@ -54,21 +54,29 @@ class EstadisticasPageState extends State<EstadisticasPage>
     final now = DateTime.now();
     switch (filtro) {
       case FiltroTiempo.dia:
-        return _transacciones.where((t) =>
-          t.fecha.year == now.year &&
-          t.fecha.month == now.month &&
-          t.fecha.day == now.day
-        ).toList();
+        return _transacciones
+            .where(
+              (t) =>
+                  t.fecha.year == now.year &&
+                  t.fecha.month == now.month &&
+                  t.fecha.day == now.day,
+            )
+            .toList();
       case FiltroTiempo.semana:
         final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
         final endOfWeek = startOfWeek.add(const Duration(days: 6));
-        return _transacciones.where((t) =>
-          !t.fecha.isBefore(startOfWeek) && !t.fecha.isAfter(endOfWeek)
-        ).toList();
+        return _transacciones
+            .where(
+              (t) =>
+                  !t.fecha.isBefore(startOfWeek) && !t.fecha.isAfter(endOfWeek),
+            )
+            .toList();
       case FiltroTiempo.mes:
-        return _transacciones.where((t) =>
-          t.fecha.year == now.year && t.fecha.month == now.month
-        ).toList();
+        return _transacciones
+            .where(
+              (t) => t.fecha.year == now.year && t.fecha.month == now.month,
+            )
+            .toList();
       case FiltroTiempo.anio:
         return _transacciones.where((t) => t.fecha.year == now.year).toList();
     }
@@ -173,20 +181,56 @@ class EstadisticasPageState extends State<EstadisticasPage>
     }
   }
 
-  List<Color> colores = [
+  List<Color> coloresIngresos = [
     Colors.blue.shade400,
     Colors.green.shade400,
     Colors.orange.shade400,
     Colors.purple.shade400,
-    Colors.red.shade400,
     Colors.yellow.shade400,
-    Colors.cyan.shade400,
-    Colors.teal.shade400,
-    Colors.pink.shade400,
-    Colors.brown.shade400,
+    Colors.indigo.shade400,
+    Colors.lightGreen.shade400,
+    Colors.amber.shade400,
+    Colors.deepPurple.shade400,
+    Colors.lime.shade400,
+    Colors.blueGrey.shade400,
+    Colors.cyan.shade300,
+    Colors.teal.shade300,
+    Colors.lightBlue.shade300,
+    Colors.pink.shade200,
+    Colors.greenAccent.shade400,
+    Colors.orangeAccent.shade400,
+    Colors.yellowAccent.shade400,
+    Colors.indigoAccent.shade200,
+    Colors.purpleAccent.shade200,
   ];
 
-  List<PieChartSectionData> _generarSeccionesPie(Map<String, double> data) {
+  List<Color> coloresGastos = [
+    Colors.red.shade400,
+    Colors.pink.shade400,
+    Colors.brown.shade400,
+    Colors.teal.shade400,
+    Colors.cyan.shade400,
+    Colors.deepOrange.shade400,
+    Colors.grey.shade600,
+    Colors.indigo.shade900,
+    Colors.green.shade900,
+    Colors.blue.shade900,
+    Colors.purple.shade900,
+    Colors.redAccent.shade700,
+    Colors.deepPurple.shade900,
+    Colors.blueGrey.shade800,
+    Colors.brown.shade800,
+    Colors.teal.shade800,
+    Colors.cyan.shade800,
+    Colors.deepOrangeAccent.shade700,
+    Colors.grey.shade800,
+    Colors.black54,
+  ];
+
+  List<PieChartSectionData> _generarSeccionesPie(
+    Map<String, double> data,
+    List<Color> colores,
+  ) {
     final total = data.values.fold(0.0, (a, b) => a + b);
     if (total == 0) return [];
 
@@ -234,10 +278,11 @@ class EstadisticasPageState extends State<EstadisticasPage>
     return barras;
   }
 
-  Widget _buildLegend(Map<String, double> data) {
+  Widget _buildLegend(Map<String, double> data, List<Color> colores) {
     final total = data.values.fold(0.0, (a, b) => a + b);
-    if (total == 0)
+    if (total == 0) {
       return const Center(child: Text('No hay datos para mostrar.'));
+    }
 
     int i = 0;
     return Wrap(
@@ -259,7 +304,12 @@ class EstadisticasPageState extends State<EstadisticasPage>
     );
   }
 
-  Widget _buildPieChartTotal(Map<String, double> data, String label, Color color) {
+  Widget _buildPieChartTotal(
+    Map<String, double> data,
+    String label,
+    Color color,
+    List<Color> colores, // Agrega este parámetro para los colores
+  ) {
     final total = data.values.fold(0.0, (a, b) => a + b);
     if (total == 0) {
       return const Center(child: Text('No hay datos para mostrar.'));
@@ -277,7 +327,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
             children: [
               PieChart(
                 PieChartData(
-                  sections: _generarSeccionesPie(data),
+                  sections: _generarSeccionesPie(
+                    data,
+                    colores,
+                  ), // Pasa los colores aquí
                   sectionsSpace: 8,
                   centerSpaceRadius: 80,
                   startDegreeOffset: -90,
@@ -307,43 +360,47 @@ class EstadisticasPageState extends State<EstadisticasPage>
     );
   }
 
-  Widget _buildCategoryIndicators(Map<String, double> data) {
+  Widget _buildCategoryIndicators(
+    Map<String, double> data,
+    List<Color> colores,
+  ) {
     final total = data.values.fold(0.0, (a, b) => a + b);
     if (total == 0) {
       return const SizedBox();
     }
     int i = 0;
     return Column(
-      children: data.entries.map((entry) {
-        final color = colores[i % colores.length];
-        i++;
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                margin: const EdgeInsets.only(right: 10),
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
+      children:
+          data.entries.map((entry) {
+            final color = colores[i % colores.length];
+            i++;
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    margin: const EdgeInsets.only(right: 10),
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      entry.key,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  Text(
+                    '\$${entry.value.toStringAsFixed(2)}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-              Expanded(
-                child: Text(
-                  entry.key,
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-              ),
-              Text(
-                '\$${entry.value.toStringAsFixed(2)}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     );
   }
 
@@ -379,10 +436,16 @@ class EstadisticasPageState extends State<EstadisticasPage>
               border: Border.all(color: Colors.grey.shade200),
             ),
             child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 6,
+              ),
               title: Text(
                 t.categoria.nombre,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               subtitle: Text(
                 '${t.fecha.day}/${t.fecha.month}/${t.fecha.year}',
@@ -406,10 +469,35 @@ class EstadisticasPageState extends State<EstadisticasPage>
   // Helper para abreviar meses en español
   String _mesAbreviado(int mes) {
     const meses = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
     ];
     return meses[mes - 1];
+  }
+
+  double _calcularIntervaloY() {
+    final maxIngreso =
+        _totalesIngresos.isNotEmpty
+            ? _totalesIngresos.reduce((a, b) => a > b ? a : b)
+            : 0.0;
+    final maxEgreso =
+        _totalesEgresos.isNotEmpty
+            ? _totalesEgresos.reduce((a, b) => a > b ? a : b)
+            : 0.0;
+    final maxY = (maxIngreso > maxEgreso ? maxIngreso : maxEgreso);
+
+    if (maxY == 0) return 1; // Si no hay datos, usa un intervalo de 1
+    return (maxY / 4).ceilToDouble(); // Divide el valor máximo en 4 intervalos
   }
 
   @override
@@ -492,7 +580,9 @@ class EstadisticasPageState extends State<EstadisticasPage>
                 children: [
                   // Tarjeta de Ingresos por categoría
                   Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     elevation: 10,
                     shadowColor: Colors.black.withOpacity(0.15),
                     child: Padding(
@@ -506,7 +596,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
                               children: [
                                 PieChart(
                                   PieChartData(
-                                    sections: _generarSeccionesPie(ingresosPorCategoria),
+                                    sections: _generarSeccionesPie(
+                                      ingresosPorCategoria,
+                                      coloresIngresos,
+                                    ),
                                     sectionsSpace: 8,
                                     centerSpaceRadius: 80,
                                     startDegreeOffset: -90,
@@ -517,7 +610,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
                                   children: [
                                     const Text(
                                       'Total Ingresos',
-                                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
                                     ),
                                     Text(
                                       '\$${ingresosPorCategoria.values.fold(0.0, (a, b) => a + b).toStringAsFixed(2)}',
@@ -533,7 +629,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
                             ),
                           ),
                           const SizedBox(height: 16),
-                          _buildCategoryIndicators(ingresosPorCategoria),
+                          _buildCategoryIndicators(
+                            ingresosPorCategoria,
+                            coloresIngresos,
+                          ),
                         ],
                       ),
                     ),
@@ -541,7 +640,9 @@ class EstadisticasPageState extends State<EstadisticasPage>
                   const SizedBox(height: 30),
                   // Tarjeta de Gastos por categoría
                   Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     elevation: 10,
                     shadowColor: Colors.black.withOpacity(0.15),
                     child: Padding(
@@ -555,7 +656,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
                               children: [
                                 PieChart(
                                   PieChartData(
-                                    sections: _generarSeccionesPie(egresosPorCategoria),
+                                    sections: _generarSeccionesPie(
+                                      egresosPorCategoria,
+                                      coloresGastos,
+                                    ),
                                     sectionsSpace: 8,
                                     centerSpaceRadius: 80,
                                     startDegreeOffset: -90,
@@ -566,7 +670,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
                                   children: [
                                     const Text(
                                       'Total Gastos',
-                                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
                                     ),
                                     Text(
                                       '\$${egresosPorCategoria.values.fold(0.0, (a, b) => a + b).toStringAsFixed(2)}',
@@ -582,7 +689,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
                             ),
                           ),
                           const SizedBox(height: 16),
-                          _buildCategoryIndicators(egresosPorCategoria),
+                          _buildCategoryIndicators(
+                            egresosPorCategoria,
+                            coloresGastos,
+                          ),
                         ],
                       ),
                     ),
@@ -594,9 +704,9 @@ class EstadisticasPageState extends State<EstadisticasPage>
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
-                  _buildLegend(ingresosPorCategoria),
+                  _buildLegend(ingresosPorCategoria, coloresIngresos),
                   const SizedBox(height: 10),
-                  _buildLegend(egresosPorCategoria),
+                  _buildLegend(egresosPorCategoria, coloresGastos),
                 ],
               ),
             ),
@@ -623,38 +733,81 @@ class EstadisticasPageState extends State<EstadisticasPage>
                   SizedBox(
                     height: 340,
                     child: BarChart(
-  BarChartData(
-    titlesData: FlTitlesData(
-      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-    ),
-    borderData: FlBorderData(
-      border: Border.all(color: Colors.transparent),
-    ),
-    gridData: FlGridData(
-      show: true,
-      drawVerticalLine: true,
-      horizontalInterval: [
-        ..._totalesIngresos,
-        ..._totalesEgresos
-      ].isNotEmpty
-          ? ([
-                ..._totalesIngresos,
-                ..._totalesEgresos
-              ].reduce((a, b) => a > b ? a : b) / 4)
-              .ceilToDouble().clamp(0.01, double.infinity)
-          : 1,
-      getDrawingHorizontalLine: (value) => FlLine(
-        color: Colors.grey.withOpacity(0.25),
-        strokeWidth: 1,
-      ),
-      getDrawingVerticalLine: (value) => FlLine(
-        color: Colors.grey.withOpacity(0.18),
-        strokeWidth: 1,
-      ),
-    ),
-    barGroups: _generarBarrasAgrupadas(), // <-- ¡Esto genera las barras!
-  ),
-),
+                      BarChartData(
+                        titlesData: FlTitlesData(
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 40,
+                              interval:
+                                  _calcularIntervaloY(), // Calcula un intervalo adecuado
+                              getTitlesWidget: (value, meta) {
+                                if (value % 1 != 0)
+                                  return const SizedBox.shrink(); // Muestra solo números enteros
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: Text(
+                                    value
+                                        .toInt()
+                                        .toString(), // Convierte el valor a entero
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 32,
+                              getTitlesWidget: (value, meta) {
+                                final index = value.toInt();
+                                if (index < 0 ||
+                                    index >= _etiquetasBarras.length) {
+                                  return const SizedBox.shrink();
+                                }
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    _etiquetasBarras[index],
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          topTitles: AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          rightTitles: AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                        ),
+                        barGroups: _generarBarrasAgrupadas(),
+                        borderData: FlBorderData(show: false),
+                        gridData: FlGridData(
+                          show: true,
+                          drawVerticalLine: false,
+                          horizontalInterval:
+                              _calcularIntervaloY(), // Usa el mismo intervalo para las líneas horizontales
+                          getDrawingHorizontalLine:
+                              (value) => FlLine(
+                                color: Colors.grey.withOpacity(0.15),
+                                strokeWidth: 1,
+                              ),
+                        ),
+                      ),
+                    ),
                   ),
                   // Historial de transacciones debajo del gráfico de barras
                   _buildHistorialTransacciones(_transacciones),
@@ -681,24 +834,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
                   ),
                   const SizedBox(height: 12),
                   // Filtros tipo "pill"
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildFiltroPill(FiltroTiempo.dia, 'Day'),
-                      const SizedBox(width: 8),
-                      _buildFiltroPill(FiltroTiempo.semana, 'Week'),
-                      const SizedBox(width: 8),
-                      _buildFiltroPill(FiltroTiempo.mes, 'Month'),
-                      const SizedBox(width: 8),
-                      _buildFiltroPill(FiltroTiempo.anio, 'Year'),
-                    ],
-                  ),
                   const SizedBox(height: 16),
                   SizedBox(
                     height: 320,
-                    child: LineChart(
-                      _generarLineChartDataEstiloImagen(),
-                    ),
+                    child: LineChart(_generarLineChartDataEstiloImagen()),
                   ),
                   buildResumenBarras(
                     etiquetas: _etiquetasBarras,
@@ -751,9 +890,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
     for (int i = 0; i < _etiquetasBarras.length; i++) {
       spots.add(FlSpot(i.toDouble(), _totalesIngresos[i]));
     }
-    final maxIngreso = _totalesIngresos.isNotEmpty
-        ? _totalesIngresos.reduce((a, b) => a > b ? a : b)
-        : 0.0;
+    final maxIngreso =
+        _totalesIngresos.isNotEmpty
+            ? _totalesIngresos.reduce((a, b) => a > b ? a : b)
+            : 0.0;
     final maxY = (maxIngreso) * 1.2;
 
     return LineChartData(
@@ -767,8 +907,8 @@ class EstadisticasPageState extends State<EstadisticasPage>
           barWidth: 3,
           dotData: FlDotData(
             show: true,
-            getDotPainter: (spot, percent, barData, index) =>
-                FlDotCirclePainter(
+            getDotPainter:
+                (spot, percent, barData, index) => FlDotCirclePainter(
                   radius: 5,
                   color: const Color(0xff009688),
                   strokeWidth: 2,
@@ -793,9 +933,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
           sideTitles: SideTitles(
             showTitles: true,
             reservedSize: 48,
-            interval: (_etiquetasBarras.length == 1)
-                ? null
-                : (maxY ~/ 4 > 0 ? maxY / 4 : (maxY > 0 ? maxY / 4 : 1)),
+            interval:
+                (_etiquetasBarras.length == 1)
+                    ? null
+                    : (maxY ~/ 4 > 0 ? maxY / 4 : (maxY > 0 ? maxY / 4 : 1)),
             getTitlesWidget: (value, meta) {
               // Si solo hay un dato, muestra solo 0 y el valor máximo
               if (_etiquetasBarras.length == 1) {
@@ -805,7 +946,11 @@ class EstadisticasPageState extends State<EstadisticasPage>
                     padding: const EdgeInsets.only(right: 8),
                     child: Text(
                       value.toInt().toString(),
-                      style: const TextStyle(fontSize: 13, color: Colors.black54, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black54,
+                        fontWeight: FontWeight.w500,
+                      ),
                       textAlign: TextAlign.right,
                     ),
                   );
@@ -819,7 +964,11 @@ class EstadisticasPageState extends State<EstadisticasPage>
                 padding: const EdgeInsets.only(right: 8),
                 child: Text(
                   value.toInt().toString(),
-                  style: const TextStyle(fontSize: 13, color: Colors.black54, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
+                  ),
                   textAlign: TextAlign.right,
                 ),
               );
@@ -839,7 +988,11 @@ class EstadisticasPageState extends State<EstadisticasPage>
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   _etiquetasBarras[index],
-                  style: const TextStyle(fontSize: 14, color: Colors.black87, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               );
@@ -854,10 +1007,9 @@ class EstadisticasPageState extends State<EstadisticasPage>
         show: true,
         drawVerticalLine: false,
         horizontalInterval: maxY ~/ 4 > 0 ? maxY / 4 : 1,
-        getDrawingHorizontalLine: (value) => FlLine(
-          color: Colors.grey.withOpacity(0.15),
-          strokeWidth: 1,
-        ),
+        getDrawingHorizontalLine:
+            (value) =>
+                FlLine(color: Colors.grey.withOpacity(0.15), strokeWidth: 1),
       ),
     );
   }
@@ -884,7 +1036,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
               children: List.generate(etiquetas.length, (i) {
                 return Container(
                   margin: const EdgeInsets.only(right: 12),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -912,7 +1067,11 @@ class EstadisticasPageState extends State<EstadisticasPage>
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.arrow_upward, color: Colors.green, size: 16),
+                          const Icon(
+                            Icons.arrow_upward,
+                            color: Colors.green,
+                            size: 16,
+                          ),
                           const SizedBox(width: 2),
                           Text(
                             ingresos[i].toStringAsFixed(0),
@@ -927,7 +1086,11 @@ class EstadisticasPageState extends State<EstadisticasPage>
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.arrow_downward, color: Colors.red, size: 16),
+                          const Icon(
+                            Icons.arrow_downward,
+                            color: Colors.red,
+                            size: 16,
+                          ),
                           const SizedBox(width: 2),
                           Text(
                             egresos[i].toStringAsFixed(0),

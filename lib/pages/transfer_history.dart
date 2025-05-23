@@ -3,6 +3,8 @@ import '../Servicios/gestor_finanzas.dart';
 import '../Modelos/transaccion.dart';
 import 'detalle_transfer.dart';
 import 'principal_pages.dart';
+import 'form_gastos.dart';
+import 'form_ingresos.dart';
 
 class Transferhistory extends StatefulWidget {
   const Transferhistory({super.key});
@@ -76,70 +78,25 @@ class _TransferhistoryState extends State<Transferhistory> {
   }
 
   Future<bool> _editarTransaccion(Transaccion transaccion) async {
-    TextEditingController montoController = TextEditingController(text: transaccion.monto.toString());
-    TextEditingController descripcionController = TextEditingController(text: transaccion.descripcion ?? "");
+  final result = await Navigator.push<bool>(
+    context,
+    MaterialPageRoute(
+      builder: (context) {
+        if (transaccion.tipo == 'ingreso') {
+          return FormIngresos(transaccion: transaccion); // Navega al formulario de ingresos
+        } else {
+          return FormGastos(transaccion: transaccion); // Navega al formulario de gastos
+        }
+      },
+    ),
+  );
 
-    bool editado = false;
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Editar transacción'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: montoController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Monto'),
-            ),
-            TextField(
-              controller: descripcionController,
-              decoration: const InputDecoration(labelText: 'Descripción'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext, false);
-            },
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final nuevoMonto = double.tryParse(montoController.text);
-              if (nuevoMonto != null) {
-                // Crea una nueva instancia de Transaccion con los cambios
-                final transaccionEditada = Transaccion(
-                  id: transaccion.id,
-                  monto: nuevoMonto,
-                  tipo: transaccion.tipo,
-                  fecha: transaccion.fecha,
-                  categoria: transaccion.categoria,
-                  descripcion: descripcionController.text,
-                );
-                // Usa el método de edición del gestor para actualizar en la base de datos y en la lista
-                await _gestorFinanzas.editarTransaccion(transaccion.id, transaccionEditada);
-                editado = true;
-                Navigator.pop(dialogContext, true);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Monto inválido')),
-                );
-              }
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
-      ),
-    );
-    if (editado || result == true) {
-      await _cargarTransacciones();
-      return true;
-    }
-    return false;
+  if (result == true) {
+    await _cargarTransacciones(); // Recarga las transacciones si se editó algo
+    return true;
   }
+  return false;
+}
 
   Future<void> _eliminarTransaccion(Transaccion transaccion) async {
     final confirm = await showDialog<bool>(
@@ -383,12 +340,6 @@ class _TransferhistoryState extends State<Transferhistory> {
                                             ? Colors.green
                                             : Colors.red,
                                       ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete, color: Colors.red),
-                                      onPressed: () async {
-                                        await _eliminarTransaccion(transaccion);
-                                      },
                                     ),
                                   ],
                                 ),

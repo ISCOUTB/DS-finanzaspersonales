@@ -6,7 +6,9 @@ import '../Servicios/gestor_finanzas.dart';
 import 'package:uuid/uuid.dart';
 
 class FormIngresos extends StatefulWidget {
-  const FormIngresos({super.key});
+  final Transaccion? transaccion;
+
+  const FormIngresos({super.key, this.transaccion});
 
   @override
   State<FormIngresos> createState() => _FormIngresosState();
@@ -25,26 +27,52 @@ class _FormIngresosState extends State<FormIngresos> {
   void initState() {
     super.initState();
     _categorias = CategoriaService.getCategoriasIngresos();
-    _selectedCategory = _categorias.first;
+
+    // Precargar datos si se pasa una transacción
+    if (widget.transaccion != null) {
+      _amountController.text = widget.transaccion!.monto.toString();
+      _nameController.text = widget.transaccion!.descripcion ?? '';
+      _selectedDate = widget.transaccion!.fecha;
+
+      // Verifica si la categoría de la transacción está en la lista
+      if (_categorias.contains(widget.transaccion!.categoria)) {
+        _selectedCategory = widget.transaccion!.categoria;
+      } else {
+        // Agrega la categoría temporalmente si no está en la lista
+        _categorias.add(widget.transaccion!.categoria);
+        _selectedCategory = widget.transaccion!.categoria;
+      }
+    } else {
+      _selectedCategory = _categorias.first;
+    }
   }
 
   void _saveTransaction() async {
     if (_formKey.currentState!.validate()) {
-      final transaction = Transaccion(
-        id: const Uuid().v4(),
+      final nuevaTransaccion = Transaccion(
+        id:
+            widget.transaccion?.id ??
+            const Uuid()
+                .v4(), // Usa el ID existente o genera uno nuevo si es null
         tipo: 'ingreso',
         monto: double.parse(_amountController.text),
+        descripcion: _nameController.text,
         fecha: _selectedDate,
         categoria: _selectedCategory,
-        descripcion: _nameController.text,
       );
 
-      await GestorFinanzas().agregarTransaccion(transaction);
+      final gestorFinanzas =
+          GestorFinanzas(); // Crea una instancia de GestorFinanzas
 
-      // Notificar a la página principal
-      if (mounted) {
-        Navigator.pop(context, true); // Envía true para indicar que se agregó una transacción
+      if (widget.transaccion != null) {
+        // Actualizar transacción existente
+        await gestorFinanzas.actualizarTransaccion(nuevaTransaccion);
+      } else {
+        // Crear nueva transacción
+        await gestorFinanzas.agregarTransaccion(nuevaTransaccion);
       }
+
+      Navigator.pop(context, true); // Retorna `true` para indicar que se guardó
     }
   }
 
@@ -114,7 +142,12 @@ class _FormIngresosState extends State<FormIngresos> {
                     child: ElevatedButton(
                       onPressed: _saveTransaction,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+                        backgroundColor: const Color.fromARGB(
+                          225,
+                          47,
+                          125,
+                          121,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
@@ -133,7 +166,9 @@ class _FormIngresosState extends State<FormIngresos> {
                       onPressed: () => Navigator.pop(context),
                       child: const Text(
                         'Cancelar',
-                        style: TextStyle(color: Color.fromARGB(225, 47, 125, 121)),
+                        style: TextStyle(
+                          color: Color.fromARGB(225, 47, 125, 121),
+                        ),
                       ),
                     ),
                   ),
@@ -159,18 +194,19 @@ class _FormIngresosState extends State<FormIngresos> {
         dropdownColor: Colors.white,
         style: const TextStyle(color: Colors.black87),
         decoration: const InputDecoration(border: InputBorder.none),
-        items: _categorias.map((categoria) {
-          return DropdownMenuItem<Categoria>(
-            value: categoria,
-            child: Row(
-              children: [
-                Text(categoria.icono),
-                const SizedBox(width: 10),
-                Text(categoria.nombre),
-              ],
-            ),
-          );
-        }).toList(),
+        items:
+            _categorias.map((categoria) {
+              return DropdownMenuItem<Categoria>(
+                value: categoria,
+                child: Row(
+                  children: [
+                    Text(categoria.icono),
+                    const SizedBox(width: 10),
+                    Text(categoria.nombre),
+                  ],
+                ),
+              );
+            }).toList(),
         onChanged: (Categoria? value) {
           if (value != null) {
             setState(() => _selectedCategory = value);
@@ -216,10 +252,7 @@ class _FormIngresosState extends State<FormIngresos> {
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: Colors.grey[300]!),
           ),
-          child: const Text(
-            'COP',
-            style: TextStyle(color: Colors.black87),
-          ),
+          child: const Text('COP', style: TextStyle(color: Colors.black87)),
         ),
       ],
     );
@@ -302,8 +335,18 @@ class _FormIngresosState extends State<FormIngresos> {
 
   String _getMonthName(int month) {
     const months = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
     ];
     return months[month - 1];
   }

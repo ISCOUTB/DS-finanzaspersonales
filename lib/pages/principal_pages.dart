@@ -410,7 +410,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                       child: Row(
                         children: [
                           Text(
-                            ' 24 ${balance['balance']?.toStringAsFixed(2)}',
+                            '${balance['balance']?.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 25,
@@ -529,7 +529,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                           ),
                           SizedBox(height: 4),
                           Text(
-                            '240.00', // Aquí puedes poner el valor real si lo deseas
+                            '', // Aquí puedes poner el valor real si lo deseas
                             style: const TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.bold,
