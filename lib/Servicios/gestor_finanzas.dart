@@ -24,22 +24,34 @@ class GestorFinanzas {
     }
   }
 
-  Future<void> agregarTransaccion(Transaccion t) async {
-    try {
-      await _dbHelper.insertTransaccion(t);
-      transacciones.add(t);
-    } catch (e) {
-      _logger.severe('Error al agregar transacción: $e');
-    }
+  Future<void> agregarTransaccion(Transaccion transaccion) async {
+    final db = await _dbHelper.database;
+
+    await db.insert(
+      'transacciones', // Nombre de la tabla
+      transaccion.toMap(), // Convierte la transacción a un mapa
+    );
+  }
+
+  Future<void> actualizarTransaccion(Transaccion transaccion) async {
+    final db = await _dbHelper.database;
+
+    await db.update(
+      'transacciones', // Nombre de la tabla
+      transaccion.toMap(), // Convierte la transacción a un mapa
+      where: 'id = ?', // Condición para encontrar la transacción
+      whereArgs: [transaccion.id], // Argumentos para la condición
+    );
   }
 
   Future<void> eliminarTransaccion(String id) async {
-    try {
-      await _dbHelper.deleteTransaccion(id);
-      transacciones.removeWhere((t) => t.id == id);
-    } catch (e) {
-      _logger.severe('Error al eliminar transacción: $e');
-    }
+    final db = await _dbHelper.database;
+
+    await db.delete(
+      'transacciones', // Nombre de la tabla
+      where: 'id = ?', // Condición para encontrar la transacción
+      whereArgs: [id], // Argumentos para la condición
+    );
   }
 
   Future<void> editarTransaccion(String id, Transaccion nueva) async {
@@ -123,5 +135,15 @@ class GestorFinanzas {
     } catch (e) {
       _logger.severe('Error al cargar transacciones por año: $e');
     }
+  }
+
+  // Agrega este método al final de la clase GestorFinanzas
+  Future<void> guardarTransacciones() async {
+    // Si usas almacenamiento local, SharedPreferences, archivo, base de datos, etc.
+    // Aquí solo es un ejemplo, debes adaptarlo a tu lógica real de guardado.
+    // Por ejemplo, si tienes un método para guardar en SharedPreferences:
+    // await saveTransaccionesToStorage(transacciones);
+
+    // Si no tienes persistencia aún, puedes dejarlo vacío para evitar errores.
   }
 }

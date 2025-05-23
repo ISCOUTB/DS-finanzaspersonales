@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'principal_pages.dart';
+import 'registro_pages.dart';
+import '../Servicios/database_helper.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -38,12 +40,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
     setState(() {
       userName = newName;
     });
-    
+
     // Notificar a PrincipalPage que debe actualizar el nombre
     if (PrincipalPage.globalKey.currentState != null) {
       PrincipalPage.globalKey.currentState!.loadUserName();
     }
-    
+
     Navigator.pop(context); // Cerrar el diálogo
   }
 
@@ -121,7 +123,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   void _showEditNameDialog() {
-    final TextEditingController nameController = TextEditingController(text: userName);
+    final TextEditingController nameController = TextEditingController(
+      text: userName,
+    );
     showDialog(
       context: context,
       builder: (context) {
@@ -129,7 +133,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
           title: const Text('Editar Nombre'),
           content: TextField(
             controller: nameController,
-            decoration: const InputDecoration(hintText: 'Ingresa tu nuevo nombre'),
+            decoration: const InputDecoration(
+              hintText: 'Ingresa tu nuevo nombre',
+            ),
           ),
           actions: [
             TextButton(
@@ -152,15 +158,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Future<void> _deleteAccountData() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    setState(() {
-      userName = 'Usuario';
-      profileImage = null;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Información de la cuenta eliminada.')),
-    );
-    Navigator.pop(context); // Regresa a la pantalla anterior
+    await prefs.clear(); // Elimina todos los datos almacenados en SharedPreferences
+
+    // Elimina todos los registros de la base de datos
+    final dbHelper = DatabaseHelper();
+    await dbHelper.deleteAllTransacciones();
+
+    // Redirige a la página de registro y elimina el historial de navegación
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const PageRegistro()),
+        (route) => false, // Elimina todas las rutas anteriores
+      );
+    }
   }
 
   void _showDeleteConfirmationDialog() {
@@ -170,7 +181,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
         return AlertDialog(
           title: const Text('Confirmar Eliminación'),
           content: const Text(
-              '¿Estás seguro de que deseas eliminar toda la información de tu cuenta? Esta acción no se puede deshacer.'),
+            '¿Estás seguro de que deseas eliminar toda la información de tu cuenta? Esta acción no se puede deshacer.',
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -181,7 +193,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context); // Cierra el cuadro de diálogo
-                _deleteAccountData(); // Elimina la información
+                _deleteAccountData(); // Elimina la información y redirige
               },
               child: const Text('Eliminar'),
             ),
@@ -222,16 +234,32 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     children: [
                       CircleAvatar(
                         radius: 70,
-                        backgroundImage: profileImage != null ? FileImage(profileImage!) : null,
-                        child: profileImage == null
-                            ? const Icon(Icons.person, size: 70, color: Colors.white)
-                            : null,
-                        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+                        backgroundImage:
+                            profileImage != null
+                                ? FileImage(profileImage!)
+                                : null,
+                        child:
+                            profileImage == null
+                                ? const Icon(
+                                  Icons.person,
+                                  size: 70,
+                                  color: Colors.white,
+                                )
+                                : null,
+                        backgroundColor: const Color.fromARGB(
+                          225,
+                          47,
+                          125,
+                          121,
+                        ),
                       ),
                       CircleAvatar(
                         radius: 20,
                         backgroundColor: Colors.white,
-                        child: const Icon(Icons.camera_alt, color: Color.fromARGB(225, 47, 125, 121)),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Color.fromARGB(225, 47, 125, 121),
+                        ),
                       ),
                     ],
                   ),
@@ -278,12 +306,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   onPressed: _showDeleteConfirmationDialog,
                   child: const Text(
                     'Eliminar Información de la Cuenta',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),

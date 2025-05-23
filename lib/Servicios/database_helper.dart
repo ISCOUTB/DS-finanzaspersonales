@@ -75,6 +75,13 @@ class DatabaseHelper {
     await db.delete('transacciones', where: 'id = ?', whereArgs: [id]);
   }
 
+  Future<void> deleteAllTransacciones() async {
+  final db = await database;
+  print('Eliminando todas las transacciones...');
+  await db.delete('transacciones');
+  print('Todas las transacciones han sido eliminadas.');
+  }
+
   Future<void> updateTransaccion(Transaccion transaccion) async {
     final db = await database;
     await db.update(
