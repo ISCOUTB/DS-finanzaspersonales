@@ -28,6 +28,17 @@ class Transaccion {
     };
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'tipo': tipo,
+      'monto': monto,
+      'descripcion': descripcion,
+      'fecha': fecha.toIso8601String(),
+      'categoria': categoria,
+    };
+  }
+
   factory Transaccion.fromJson(Map<String, dynamic> json) {
     return Transaccion(
       id: json['id'],
