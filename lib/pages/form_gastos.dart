@@ -3,8 +3,8 @@ import '../Modelos/categoria.dart';
 import '../Modelos/transaccion.dart';
 import '../Modelos/categoria_service.dart';
 import '../Servicios/gestor_finanzas.dart';
-import '../Servicios/database_helper.dart';
 import 'package:uuid/uuid.dart';
+import 'transfer_history.dart';
 
 class FormGastos extends StatefulWidget {
   final Transaccion? transaccion;
@@ -50,27 +50,27 @@ class _FormGastosState extends State<FormGastos> {
   }
 
   void _saveTransaction() async {
-  if (_formKey.currentState!.validate()) {
-    final nuevaTransaccion = Transaccion(
-      id: widget.transaccion?.id ?? const Uuid().v4(),
-      tipo: 'egreso',
-      monto: double.parse(_amountController.text),
-      descripcion: _nameController.text,
-      fecha: _selectedDate,
-      categoria: _selectedCategory,
-    );
-
-    if (widget.transaccion != null) {
-      await DatabaseHelper().updateTransaccion(nuevaTransaccion);
-    } else {
-      await DatabaseHelper().insertTransaccion(nuevaTransaccion); // <--- AQUÍ EL CAMBIO
-    }
-
-    if (mounted) {
-      Navigator.pop(context, true);
+    if (_formKey.currentState!.validate()) {
+      final nuevaTransaccion = Transaccion(
+        id: widget.transaccion?.id ?? const Uuid().v4(),
+        tipo: 'egreso',
+        monto: double.parse(_amountController.text),
+        descripcion: _nameController.text,
+        fecha: _selectedDate,
+        categoria: _selectedCategory,
+      );
+      final gestor = GestorFinanzas(); // Singleton
+      if (widget.transaccion != null) {
+        await gestor.editarTransaccion(nuevaTransaccion.id, nuevaTransaccion);
+      } else {
+        await gestor.agregarTransaccion(nuevaTransaccion);
+      }
+      if (mounted) {
+        transaccionesActualizadas.value = !transaccionesActualizadas.value;
+        Navigator.pop(context, true);
+      }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -84,9 +84,9 @@ class _FormGastosState extends State<FormGastos> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Planificar un gasto',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          widget.transaccion != null ? 'Editar egreso' : 'Planificar un gasto',
+          style: const TextStyle(color: Colors.white),
         ),
       ),
       body: Stack(
@@ -148,9 +148,9 @@ class _FormGastosState extends State<FormGastos> {
                           borderRadius: BorderRadius.circular(25),
                         ),
                       ),
-                      child: const Text(
-                        'Crear',
-                        style: TextStyle(
+                      child: Text(
+                        widget.transaccion != null ? 'Modificar' : 'Crear',
+                        style: const TextStyle(
                           color: Color.fromARGB(255, 255, 255, 255),
                         ),
                       ),

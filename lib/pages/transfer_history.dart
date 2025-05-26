@@ -5,6 +5,10 @@ import 'detalle_transfer.dart';
 import 'principal_pages.dart';
 import 'form_gastos.dart';
 import 'form_ingresos.dart';
+import 'estadisticas.dart';
+
+// Notificador global para cambios en transacciones
+final ValueNotifier<bool> transaccionesActualizadas = ValueNotifier(false);
 
 class Transferhistory extends StatefulWidget {
   const Transferhistory({super.key});
@@ -16,7 +20,6 @@ class Transferhistory extends StatefulWidget {
 class _TransferhistoryState extends State<Transferhistory> {
   final GestorFinanzas _gestorFinanzas = GestorFinanzas();
   String _filtroActual = 'Todas';
-  List<Transaccion> _transacciones = [];
   String _searchQuery = '';
   DateTimeRange? _selectedDateRange;
 
@@ -26,10 +29,16 @@ class _TransferhistoryState extends State<Transferhistory> {
     _cargarTransacciones();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _cargarTransacciones();
+  }
+
   Future<void> _cargarTransacciones() async {
     await _gestorFinanzas.cargarTransacciones();
     setState(() {
-      _transacciones = _filtrarTransacciones();
+      // Solo forzamos la reconstrucción, el filtrado se hace en _getFilteredTransacciones
     });
   }
 
@@ -78,25 +87,30 @@ class _TransferhistoryState extends State<Transferhistory> {
   }
 
   Future<bool> _editarTransaccion(Transaccion transaccion) async {
-  final result = await Navigator.push<bool>(
-    context,
-    MaterialPageRoute(
-      builder: (context) {
-        if (transaccion.tipo == 'ingreso') {
-          return FormIngresos(transaccion: transaccion); // Navega al formulario de ingresos
-        } else {
-          return FormGastos(transaccion: transaccion); // Navega al formulario de gastos
-        }
-      },
-    ),
-  );
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          if (transaccion.tipo == 'ingreso') {
+            return FormIngresos(transaccion: transaccion); // Navega al formulario de ingresos
+          } else {
+            return FormGastos(transaccion: transaccion); // Navega al formulario de gastos
+          }
+        },
+      ),
+    );
 
-  if (result == true) {
-    await _cargarTransacciones(); // Recarga las transacciones si se editó algo
-    return true;
+    if (result == true) {
+      await _cargarTransacciones(); // Recarga las transacciones si se editó algo
+      setState(() {}); // Fuerza la reconstrucción para reflejar los cambios
+      // Notificar a la pantalla principal y estadísticas para recargar los datos
+      PrincipalPage.globalKey.currentState?.cargarTransacciones();
+      EstadisticasPage.globalKey.currentState?.cargarDatos();
+      transaccionesActualizadas.value = !transaccionesActualizadas.value;
+      return true;
+    }
+    return false;
   }
-  return false;
-}
 
   Future<void> _eliminarTransaccion(Transaccion transaccion) async {
     final confirm = await showDialog<bool>(
@@ -121,10 +135,12 @@ class _TransferhistoryState extends State<Transferhistory> {
       // Usa el método eliminarTransaccion del gestor para eliminar correctamente en BD y en memoria
       await _gestorFinanzas.eliminarTransaccion(transaccion.id);
       setState(() {
-        _transacciones = _filtrarTransacciones();
+        _filtrarTransacciones();
       });
-      // Notificar a la pantalla principal para recargar los datos
+      // Notificar a la pantalla principal y estadísticas para recargar los datos
       PrincipalPage.globalKey.currentState?.cargarTransacciones();
+      EstadisticasPage.globalKey.currentState?.cargarDatos();
+      transaccionesActualizadas.value = !transaccionesActualizadas.value;
     }
   }
 
@@ -135,60 +151,88 @@ class _TransferhistoryState extends State<Transferhistory> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
+            // Header compacto
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.only(top: 18, left: 20, right: 20, bottom: 8),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Historial de Transferencias',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ],
               ),
             ),
-            // Buscador y filtro de fechas
+            // Buscador moderno con botón de fecha a la derecha
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
               child: Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Buscar transacción...',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      onChanged: (value) {
-                        setState(() {
-                          _searchQuery = value;
-                        });
-                      },
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Buscar transacción...',
+                          hintStyle: TextStyle(color: Colors.grey[500]),
+                          prefixIcon: const Icon(Icons.search, color: Color(0xFF368983)),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 0),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value;
+                          });
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
-                  IconButton(
-                    icon: const Icon(Icons.date_range, color: Color.fromARGB(225, 47, 125, 121)),
-                    tooltip: 'Filtrar por fecha',
-                    onPressed: () async {
-                      final picked = await showDateRangePicker(
-                        context: context,
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                        initialDateRange: _selectedDateRange,
-                      );
-                      if (picked != null) {
-                        setState(() {
-                          _selectedDateRange = picked;
-                        });
-                      }
-                    },
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.date_range, color: Color(0xFF368983)),
+                      tooltip: 'Filtrar por fecha',
+                      onPressed: () async {
+                        final picked = await showDateRangePicker(
+                          context: context,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                          initialDateRange: _selectedDateRange,
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            _selectedDateRange = picked;
+                          });
+                        }
+                      },
+                    ),
                   ),
                   if (_selectedDateRange != null)
                     IconButton(
@@ -203,6 +247,66 @@ class _TransferhistoryState extends State<Transferhistory> {
                 ],
               ),
             ),
+            // Filtros pill modernos con degradado
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 18, bottom: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: ['Todas', 'Ingresos', 'Gastos'].map((filtro) {
+                  final activo = _filtroActual == filtro;
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _filtroActual = filtro;
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            gradient: activo
+                                ? const LinearGradient(
+                                    colors: [Color(0xFF368983), Color(0xFF4CAF50)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
+                                : null,
+                            color: activo ? null : Colors.white,
+                            borderRadius: BorderRadius.circular(22),
+                            border: activo
+                                ? null
+                                : Border.all(color: const Color(0xFF368983).withOpacity(0.18), width: 1.2),
+                            boxShadow: activo
+                                ? [
+                                    BoxShadow(
+                                      color: const Color(0xFF368983).withOpacity(0.13),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : [],
+                          ),
+                          child: Center(
+                            child: Text(
+                              filtro.toUpperCase(),
+                              style: TextStyle(
+                                color: activo ? Colors.white : const Color(0xFF368983),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                letterSpacing: 1.1,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
             // Contenido principal
             Expanded(
               child: Container(
@@ -212,52 +316,6 @@ class _TransferhistoryState extends State<Transferhistory> {
                 ),
                 child: Column(
                   children: [
-                    // Filtros
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children:
-                            ['Todas', 'Ingresos', 'Gastos'].map((filtro) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _filtroActual = filtro;
-                                // _transacciones = _filtrarTransacciones(); // Ya no es necesario, usamos _getFilteredTransacciones()
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color:
-                                    _filtroActual == filtro
-                                        ? const Color.fromARGB(
-                                            225,
-                                            47,
-                                            125,
-                                            121,
-                                          )
-                                        : Colors.grey.withAlpha(26),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                filtro,
-                                style: TextStyle(
-                                  color:
-                                      _filtroActual == filtro
-                                          ? Colors.white
-                                          : Colors.grey[800],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
                     // Lista de transacciones con animación
                     Expanded(
                       child: AnimatedSwitcher(
@@ -278,7 +336,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                               ),
                               child: ListTile(
                                 onTap: () async {
-                                  final result = await Navigator.push<bool>(
+                                  await Navigator.push<bool>(
                                     context,
                                     MaterialPageRoute(
                                       builder: (detailContext) =>
@@ -294,9 +352,6 @@ class _TransferhistoryState extends State<Transferhistory> {
                                       ),
                                     ),
                                   );
-                                  if (result == true) {
-                                    await _cargarTransacciones();
-                                  }
                                 },
                                 leading: Container(
                                   width: 50,

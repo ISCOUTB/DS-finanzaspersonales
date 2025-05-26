@@ -5,7 +5,7 @@ import 'form_ingresos.dart';
 import 'form_gastos.dart';
 import '../Modelos/transaccion.dart';
 import '../Servicios/gestor_finanzas.dart';
-
+import 'transfer_history.dart';
 
 class PrincipalPage extends StatefulWidget {
   static final GlobalKey<PrincipalPageState> globalKey = GlobalKey<PrincipalPageState>();
@@ -27,6 +27,12 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     WidgetsBinding.instance.addObserver(this);
     cargarTransacciones();
     loadUserName();
+    // Escuchar cambios en transacciones
+    transaccionesActualizadas.addListener(_onTransaccionesActualizadas);
+  }
+
+  void _onTransaccionesActualizadas() {
+    cargarTransacciones();
   }
 
   @override
@@ -46,6 +52,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    transaccionesActualizadas.removeListener(_onTransaccionesActualizadas);
     super.dispose();
   }
 
@@ -90,9 +97,10 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
               transaccion.fecha.day == now.day;
           break;
         case 'semana':
+          // Corregido: semana actual de lunes a domingo
           DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-          includeTransaction = transaccion.fecha.isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
-              transaccion.fecha.isBefore(startOfWeek.add(const Duration(days: 7)));
+          DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
+          includeTransaction = !transaccion.fecha.isBefore(startOfWeek) && !transaccion.fecha.isAfter(endOfWeek);
           break;
         case 'mes':
           includeTransaction = transaccion.fecha.year == now.year &&
@@ -125,93 +133,43 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     final gastos = balance['gastos'] ?? 0.0;
     final total = ingresos + gastos;
 
-    // Colores originales fijos
-    const ingresoColor = Color(0xFF4CAF50);
-    const gastoColor = Color(0xFFE57373);
+    // Colores minimalistas
+    const ingresoColor = Color(0xFF43A047); // Verde más sobrio
+    const gastoColor = Color(0xFFE53935); // Rojo más sobrio
 
     return PieChartData(
-      sectionsSpace: 2,
-      centerSpaceRadius: 60,
+      sectionsSpace: 0, // Sin separación
+      centerSpaceRadius: 70, // Más espacio central
       startDegreeOffset: -90,
       sections: [
         PieChartSectionData(
           color: ingresoColor,
           value: ingresos,
           title: total == 0 ? '' : '${(ingresos / total * 100).toStringAsFixed(1)}%',
-          radius: 70,
+          radius: 65,
           titleStyle: const TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.black26,
-                blurRadius: 4,
-                offset: Offset(1, 1),
-              ),
-            ],
+            letterSpacing: 0.2,
           ),
-          badgeWidget: total == 0
-              ? null
-              : _buildPieBadge(
-                  icon: Icons.arrow_upward,
-                  color: ingresoColor,
-                  label: 'Ingresos',
-                ),
-          badgePositionPercentageOffset: .92,
+          badgeWidget: null, // Sin badge para minimalismo
         ),
         PieChartSectionData(
           color: gastoColor,
           value: gastos,
           title: total == 0 ? '' : '${(gastos / total * 100).toStringAsFixed(1)}%',
-          radius: 70,
+          radius: 65,
           titleStyle: const TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.black26,
-                blurRadius: 4,
-                offset: Offset(1, 1),
-              ),
-            ],
+            letterSpacing: 0.2,
           ),
-          badgeWidget: total == 0
-              ? null
-              : _buildPieBadge(
-                  icon: Icons.arrow_downward,
-                  color: gastoColor,
-                  label: 'Gastos',
-                ),
-          badgePositionPercentageOffset: .92,
+          badgeWidget: null, // Sin badge para minimalismo
         ),
       ],
       borderData: FlBorderData(show: false),
-    );
-  }
-
-  // Widget para los badges de ingresos/gastos en el gráfico
-  Widget _buildPieBadge({required IconData icon, required Color color, required String label}) {
-    // Corrige el error de contexto de widget: asegúrate de que este método esté dentro de la clase PrincipalPageState
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CircleAvatar(
-          backgroundColor: color.withOpacity(0.15),
-          radius: 18,
-          child: Icon(icon, color: color, size: 22),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
-          ),
-        ),
-      ],
     );
   }
 
@@ -324,7 +282,6 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     const fondoHeader = Color(0xff368983);
     const fondoCard = Color.fromARGB(225, 47, 125, 121); // Color original de la tarjeta
     const fondoBalance = Color(0xFFF8F6FF);
-    const colorTextoBalance = Color(0xff368983); // Color original del texto de balance
     const colorIngresos = Color(0xFF4CAF50); // Verde original
     const colorGastos = Color(0xFFE57373); // Rojo original
 
@@ -378,67 +335,122 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                 height: 170,
                 width: MediaQuery.of(context).size.width * 0.9,
                 decoration: BoxDecoration(
-                  color: fondoCard,
-                  borderRadius: BorderRadius.circular(15),
+                  color: fondoCard, // Verde principal
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.22), // Más oscura
+                      blurRadius: 38,
+                      spreadRadius: 6,
+                      offset: const Offset(0, 28), // Más desplazada
+                    ),
+                  ],
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.65), // Borde blanco sutil
+                    width: 1.4,
+                  ),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF368983), Color(0xFF4CAF50)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                 ),
-                child: Column(
+                child: Stack(
                   children: [
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                    // Círculo decorativo grande
+                    Positioned(
+                      left: -60,
+                      top: 30,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.08),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                    // Eliminado: círculo decorativo pequeño (sombra rara)
+                    // Positioned(
+                    //   right: -30,
+                    //   bottom: -20,
+                    //   child: Container(
+                    //     width: 70,
+                    //     height: 70,
+                    //     decoration: BoxDecoration(
+                    //       color: Colors.black.withOpacity(0.10),
+                    //       shape: BoxShape.circle,
+                    //     ),
+                    //   ),
+                    // ),
+                    // Chip de tarjeta en vez de wifi
+                    Positioned(
+                      right: 24,
+                      top: 18,
+                      child: CardChip(),
+                    ),
+                    // Número de tarjeta y logo ficticio
+                    Positioned(
+                      left: 24,
+                      top: 18,
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          // Eliminado: Texto '•••• 1237' y chip 'FINANZAS'
+                        ],
+                      ),
+                    ),
+                    // Contenido principal
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Spacer(),
+                          Text(
                             'Total Balance',
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                              color: Colors.white,
+                              color: Colors.white.withOpacity(0.85),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: const Icon(Icons.arrow_downward, color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 7),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 15),
-                      child: Row(
-                        children: [
+                          const SizedBox(height: 4),
                           Text(
-                            '${balance['balance']?.toStringAsFixed(2)}',
+                            balance['balance'] != null && (balance['ingresos'] != 0 || balance['gastos'] != 0)
+                                ? balance['balance']!.toStringAsFixed(2)
+                                : '0.00',
                             style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 25,
                               color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 25),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildBalanceItem(
-                            icon: Icons.arrow_upward,
-                            title: 'Ingresos',
-                            amount: balance['ingresos']?.toStringAsFixed(2) ?? '0.00',
-                            isIncome: true,
-                            color: colorIngresos,
-                          ),
-                          _buildBalanceItem(
-                            icon: Icons.arrow_downward,
-                            title: 'Gastos',
-                            amount: balance['gastos']?.toStringAsFixed(2) ?? '-0.00',
-                            isIncome: false,
-                            color: colorGastos,
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Icon(Icons.arrow_upward, color: colorIngresos, size: 20),
+                              const SizedBox(width: 4),
+                              Text(
+                                '+${balance['ingresos']?.toStringAsFixed(2) ?? '0.00'}',
+                                style: TextStyle(
+                                  color: colorIngresos,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(width: 18),
+                              Icon(Icons.arrow_downward, color: colorGastos, size: 20),
+                              const SizedBox(width: 4),
+                              Text(
+                                '-${balance['gastos']?.toStringAsFixed(2) ?? '0.00'}',
+                                style: TextStyle(
+                                  color: colorGastos,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -451,113 +463,165 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
               offset: const Offset(0, -110),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: ['día', 'semana', 'mes', 'año'].map((filter) {
-                    bool isSelected = _selectedFilter == filter;
-                    return GestureDetector(
-                      onTap: () => setState(() => _selectedFilter = filter),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected ? fondoCard : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          filter,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.grey,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: ['día', 'semana', 'mes', 'año'].map((filter) {
+                      bool isSelected = _selectedFilter == filter;
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(22),
+                        onTap: () => setState(() => _selectedFilter = filter),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                          decoration: BoxDecoration(
+                            gradient: isSelected
+                                ? const LinearGradient(
+                                    colors: [Color(0xFF368983), Color(0xFF4CAF50)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
+                                : null,
+                            color: isSelected ? null : Colors.transparent,
+                            borderRadius: BorderRadius.circular(22),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: const Color(0xFF368983).withOpacity(0.18),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : [],
+                            border: isSelected
+                                ? null
+                                : Border.all(color: const Color(0xFF368983).withOpacity(0.13), width: 1.2),
+                          ),
+                          child: Text(
+                            filter.toUpperCase(),
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : const Color(0xFF368983),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              letterSpacing: 1.1,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ),
             Transform.translate(
               offset: const Offset(0, -90),
               child: Container(
-                height: 390,
-                width: MediaQuery.of(context).size.width * 0.99,
-                margin: const EdgeInsets.only(bottom: 32),
+                height: 400, // Aumenta la altura
+                width: MediaQuery.of(context).size.width * 0.99, // Más ancho
+                margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(32),
+                  borderRadius: BorderRadius.circular(36), // Más redondeado
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 22,
+                      color: Colors.black.withOpacity(0.10),
+                      blurRadius: 24,
                       offset: const Offset(0, 10),
                     ),
                   ],
                   border: Border.all(
-                    color: fondoCard.withOpacity(0.07),
+                    color: fondoCard.withOpacity(0.10),
                     width: 1.2,
                   ),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 36),
                     SizedBox(
-                      height: 120,
+                      height: 180, // Más grande el gráfico
                       child: PieChart(
                         generatePieChartData(),
                         swapAnimationDuration: const Duration(milliseconds: 900),
                         swapAnimationCurve: Curves.easeInOutCubic,
                       ),
                     ),
+                    const SizedBox(height: 44),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: colorIngresos.withOpacity(0.13),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.arrow_upward, color: colorIngresos, size: 22),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    '+${balance['ingresos']?.toStringAsFixed(2) ?? '0.00'}',
+                                    style: TextStyle(
+                                      color: colorIngresos,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 17,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: colorGastos.withOpacity(0.13),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.arrow_downward, color: colorGastos, size: 22),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    '-${balance['gastos']?.toStringAsFixed(2) ?? '0.00'}',
+                                    style: TextStyle(
+                                      color: colorGastos,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 17,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 30),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 0, bottom: 2),
-                      child: Column(
-                        children: [
-                          const Text(
-                            'Total',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.black54,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            '', // Aquí puedes poner el valor real si lo deseas
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                              color: colorTextoBalance,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 18, left: 16, right: 16, bottom: 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildLegendItem(
-                            color: colorIngresos,
-                            label: 'Ingresos',
-                            icon: Icons.arrow_upward,
-                          ),
-                          _buildLegendItem(
-                            color: colorGastos,
-                            label: 'Gastos',
-                            icon: Icons.arrow_downward,
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -574,83 +638,58 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
       ),
     );
   }
+}
 
-  Widget _buildBalanceItem({
-    required IconData icon,
-    required String title,
-    required String amount,
-    required bool isIncome,
-    required Color color,
-  }) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 13,
-          backgroundColor: color.withOpacity(0.18),
-          child: Icon(
-            icon,
-            color: color,
-            size: 19,
-          ),
-        ),
-        const SizedBox(width: 7),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-                color: color,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              '\$ $amount',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 17,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-      ],
+// Widget para el chip de tarjeta tipo EMV
+class CardChip extends StatelessWidget {
+  const CardChip({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 38,
+      height: 28,
+      child: CustomPaint(
+        painter: _CardChipPainter(),
+      ),
     );
   }
+}
 
-  // Leyenda para el gráfico mejorada con flecha visible y mejor tipografía
-  Widget _buildLegendItem({required Color color, required String label, required IconData icon}) {
-    return Row(
-      children: [
-        Container(
-          width: 22,
-          height: 22,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.18),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: color.withOpacity(0.5), width: 1),
-          ),
-          child: Center(
-            child: Icon(
-              icon,
-              color: color,
-              size: 18,
-            ),
-          ),
-        ),
-        const SizedBox(width: 7),
-        Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-            color: color,
-            letterSpacing: 0.2,
-          ),
-        ),
-      ],
-    );
+class _CardChipPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = 7.0;
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final chipPaint = Paint()
+      ..color = const Color(0xFFE0DFDB)
+      ..style = PaintingStyle.fill;
+    final borderPaint = Paint()
+      ..color = Colors.black.withOpacity(0.38)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+    // Dibuja el rectángulo principal del chip
+    final chipRRect = RRect.fromRectAndRadius(rect, Radius.circular(r));
+    canvas.drawRRect(chipRRect, chipPaint);
+    canvas.drawRRect(chipRRect, borderPaint);
+    // Líneas internas (similares a la imagen)
+    final linePaint = Paint()
+      ..color = Colors.black.withOpacity(0.45)
+      ..strokeWidth = 1.0;
+    // Líneas horizontales
+    canvas.drawLine(Offset(size.width * 0.0, size.height * 0.33), Offset(size.width, size.height * 0.33), linePaint);
+    canvas.drawLine(Offset(size.width * 0.0, size.height * 0.66), Offset(size.width, size.height * 0.66), linePaint);
+    // Líneas verticales
+    canvas.drawLine(Offset(size.width * 0.33, 0), Offset(size.width * 0.33, size.height), linePaint);
+    canvas.drawLine(Offset(size.width * 0.66, 0), Offset(size.width * 0.66, size.height), linePaint);
+    // Líneas diagonales y detalles
+    canvas.drawLine(Offset(0, size.height * 0.33), Offset(size.width * 0.33, 0), linePaint);
+    canvas.drawLine(Offset(size.width * 0.33, 0), Offset(size.width * 0.66, size.height * 0.33), linePaint);
+    canvas.drawLine(Offset(size.width * 0.66, size.height * 0.33), Offset(size.width, 0), linePaint);
+    canvas.drawLine(Offset(size.width * 0.33, size.height), Offset(size.width * 0.0, size.height * 0.66), linePaint);
+    canvas.drawLine(Offset(size.width * 0.33, size.height), Offset(size.width * 0.66, size.height * 0.66), linePaint);
+    canvas.drawLine(Offset(size.width * 0.66, size.height), Offset(size.width, size.height * 0.66), linePaint);
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

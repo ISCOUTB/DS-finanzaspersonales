@@ -4,7 +4,7 @@ import '../Modelos/transaccion.dart';
 import '../Modelos/categoria_service.dart';
 import '../Servicios/gestor_finanzas.dart';
 import 'package:uuid/uuid.dart';
-import '../Servicios/database_helper.dart';
+import 'transfer_history.dart';
 
 class FormIngresos extends StatefulWidget {
   final Transaccion? transaccion;
@@ -49,29 +49,31 @@ class _FormIngresosState extends State<FormIngresos> {
   }
 
   void _saveTransaction() async {
-  if (_formKey.currentState!.validate()) {
-    final nuevaTransaccion = Transaccion(
-      id: widget.transaccion?.id ?? const Uuid().v4(),
-      tipo: 'ingreso',
-      monto: double.parse(_amountController.text),
-      descripcion: _nameController.text,
-      fecha: _selectedDate,
-      categoria: _selectedCategory,
-    );
-
-    if (widget.transaccion != null) {
-      await DatabaseHelper().updateTransaccion(nuevaTransaccion);
-    } else {
-      await DatabaseHelper().insertTransaccion(nuevaTransaccion); // <--- AQUÍ EL CAMBIO
-    }
-
-    if (mounted) {
-      Navigator.pop(context, true);
+    if (_formKey.currentState!.validate()) {
+      final nuevaTransaccion = Transaccion(
+        id: widget.transaccion?.id ?? const Uuid().v4(),
+        tipo: 'ingreso',
+        monto: double.parse(_amountController.text),
+        descripcion: _nameController.text,
+        fecha: _selectedDate,
+        categoria: _selectedCategory,
+      );
+      final gestor = GestorFinanzas();
+      if (widget.transaccion != null) {
+        await gestor.editarTransaccion(nuevaTransaccion.id, nuevaTransaccion);
+      } else {
+        await gestor.agregarTransaccion(nuevaTransaccion);
+      }
+      if (mounted) {
+        transaccionesActualizadas.value = !transaccionesActualizadas.value;
+        Navigator.pop(context, true);
+      }
     }
   }
-}
+
   @override
   Widget build(BuildContext context) {
+    final bool isEditing = widget.transaccion != null;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color.fromARGB(225, 47, 125, 121),
@@ -82,9 +84,9 @@ class _FormIngresosState extends State<FormIngresos> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Planificar un ingreso',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          isEditing ? 'Editar ingreso' : 'Planificar un ingreso',
+          style: const TextStyle(color: Colors.white),
         ),
       ),
       body: Stack(
@@ -112,7 +114,7 @@ class _FormIngresosState extends State<FormIngresos> {
                     _buildLabel('Fecha'),
                     _buildDatePicker(),
                     const SizedBox(height: 20),
-                    _buildLabel('Nombre'),
+                    _buildLabel('Descripción'),
                     _buildNameField(),
                     const SizedBox(height: 150),
                   ],
@@ -146,9 +148,9 @@ class _FormIngresosState extends State<FormIngresos> {
                           borderRadius: BorderRadius.circular(25),
                         ),
                       ),
-                      child: const Text(
-                        'Crear',
-                        style: TextStyle(color: Colors.white),
+                      child: Text(
+                        isEditing ? 'Modificar' : 'Crear',
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
@@ -158,9 +160,9 @@ class _FormIngresosState extends State<FormIngresos> {
                     height: 50,
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Cancelar',
-                        style: TextStyle(
+                      child: Text(
+                        isEditing ? 'Volver' : 'Cancelar',
+                        style: const TextStyle(
                           color: Color.fromARGB(225, 47, 125, 121),
                         ),
                       ),
@@ -229,10 +231,15 @@ class _FormIngresosState extends State<FormIngresos> {
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(color: Colors.grey[300]!),
               ),
+              hintText: '0.00',
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Por favor ingresa un monto';
+              }
+              final num? parsed = num.tryParse(value);
+              if (parsed == null || parsed <= 0) {
+                return 'Ingresa un monto válido y mayor a 0';
               }
               return null;
             },
@@ -303,6 +310,7 @@ class _FormIngresosState extends State<FormIngresos> {
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey[300]!),
         ),
+        hintText: 'Descripción',
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {

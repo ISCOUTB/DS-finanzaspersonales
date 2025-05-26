@@ -13,15 +13,16 @@ class _PageRegistroState extends State<PageRegistro> {
   final _nameController = TextEditingController();
   bool _canContinue = false;
 
+  void _onNameChanged() {
+    setState(() {
+      _canContinue = _nameController.text.isNotEmpty;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    // Añadir listener para detectar cambios en el texto
-    _nameController.addListener(() {
-      setState(() {
-        _canContinue = _nameController.text.isNotEmpty;
-      });
-    });
+    _nameController.addListener(_onNameChanged);
   }
 
   Future<void> _saveNameAndNavigate() async {
@@ -121,7 +122,7 @@ class _PageRegistroState extends State<PageRegistro> {
 
   @override
   void dispose() {
-    _nameController.removeListener(() {}); // Remover el listener
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     super.dispose();
   }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../Modelos/categoria.dart';
 import '../Modelos/transaccion.dart';
 import '../Servicios/gestor_finanzas.dart';
+import 'transfer_history.dart';
 
 enum FiltroTiempo { dia, semana, mes, anio }
 
@@ -19,7 +19,6 @@ class EstadisticasPage extends StatefulWidget {
 class EstadisticasPageState extends State<EstadisticasPage>
     with SingleTickerProviderStateMixin {
   final GestorFinanzas _gestor = GestorFinanzas();
-  int _anioSeleccionado = DateTime.now().year;
   List<Transaccion> _transacciones = [];
 
   FiltroTiempo _filtroSeleccionado = FiltroTiempo.mes;
@@ -35,6 +34,19 @@ class EstadisticasPageState extends State<EstadisticasPage>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     cargarDatos();
+    // Escuchar cambios en transacciones
+    transaccionesActualizadas.addListener(_onTransaccionesActualizadas);
+  }
+
+  void _onTransaccionesActualizadas() {
+    cargarDatos();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    transaccionesActualizadas.removeListener(_onTransaccionesActualizadas);
+    super.dispose();
   }
 
   @override
@@ -304,62 +316,6 @@ class EstadisticasPageState extends State<EstadisticasPage>
     );
   }
 
-  Widget _buildPieChartTotal(
-    Map<String, double> data,
-    String label,
-    Color color,
-    List<Color> colores, // Agrega este parámetro para los colores
-  ) {
-    final total = data.values.fold(0.0, (a, b) => a + b);
-    if (total == 0) {
-      return const Center(child: Text('No hay datos para mostrar.'));
-    }
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      elevation: 10,
-      shadowColor: Colors.black.withOpacity(0.15),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: SizedBox(
-          height: 250,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              PieChart(
-                PieChartData(
-                  sections: _generarSeccionesPie(
-                    data,
-                    colores,
-                  ), // Pasa los colores aquí
-                  sectionsSpace: 8,
-                  centerSpaceRadius: 80,
-                  startDegreeOffset: -90,
-                ),
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(fontSize: 14, color: Colors.black54),
-                  ),
-                  Text(
-                    '\$${total.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildCategoryIndicators(
     Map<String, double> data,
     List<Color> colores,
@@ -466,25 +422,6 @@ class EstadisticasPageState extends State<EstadisticasPage>
     );
   }
 
-  // Helper para abreviar meses en español
-  String _mesAbreviado(int mes) {
-    const meses = [
-      'Ene',
-      'Feb',
-      'Mar',
-      'Abr',
-      'May',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dic',
-    ];
-    return meses[mes - 1];
-  }
-
   double _calcularIntervaloY() {
     final maxIngreso =
         _totalesIngresos.isNotEmpty
@@ -513,16 +450,6 @@ class EstadisticasPageState extends State<EstadisticasPage>
     );
 
     _calcularTotalesBarras(filtradas);
-
-    final maxIngreso =
-        _totalesIngresos.isNotEmpty
-            ? _totalesIngresos.reduce((a, b) => a > b ? a : b)
-            : 0.0;
-    final maxEgreso =
-        _totalesEgresos.isNotEmpty
-            ? _totalesEgresos.reduce((a, b) => a > b ? a : b)
-            : 0.0;
-    final maxY = (maxIngreso > maxEgreso ? maxIngreso : maxEgreso) * 1.2;
 
     return DefaultTabController(
       length: 3, // Cambia a 3 pestañas
@@ -855,50 +782,18 @@ class EstadisticasPageState extends State<EstadisticasPage>
     );
   }
 
-  // Nuevo: Widget para filtro tipo "pill"
-  Widget _buildFiltroPill(FiltroTiempo filtro, String label) {
-    final bool selected = _filtroSeleccionado == filtro;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _filtroSeleccionado = filtro;
-        });
-        cargarDatos();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xff009688) : Colors.grey[200],
-          borderRadius: BorderRadius.circular(22),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-      ),
-    );
-  }
-
   // Nuevo: Gráfico de líneas con fondo degradado y solo una línea
   LineChartData _generarLineChartDataEstiloImagen() {
     List<FlSpot> spots = [];
     for (int i = 0; i < _etiquetasBarras.length; i++) {
       spots.add(FlSpot(i.toDouble(), _totalesIngresos[i]));
     }
-    final maxIngreso =
-        _totalesIngresos.isNotEmpty
-            ? _totalesIngresos.reduce((a, b) => a > b ? a : b)
-            : 0.0;
-    final maxY = (maxIngreso) * 1.2;
 
     return LineChartData(
       minY: 0,
-      maxY: maxY == 0 ? 100 : maxY,
+      maxY: _totalesIngresos.isNotEmpty
+          ? _totalesIngresos.reduce((a, b) => a > b ? a : b) * 1.2
+          : 100,
       lineBarsData: [
         LineChartBarData(
           spots: spots,
@@ -936,11 +831,16 @@ class EstadisticasPageState extends State<EstadisticasPage>
             interval:
                 (_etiquetasBarras.length == 1)
                     ? null
-                    : (maxY ~/ 4 > 0 ? maxY / 4 : (maxY > 0 ? maxY / 4 : 1)),
+                    : (_totalesIngresos.isNotEmpty
+                        ? (_totalesIngresos.reduce((a, b) => a > b ? a : b) / 4)
+                            .ceilToDouble()
+                        : 1),
             getTitlesWidget: (value, meta) {
               // Si solo hay un dato, muestra solo 0 y el valor máximo
               if (_etiquetasBarras.length == 1) {
-                final maxValue = maxY == 0 ? 100 : maxY;
+                final maxValue = _totalesIngresos.isNotEmpty
+                    ? _totalesIngresos.reduce((a, b) => a > b ? a : b)
+                    : 100;
                 if (value == 0 || value == maxValue) {
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -958,7 +858,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
                 return const SizedBox.shrink();
               }
               // Para varios datos, solo muestra valores enteros y bien alineados
-              if (value < 0 || value > maxY) return const SizedBox.shrink();
+              if (value < 0 || value > _totalesIngresos.reduce((a, b) => a > b ? a : b)) return const SizedBox.shrink();
               if (value % 1 != 0) return const SizedBox.shrink();
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -1006,7 +906,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
       gridData: FlGridData(
         show: true,
         drawVerticalLine: false,
-        horizontalInterval: maxY ~/ 4 > 0 ? maxY / 4 : 1,
+        horizontalInterval: _totalesIngresos.isNotEmpty
+            ? (_totalesIngresos.reduce((a, b) => a > b ? a : b) / 4)
+                .ceilToDouble()
+            : 1,
         getDrawingHorizontalLine:
             (value) =>
                 FlLine(color: Colors.grey.withOpacity(0.15), strokeWidth: 1),

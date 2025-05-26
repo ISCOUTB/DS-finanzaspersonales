@@ -35,7 +35,9 @@ class Transaccion {
       'monto': monto,
       'descripcion': descripcion,
       'fecha': fecha.toIso8601String(),
-      'categoria': categoria,
+      'categoria_nombre': categoria.nombre,
+      'categoria_tipo': categoria.tipo,
+      'categoria_icono': categoria.icono,
     };
   }
 

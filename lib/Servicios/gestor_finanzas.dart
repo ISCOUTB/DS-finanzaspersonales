@@ -58,10 +58,8 @@ class GestorFinanzas {
   Future<void> editarTransaccion(String id, Transaccion nueva) async {
     try {
       await _dbHelper.updateTransaccion(nueva);
-      final index = transacciones.indexWhere((t) => t.id == id);
-      if (index != -1) {
-        transacciones[index] = nueva;
-      }
+      // Recargar todas las transacciones desde la base de datos para asegurar sincronización
+      await cargarTransacciones();
     } catch (e) {
       _logger.severe('Error al editar transacción: $e');
     }

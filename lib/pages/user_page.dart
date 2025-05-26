@@ -5,6 +5,7 @@ import 'dart:io';
 import 'principal_pages.dart';
 import 'registro_pages.dart';
 import '../Servicios/database_helper.dart';
+import '../widgets/profile_avatar.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -232,27 +233,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   child: Stack(
                     alignment: Alignment.bottomRight,
                     children: [
-                      CircleAvatar(
-                        radius: 70,
-                        backgroundImage:
-                            profileImage != null
-                                ? FileImage(profileImage!)
-                                : null,
-                        child:
-                            profileImage == null
-                                ? const Icon(
-                                  Icons.person,
-                                  size: 70,
-                                  color: Colors.white,
-                                )
-                                : null,
-                        backgroundColor: const Color.fromARGB(
-                          225,
-                          47,
-                          125,
-                          121,
-                        ),
-                      ),
+                      ProfileAvatar(radius: 70),
                       CircleAvatar(
                         radius: 20,
                         backgroundColor: Colors.white,
