@@ -6,9 +6,9 @@ import 'form_gastos.dart';
 import '../Modelos/transaccion.dart';
 import '../Servicios/gestor_finanzas.dart';
 
-
 class PrincipalPage extends StatefulWidget {
-  static final GlobalKey<PrincipalPageState> globalKey = GlobalKey<PrincipalPageState>();
+  static final GlobalKey<PrincipalPageState> globalKey =
+      GlobalKey<PrincipalPageState>();
 
   const PrincipalPage({super.key});
 
@@ -16,7 +16,8 @@ class PrincipalPage extends StatefulWidget {
   State<PrincipalPage> createState() => PrincipalPageState();
 }
 
-class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserver {
+class PrincipalPageState extends State<PrincipalPage>
+    with WidgetsBindingObserver {
   String _selectedFilter = 'día';
   List<Transaccion> _transacciones = [];
   final _gestorFinanzas = GestorFinanzas();
@@ -85,17 +86,24 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
 
       switch (_selectedFilter) {
         case 'día':
-          includeTransaction = transaccion.fecha.year == now.year &&
+          includeTransaction =
+              transaccion.fecha.year == now.year &&
               transaccion.fecha.month == now.month &&
               transaccion.fecha.day == now.day;
           break;
         case 'semana':
           DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-          includeTransaction = transaccion.fecha.isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
-              transaccion.fecha.isBefore(startOfWeek.add(const Duration(days: 7)));
+          includeTransaction =
+              transaccion.fecha.isAfter(
+                startOfWeek.subtract(const Duration(days: 1)),
+              ) &&
+              transaccion.fecha.isBefore(
+                startOfWeek.add(const Duration(days: 7)),
+              );
           break;
         case 'mes':
-          includeTransaction = transaccion.fecha.year == now.year &&
+          includeTransaction =
+              transaccion.fecha.year == now.year &&
               transaccion.fecha.month == now.month;
           break;
         case 'año':
@@ -137,7 +145,10 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
         PieChartSectionData(
           color: ingresoColor,
           value: ingresos,
-          title: total == 0 ? '' : '${(ingresos / total * 100).toStringAsFixed(1)}%',
+          title:
+              total == 0
+                  ? ''
+                  : '${(ingresos / total * 100).toStringAsFixed(1)}%',
           radius: 70,
           titleStyle: const TextStyle(
             fontSize: 18,
@@ -151,19 +162,21 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
               ),
             ],
           ),
-          badgeWidget: total == 0
-              ? null
-              : _buildPieBadge(
-                  icon: Icons.arrow_upward,
-                  color: ingresoColor,
-                  label: 'Ingresos',
-                ),
+          badgeWidget:
+              total == 0
+                  ? null
+                  : _buildPieBadge(
+                    icon: Icons.arrow_upward,
+                    color: ingresoColor,
+                    label: 'Ingresos',
+                  ),
           badgePositionPercentageOffset: .92,
         ),
         PieChartSectionData(
           color: gastoColor,
           value: gastos,
-          title: total == 0 ? '' : '${(gastos / total * 100).toStringAsFixed(1)}%',
+          title:
+              total == 0 ? '' : '${(gastos / total * 100).toStringAsFixed(1)}%',
           radius: 70,
           titleStyle: const TextStyle(
             fontSize: 18,
@@ -177,13 +190,14 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
               ),
             ],
           ),
-          badgeWidget: total == 0
-              ? null
-              : _buildPieBadge(
-                  icon: Icons.arrow_downward,
-                  color: gastoColor,
-                  label: 'Gastos',
-                ),
+          badgeWidget:
+              total == 0
+                  ? null
+                  : _buildPieBadge(
+                    icon: Icons.arrow_downward,
+                    color: gastoColor,
+                    label: 'Gastos',
+                  ),
           badgePositionPercentageOffset: .92,
         ),
       ],
@@ -192,7 +206,11 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
   }
 
   // Widget para los badges de ingresos/gastos en el gráfico
-  Widget _buildPieBadge({required IconData icon, required Color color, required String label}) {
+  Widget _buildPieBadge({
+    required IconData icon,
+    required Color color,
+    required String label,
+  }) {
     // Corrige el error de contexto de widget: asegúrate de que este método esté dentro de la clase PrincipalPageState
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -244,7 +262,9 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                   if (result == true && mounted) {
                     await cargarTransacciones();
                     ScaffoldMessenger.of(navContext.context).showSnackBar(
-                      const SnackBar(content: Text('Gasto agregado correctamente')),
+                      const SnackBar(
+                        content: Text('Gasto agregado correctamente'),
+                      ),
                     );
                   }
                 },
@@ -273,12 +293,16 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                   final navContext = Navigator.of(context);
                   Navigator.pop(context);
                   final result = await navContext.push(
-                    MaterialPageRoute(builder: (context) => const FormIngresos()),
+                    MaterialPageRoute(
+                      builder: (context) => const FormIngresos(),
+                    ),
                   );
                   if (result == true && mounted) {
                     await cargarTransacciones();
                     ScaffoldMessenger.of(navContext.context).showSnackBar(
-                      const SnackBar(content: Text('Ingreso agregado correctamente')),
+                      const SnackBar(
+                        content: Text('Ingreso agregado correctamente'),
+                      ),
                     );
                   }
                 },
@@ -322,9 +346,16 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
     final balance = _calculateBalance();
     // Colores originales
     const fondoHeader = Color(0xff368983);
-    const fondoCard = Color.fromARGB(225, 47, 125, 121); // Color original de la tarjeta
+    const fondoCard = Color.fromARGB(
+      225,
+      47,
+      125,
+      121,
+    ); // Color original de la tarjeta
     const fondoBalance = Color(0xFFF8F6FF);
-    const colorTextoBalance = Color(0xff368983); // Color original del texto de balance
+    const colorTextoBalance = Color(
+      0xff368983,
+    ); // Color original del texto de balance
     const colorIngresos = Color(0xFF4CAF50); // Verde original
     const colorGastos = Color(0xFFE57373); // Rojo original
 
@@ -399,7 +430,10 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                           ),
                           GestureDetector(
                             onTap: () {},
-                            child: const Icon(Icons.arrow_downward, color: Colors.white),
+                            child: const Icon(
+                              Icons.arrow_downward,
+                              color: Colors.white,
+                            ),
                           ),
                         ],
                       ),
@@ -429,14 +463,18 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                           _buildBalanceItem(
                             icon: Icons.arrow_upward,
                             title: 'Ingresos',
-                            amount: balance['ingresos']?.toStringAsFixed(2) ?? '0.00',
+                            amount:
+                                balance['ingresos']?.toStringAsFixed(2) ??
+                                '0.00',
                             isIncome: true,
                             color: colorIngresos,
                           ),
                           _buildBalanceItem(
                             icon: Icons.arrow_downward,
                             title: 'Gastos',
-                            amount: balance['gastos']?.toStringAsFixed(2) ?? '-0.00',
+                            amount:
+                                balance['gastos']?.toStringAsFixed(2) ??
+                                '-0.00',
                             isIncome: false,
                             color: colorGastos,
                           ),
@@ -453,30 +491,37 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: ['día', 'semana', 'mes', 'año'].map((filter) {
-                    bool isSelected = _selectedFilter == filter;
-                    return GestureDetector(
-                      onTap: () => setState(() => _selectedFilter = filter),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected ? fondoCard : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          filter,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.grey,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                  children:
+                      ['día', 'semana', 'mes', 'año'].map((filter) {
+                        bool isSelected = _selectedFilter == filter;
+                        return GestureDetector(
+                          onTap: () async {
+                            setState(() {
+                              _selectedFilter = filter;
+                            });
+                            await cargarTransacciones(); // <-- Esto recarga los datos cada vez que cambias el filtro
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  isSelected ? fondoCard : Colors.transparent,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              filter,
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.grey,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                        );
+                      }).toList(),
                 ),
               ),
             ),
@@ -509,7 +554,9 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                       height: 120,
                       child: PieChart(
                         generatePieChartData(),
-                        swapAnimationDuration: const Duration(milliseconds: 900),
+                        swapAnimationDuration: const Duration(
+                          milliseconds: 900,
+                        ),
                         swapAnimationCurve: Curves.easeInOutCubic,
                       ),
                     ),
@@ -541,7 +588,12 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(top: 18, left: 16, right: 16, bottom: 0),
+                      padding: const EdgeInsets.only(
+                        top: 18,
+                        left: 16,
+                        right: 16,
+                        bottom: 0,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -587,11 +639,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
         CircleAvatar(
           radius: 13,
           backgroundColor: color.withOpacity(0.18),
-          child: Icon(
-            icon,
-            color: color,
-            size: 19,
-          ),
+          child: Icon(icon, color: color, size: 19),
         ),
         const SizedBox(width: 7),
         Column(
@@ -621,7 +669,11 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
   }
 
   // Leyenda para el gráfico mejorada con flecha visible y mejor tipografía
-  Widget _buildLegendItem({required Color color, required String label, required IconData icon}) {
+  Widget _buildLegendItem({
+    required Color color,
+    required String label,
+    required IconData icon,
+  }) {
     return Row(
       children: [
         Container(
@@ -632,13 +684,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: color.withOpacity(0.5), width: 1),
           ),
-          child: Center(
-            child: Icon(
-              icon,
-              color: color,
-              size: 18,
-            ),
-          ),
+          child: Center(child: Icon(icon, color: color, size: 18)),
         ),
         const SizedBox(width: 7),
         Text(

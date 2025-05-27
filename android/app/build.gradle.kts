@@ -20,27 +20,11 @@ android {
     }
 
     defaultConfig {
-        // Especifica tu propio Application ID único
         applicationId = "com.example.finanse_tracker"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-    }
-
-    signingConfigs {
-        release {
-            val keystoreProperties = Properties()
-            val keystorePropertiesFile = rootProject.file("key.properties")
-            if (keystorePropertiesFile.exists()) {
-                keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-            }
-
-            storeFile = file(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
-        }
     }
 
     buildTypes {
@@ -54,8 +38,8 @@ android {
                 "proguard-rules.pro" // Archivo personalizado de reglas
             )
 
-            // Configuración de firma para el tipo release
-            signingConfig = signingConfigs.getByName("release")
+            // Elimina la configuración de firma para evitar errores
+            // signingConfig = signingConfigs.getByName("release")
         }
     }
 }

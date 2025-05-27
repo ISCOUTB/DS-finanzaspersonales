@@ -25,22 +25,17 @@ class TransactionDetail extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) {
           if (transaccion.tipo == 'ingreso') {
-            return FormIngresos(
-              transaccion: transaccion,
-            ); // Navega al formulario de ingresos
+            return FormIngresos(transaccion: transaccion);
           } else {
-            return FormGastos(
-              transaccion: transaccion,
-            ); // Navega al formulario de gastos
+            return FormGastos(transaccion: transaccion);
           }
         },
       ),
     );
 
     if (result == true) {
-      // Actualizar directamente la transacción existente
-      final gestorFinanzas = GestorFinanzas();
-      await gestorFinanzas.actualizarTransaccion(transaccion);
+      // Regresa a la pantalla anterior y notifica que hubo cambios
+      Navigator.of(context).pop(true);
       return true;
     }
     return false;
@@ -58,14 +53,13 @@ class TransactionDetail extends StatelessWidget {
               onPressed: () async {
                 final result = await _editarTransaccion(context, transaccion);
                 if (result == true) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Transacción actualizada exitosamente'),
-                    ),
-                  );
-                  Navigator.of(
-                    context,
-                  ).pop(true); // Cierra la página de detalles si se actualizó
+                  // Ya se hace pop en _editarTransaccion, así que no es necesario hacer otro pop aquí
+                  // Si quieres mostrar un mensaje, puedes hacerlo antes del pop
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   const SnackBar(
+                  //     content: Text('Transacción actualizada exitosamente'),
+                  //   ),
+                  // );
                 }
               },
             ),
@@ -127,7 +121,7 @@ class TransactionDetail extends StatelessWidget {
                 transaccion.descripcion!.isNotEmpty)
               _buildDetailRow('Descripción', transaccion.descripcion!),
             const Spacer(),
-            // ...existing code for any buttons or actions...
+            // ...aquí puedes agregar botones adicionales si lo necesitas...
           ],
         ),
       ),

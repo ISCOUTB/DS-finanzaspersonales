@@ -63,16 +63,18 @@ class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int _selectedIndex = 0;
-  late List<Widget> _pages;
 
-  @override
-  void initState() {
-    super.initState();
-    _pages = [
-      PrincipalPage(key: _principalKey),
-      EstadisticasPage(key: _estadisticasKey),
-      Transferhistory(),
-    ];
+  Widget _getPage(int index) {
+    switch (index) {
+      case 0:
+        return PrincipalPage(key: GlobalKey<PrincipalPageState>());
+      case 1:
+        return EstadisticasPage(key: GlobalKey<EstadisticasPageState>());
+      case 2:
+        return const Transferhistory();
+      default:
+        return PrincipalPage(key: GlobalKey<PrincipalPageState>());
+    }
   }
 
   void _onItemTapped(int index) {
@@ -121,11 +123,11 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       drawer: const SideMenu(),
       endDrawer: const SideMenu(),
-      body: IndexedStack(index: _selectedIndex, children: _pages),
+      body: _getPage(_selectedIndex), // <-- Cambia aquí para reconstruir la página al cambiar de índice
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF368983), // Color original de la barra inferior
-        selectedItemColor: const Color(0xFFBEC6A0), // Color original del ítem seleccionado
-        unselectedItemColor: Colors.white, // Color original de ítems no seleccionados
+        backgroundColor: const Color(0xFF368983),
+        selectedItemColor: const Color(0xFFBEC6A0),
+        unselectedItemColor: Colors.white,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [

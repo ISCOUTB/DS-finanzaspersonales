@@ -4,6 +4,7 @@ import '../Modelos/transaccion.dart';
 import '../Modelos/categoria_service.dart';
 import '../Servicios/gestor_finanzas.dart';
 import 'package:uuid/uuid.dart';
+import '../Servicios/database_helper.dart';
 
 class FormIngresos extends StatefulWidget {
   final Transaccion? transaccion;
@@ -50,10 +51,7 @@ class _FormIngresosState extends State<FormIngresos> {
   void _saveTransaction() async {
     if (_formKey.currentState!.validate()) {
       final nuevaTransaccion = Transaccion(
-        id:
-            widget.transaccion?.id ??
-            const Uuid()
-                .v4(), // Usa el ID existente o genera uno nuevo si es null
+        id: widget.transaccion?.id ?? const Uuid().v4(),
         tipo: 'ingreso',
         monto: double.parse(_amountController.text),
         descripcion: _nameController.text,
@@ -61,18 +59,26 @@ class _FormIngresosState extends State<FormIngresos> {
         categoria: _selectedCategory,
       );
 
-      final gestorFinanzas =
-          GestorFinanzas(); // Crea una instancia de GestorFinanzas
+      final dbHelper = DatabaseHelper();
 
-      if (widget.transaccion != null) {
-        // Actualizar transacción existente
-        await gestorFinanzas.actualizarTransaccion(nuevaTransaccion);
-      } else {
-        // Crear nueva transacción
-        await gestorFinanzas.agregarTransaccion(nuevaTransaccion);
+      try {
+        if (widget.transaccion != null) {
+          // Actualizar transacción existente
+          await dbHelper.updateTransaccion(nuevaTransaccion);
+        } else {
+          // Crear nueva transacción
+          await dbHelper.insertTransaccion(nuevaTransaccion);
+        }
+
+        Navigator.pop(
+          context,
+          true,
+        ); // Retorna `true` para indicar que se guardó
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar la transacción: $e')),
+        );
       }
-
-      Navigator.pop(context, true); // Retorna `true` para indicar que se guardó
     }
   }
 

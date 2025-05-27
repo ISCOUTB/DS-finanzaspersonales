@@ -1,3 +1,4 @@
+import 'package:finanse_tracker/Servicios/database_helper.dart';
 import 'package:flutter/material.dart';
 import '../Modelos/categoria.dart';
 import '../Modelos/transaccion.dart';
@@ -50,23 +51,34 @@ class _FormGastosState extends State<FormGastos> {
 
   void _saveTransaction() async {
     if (_formKey.currentState!.validate()) {
-      final transaction = Transaccion(
-        id: const Uuid().v4(),
+      final nuevaTransaccion = Transaccion(
+        id: widget.transaccion?.id ?? const Uuid().v4(),
         tipo: 'egreso',
         monto: double.parse(_amountController.text),
+        descripcion: _nameController.text,
         fecha: _selectedDate,
         categoria: _selectedCategory,
-        descripcion: _nameController.text,
       );
 
-      await GestorFinanzas().agregarTransaccion(transaction);
+      final dbHelper = DatabaseHelper();
 
-      // Notificar a la página principal
-      if (mounted) {
+      try {
+        if (widget.transaccion != null) {
+          // Actualizar transacción existente
+          await dbHelper.updateTransaccion(nuevaTransaccion);
+        } else {
+          // Crear nueva transacción
+          await dbHelper.insertTransaccion(nuevaTransaccion);
+        }
+
         Navigator.pop(
           context,
           true,
-        ); // Envía true para indicar que se agregó una transacción
+        ); // Retorna `true` para indicar que se guardó
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar la transacción: $e')),
+        );
       }
     }
   }
