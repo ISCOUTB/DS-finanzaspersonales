@@ -116,9 +116,12 @@ class SideMenu extends StatelessWidget {
                 );
               },
             ),
+            // El resumen de presupuestos por categoría ya no se muestra aquí
           ],
         ),
       ),
     );
   }
 }
+
+// Eliminar el widget PresupuestosPorCategoriaResumen de este archivo
