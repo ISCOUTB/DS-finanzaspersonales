@@ -99,7 +99,6 @@ class _PresupuestoGeneralBar extends StatelessWidget {
     final porcentaje = (gastado / presupuesto).clamp(0.0, 1.0);
     final sobrepasado = gastado > presupuesto;
     final colorBarra = sobrepasado ? Colors.red : const Color(0xFF368983);
-    final colorFondo = sobrepasado ? Colors.red.withOpacity(0.08) : const Color(0xFF368983).withOpacity(0.07);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -155,150 +154,89 @@ class _PresupuestosPorCategoriaViewState extends State<_PresupuestosPorCategoria
       gastosPorCategoria[cat.nombre] = total;
     }
     if (categorias.isEmpty) {
-      return Stack(
-        children: [
-          const Center(
-            child: Text('No hay presupuestos definidos para categorías.', style: TextStyle(fontSize: 17, color: Color(0xFF368983))),
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: FloatingActionButton(
-              backgroundColor: const Color(0xFF368983),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-              child: const Icon(Icons.add, size: 36),
-              onPressed: () {
-                // Aquí podrías abrir el modal para agregar una categoría o presupuesto
-              },
-            ),
-          ),
-        ],
+      return const Center(
+        child: Text('No hay presupuestos definidos para categorías.', style: TextStyle(fontSize: 17, color: Color(0xFF368983))),
       );
     }
-    return Stack(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 12),
-            if (_categoriaSeleccionada != null)
-              Builder(
-                builder: (context) {
-                  final cat = categorias.firstWhere((c) => c.nombre == _categoriaSeleccionada);
-                  final gastado = gastosPorCategoria[cat.nombre] ?? 0.0;
-                  final presupuesto = cat.presupuestoMensual!;
-                  final porcentaje = (gastado / presupuesto).clamp(0.0, 1.0);
-                  final sobrepasado = gastado > presupuesto;
-                  final colorBarra = sobrepasado ? Colors.red : const Color(0xFF368983);
-                  final colorFondo = sobrepasado ? Colors.red.withOpacity(0.08) : const Color(0xFF368983).withOpacity(0.07);
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: colorFondo,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: colorBarra.withOpacity(0.18)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colorBarra.withOpacity(0.07),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+        const SizedBox(height: 12),
+        if (_categoriaSeleccionada != null)
+          Builder(
+            builder: (context) {
+              final cat = categorias.firstWhere((c) => c.nombre == _categoriaSeleccionada);
+              final gastado = gastosPorCategoria[cat.nombre] ?? 0.0;
+              final presupuesto = cat.presupuestoMensual!;
+              final porcentaje = (gastado / presupuesto).clamp(0.0, 1.0);
+              final sobrepasado = gastado > presupuesto;
+              final colorBarra = sobrepasado ? Colors.red : const Color(0xFF368983);
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: colorBarra.withOpacity(0.18)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorBarra.withOpacity(0.07),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  ],
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Text(cat.icono, style: const TextStyle(fontSize: 28)),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                cat.nombre,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: colorBarra.withOpacity(0.13),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: Text(
-                                '${(porcentaje * 100).toStringAsFixed(0)}%',
-                                style: TextStyle(
-                                  color: colorBarra,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: LinearProgressIndicator(
-                            value: porcentaje > 1 ? 1 : porcentaje,
-                            backgroundColor: Colors.grey[200],
-                            color: colorBarra,
-                            minHeight: 14,
+                        Text(cat.icono, style: const TextStyle(fontSize: 28)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            cat.nombre,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Gastado: ${gastado.toStringAsFixed(0)} COP', style: const TextStyle(fontSize: 14)),
-                            Text('Límite: ${presupuesto.toStringAsFixed(0)} COP', style: const TextStyle(fontSize: 14)),
-                          ],
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: colorBarra.withOpacity(0.13),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Text(
+                            '${(porcentaje * 100).toStringAsFixed(0)}%',
+                            style: TextStyle(
+                              color: colorBarra,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                  );
-                },
-              ),
-            const SizedBox(height: 80), // Espacio para el botón flotante
-          ],
-        ),
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: FloatingActionButton(
-            backgroundColor: const Color(0xFF368983),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            child: const Icon(Icons.add, size: 36),
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (BuildContext context) {
-                  return SizedBox(
-                    height: 320,
-                    child: ListView(
-                      padding: const EdgeInsets.all(20),
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: porcentaje > 1 ? 1 : porcentaje,
+                        backgroundColor: Colors.grey[200],
+                        color: colorBarra,
+                        minHeight: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Selecciona una categoría', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                        const SizedBox(height: 16),
-                        ...categorias.map((cat) => ListTile(
-                              leading: Text(cat.icono, style: const TextStyle(fontSize: 24)),
-                              title: Text(cat.nombre),
-                              onTap: () {
-                                setState(() {
-                                  _categoriaSeleccionada = cat.nombre;
-                                });
-                                Navigator.pop(context);
-                              },
-                            )),
+                        Text('Gastado: ${gastado.toStringAsFixed(0)} COP', style: const TextStyle(fontSize: 14)),
+                        Text('Límite: ${presupuesto.toStringAsFixed(0)} COP', style: const TextStyle(fontSize: 14)),
                       ],
                     ),
-                  );
-                },
+                  ],
+                ),
               );
             },
           ),
-        ),
+        const SizedBox(height: 80), // Espacio para el botón flotante
       ],
     );
   }
