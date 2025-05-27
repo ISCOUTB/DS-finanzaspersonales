@@ -68,8 +68,5 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: 'https://sonarcloud.io'
-        with:
-          args: >
-            -Dsonar.sources=lib
-            -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
-            -Dsonar.cfamily.compile-commands=build-wrapper-output/compile_commands.json
+        with: {}
+
