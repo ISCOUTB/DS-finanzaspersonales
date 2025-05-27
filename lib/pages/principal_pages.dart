@@ -201,6 +201,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                   );
                   if (result == true && mounted) {
                     await cargarTransacciones();
+                    transaccionesActualizadas.value = !transaccionesActualizadas.value;
                     ScaffoldMessenger.of(navContext.context).showSnackBar(
                       const SnackBar(content: Text('Gasto agregado correctamente')),
                     );
@@ -235,6 +236,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                   );
                   if (result == true && mounted) {
                     await cargarTransacciones();
+                    transaccionesActualizadas.value = !transaccionesActualizadas.value;
                     ScaffoldMessenger.of(navContext.context).showSnackBar(
                       const SnackBar(content: Text('Ingreso agregado correctamente')),
                     );

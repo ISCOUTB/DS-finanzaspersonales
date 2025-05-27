@@ -23,17 +23,25 @@ class _TransferhistoryState extends State<Transferhistory> {
   String _searchQuery = '';
   DateTimeRange? _selectedDateRange;
 
+  late final VoidCallback _transaccionesListener;
+
   @override
   void initState() {
     super.initState();
     _cargarTransacciones();
     // Escuchar cambios globales para refrescar automáticamente
-    transaccionesActualizadas.addListener(_cargarTransacciones);
+    _transaccionesListener = () {
+      setState(() {
+        _filtroActual = 'Todas';
+      });
+      _cargarTransacciones();
+    };
+    transaccionesActualizadas.addListener(_transaccionesListener);
   }
 
   @override
   void dispose() {
-    transaccionesActualizadas.removeListener(_cargarTransacciones);
+    transaccionesActualizadas.removeListener(_transaccionesListener);
     super.dispose();
   }
 

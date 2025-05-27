@@ -72,6 +72,21 @@ class _FormGastosState extends State<FormGastos> {
     }
   }
 
+  void _updateSelectedCategoryIfNeeded() {
+    // Si la categoría seleccionada no está en la lista, selecciona la primera
+    if (!_categorias.contains(_selectedCategory)) {
+      if (_categorias.isNotEmpty) {
+        _selectedCategory = _categorias.first;
+      }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateSelectedCategoryIfNeeded();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -180,6 +195,8 @@ class _FormGastosState extends State<FormGastos> {
   }
 
   Widget _buildCategoryDropdown() {
+    // Elimina duplicados por nombre
+    final categoriasUnicas = _categorias.toSet().toList();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -192,22 +209,23 @@ class _FormGastosState extends State<FormGastos> {
         dropdownColor: Colors.white,
         style: const TextStyle(color: Colors.black87),
         decoration: const InputDecoration(border: InputBorder.none),
-        items:
-            _categorias.map((categoria) {
-              return DropdownMenuItem<Categoria>(
-                value: categoria,
-                child: Row(
-                  children: [
-                    Text(categoria.icono),
-                    const SizedBox(width: 10),
-                    Text(categoria.nombre),
-                  ],
-                ),
-              );
-            }).toList(),
+        items: categoriasUnicas.map((categoria) {
+          return DropdownMenuItem<Categoria>(
+            value: categoria,
+            child: Row(
+              children: [
+                Text(categoria.icono),
+                const SizedBox(width: 10),
+                Text(categoria.nombre),
+              ],
+            ),
+          );
+        }).toList(),
         onChanged: (Categoria? value) {
           if (value != null) {
-            setState(() => _selectedCategory = value);
+            setState(() {
+              _selectedCategory = value;
+            });
           }
         },
       ),

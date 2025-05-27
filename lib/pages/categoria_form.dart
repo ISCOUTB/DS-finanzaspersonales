@@ -69,6 +69,19 @@ class _CategoriaFormState extends State<CategoriaForm> {
     }
   }
 
+  void _updateSelectedIconIfNeeded() {
+    // Si el ícono seleccionado no está en la lista, selecciona el primero
+    if (!_iconOptions.contains(_selectedIcon)) {
+      _selectedIcon = _iconOptions.isNotEmpty ? _iconOptions.first : '';
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateSelectedIconIfNeeded();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -221,6 +234,8 @@ class _CategoriaFormState extends State<CategoriaForm> {
   }
 
   Widget _buildIconDropdown() {
+    // Elimina duplicados
+    final iconosUnicos = _iconOptions.toSet().toList();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -231,9 +246,9 @@ class _CategoriaFormState extends State<CategoriaForm> {
       child: DropdownButtonFormField<String>(
         value: _selectedIcon,
         dropdownColor: Colors.white,
-        style: const TextStyle(color: Colors.black87),
+        style: const TextStyle(color: Colors.black87, fontSize: 20),
         decoration: const InputDecoration(border: InputBorder.none),
-        items: _iconOptions.map((icon) {
+        items: iconosUnicos.map((icon) {
           return DropdownMenuItem<String>(
             value: icon,
             child: Text(icon, style: const TextStyle(fontSize: 20)),
