@@ -16,6 +16,8 @@ class _CategoriaFormState extends State<CategoriaForm> {
   final _nameController = TextEditingController();
   String _selectedType = 'ingreso';
   String _selectedIcon = '✨';
+  double? _presupuestoMensual;
+  final _presupuestoController = TextEditingController();
 
   final List<String> _iconOptions = [
     '💰', '💻', '📈', '🛒', '🏆', '🎁', '🏦', '🏠', '🧾', '📊', '🆘', '✨',
@@ -30,15 +32,25 @@ class _CategoriaFormState extends State<CategoriaForm> {
       _nameController.text = widget.categoria!.nombre;
       _selectedType = widget.categoria!.tipo;
       _selectedIcon = widget.categoria!.icono;
+      _presupuestoMensual = widget.categoria!.presupuestoMensual;
+      if (_presupuestoMensual != null) {
+        _presupuestoController.text = _presupuestoMensual!.toString();
+      }
     }
   }
 
   void _saveCategory() {
     if (_formKey.currentState!.validate()) {
+      double? presupuesto;
+      if (_selectedType == 'egreso' && _presupuestoController.text.isNotEmpty) {
+        presupuesto = double.tryParse(_presupuestoController.text);
+        if (presupuesto != null && presupuesto <= 0) presupuesto = null;
+      }
       final newCategory = Categoria(
         nombre: _nameController.text,
         tipo: _selectedType,
         icono: _selectedIcon,
+        presupuestoMensual: _selectedType == 'egreso' ? presupuesto : null,
       );
 
       bool success;
@@ -94,9 +106,9 @@ class _CategoriaFormState extends State<CategoriaForm> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Crear Categoría',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          widget.categoria != null ? 'Editar Categoría' : 'Crear Categoría',
+          style: const TextStyle(color: Colors.white),
         ),
       ),
       body: Stack(
@@ -123,6 +135,11 @@ class _CategoriaFormState extends State<CategoriaForm> {
                     const SizedBox(height: 20),
                     _buildLabel('Ícono'),
                     _buildIconDropdown(),
+                    if (_selectedType == 'egreso') ...[
+                      const SizedBox(height: 20),
+                      _buildLabel('Presupuesto mensual (opcional)'),
+                      _buildPresupuestoField(),
+                    ],
                     const SizedBox(height: 150),
                   ],
                 ),
@@ -260,6 +277,37 @@ class _CategoriaFormState extends State<CategoriaForm> {
           }
         },
       ),
+    );
+  }
+
+  Widget _buildPresupuestoField() {
+    return TextFormField(
+      controller: _presupuestoController,
+      keyboardType: TextInputType.number,
+      style: const TextStyle(color: Colors.black87),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.grey[100],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        hintText: 'Ej: 500000',
+        suffixText: 'COP',
+      ),
+      validator: (value) {
+        if (_selectedType == 'egreso' && value != null && value.isNotEmpty) {
+          final parsed = double.tryParse(value);
+          if (parsed == null || parsed <= 0) {
+            return 'Ingresa un monto válido mayor a 0';
+          }
+        }
+        return null;
+      },
     );
   }
 

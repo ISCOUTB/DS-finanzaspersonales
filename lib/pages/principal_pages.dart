@@ -530,14 +530,14 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
               ),
             ),
             Transform.translate(
-              offset: const Offset(0, -90),
+              offset: const Offset(0, -100),
               child: Container(
-                height: 400, // Aumenta la altura
-                width: MediaQuery.of(context).size.width * 0.99, // Más ancho
+                height: 390, // Más alto para cubrir todo el contenido
+                width: MediaQuery.of(context).size.width * 0.99,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(36), // Más redondeado
+                  borderRadius: BorderRadius.circular(36),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.10),
@@ -553,16 +553,16 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 36),
+                    const SizedBox(height: 66), // Más espacio arriba
                     SizedBox(
-                      height: 180, // Más grande el gráfico
+                      height: 120, // Gráfico más pequeño
                       child: PieChart(
                         generatePieChartData(),
                         swapAnimationDuration: const Duration(milliseconds: 900),
                         swapAnimationCurve: Curves.easeInOutCubic,
                       ),
                     ),
-                    const SizedBox(height: 44),
+                    const SizedBox(height: 85), // Más espacio entre gráfico y totales
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -623,11 +623,13 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                         ),
                       ],
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 18),
                   ],
                 ),
               ),
             ),
+            // Ahora la sección de presupuestos por categoría va aquí, debajo del gráfico
+            // (Eliminado: ya no se muestra en la principal, solo en el Drawer)
             // Eliminar campo de búsqueda, filtro de fechas y lista filtrada de la principal
           ],
         ),

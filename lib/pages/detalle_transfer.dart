@@ -81,7 +81,6 @@ class _TransactionDetailState extends State<TransactionDetail> {
 
   @override
   Widget build(BuildContext context) {
-    final transaccion = _transaccionActual;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalle de Transferencia'),

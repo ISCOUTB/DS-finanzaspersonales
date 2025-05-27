@@ -34,6 +34,15 @@ class DatabaseHelper {
         categoria_icono TEXT
       )
     ''');
+    await db.execute('''
+      CREATE TABLE metas_ahorro(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        categoria_nombre TEXT,
+        objetivo REAL,
+        acumulado REAL,
+        icono TEXT
+      )
+    ''');
   }
 
   Future<void> insertTransaccion(Transaccion transaccion) async {
@@ -77,9 +86,10 @@ class DatabaseHelper {
 
   Future<void> deleteAllTransacciones() async {
   final db = await database;
-  print('Eliminando todas las transacciones...');
+  // Reemplazar 'print' por un logger o comentar para evitar prints en producción
+  // print('Eliminando todas las transacciones...');
   await db.delete('transacciones');
-  print('Todas las transacciones han sido eliminadas.');
+  // print('Todas las transacciones han sido eliminadas.');
   }
 
   Future<void> updateTransaccion(Transaccion transaccion) async {
@@ -130,5 +140,40 @@ class DatabaseHelper {
       print('Error en getTransaccionesPorAnio: $e');
       return [];
     }
+  }
+
+  Future<int> insertMetaAhorro(String categoriaNombre, double objetivo, double acumulado, String icono) async {
+    final db = await database;
+    return await db.insert('metas_ahorro', {
+      'categoria_nombre': categoriaNombre,
+      'objetivo': objetivo,
+      'acumulado': acumulado,
+      'icono': icono,
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getMetasAhorro() async {
+    final db = await database;
+    return await db.query('metas_ahorro');
+  }
+
+  Future<void> updateMetaAhorro(int id, String categoriaNombre, double objetivo, double acumulado, String icono) async {
+    final db = await database;
+    await db.update(
+      'metas_ahorro',
+      {
+        'categoria_nombre': categoriaNombre,
+        'objetivo': objetivo,
+        'acumulado': acumulado,
+        'icono': icono,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> deleteMetaAhorro(int id) async {
+    final db = await database;
+    await db.delete('metas_ahorro', where: 'id = ?', whereArgs: [id]);
   }
 }

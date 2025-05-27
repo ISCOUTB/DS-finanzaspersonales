@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'categorias_pages.dart';
+import 'presupuestos_categoria_page.dart' as presupuestos;
 
 class SideMenu extends StatelessWidget {
   const SideMenu({super.key});
@@ -62,6 +63,56 @@ class SideMenu extends StatelessWidget {
             },
           ),
           const SizedBox(height: 10),
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(225, 47, 125, 121).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.savings,
+                color: Color.fromARGB(225, 47, 125, 121),
+              ),
+            ),
+            title: const Text(
+              'Metas de Ahorro',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            onTap: () {
+              Navigator.pushNamed(context, '/metas-ahorro');
+            },
+          ),
+          const SizedBox(height: 10),
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(225, 47, 125, 121).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.pie_chart,
+                color: Color.fromARGB(225, 47, 125, 121),
+              ),
+            ),
+            title: const Text(
+              'Presupuestos',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const presupuestos.PresupuestosPage()),
+              );
+            },
+          ),
         ],
       ),
     );

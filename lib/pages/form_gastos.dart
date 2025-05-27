@@ -72,15 +72,6 @@ class _FormGastosState extends State<FormGastos> {
     }
   }
 
-  void _updateSelectedCategoryIfNeeded() {
-    // Si la categoría seleccionada no está en la lista, selecciona la primera
-    if (!_categorias.contains(_selectedCategory)) {
-      if (_categorias.isNotEmpty) {
-        _selectedCategory = _categorias.first;
-      }
-    }
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -257,10 +248,15 @@ class _FormGastosState extends State<FormGastos> {
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(color: Colors.grey[300]!),
               ),
+              hintText: '0.00',
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Por favor ingresa un monto';
+              }
+              final num? parsed = num.tryParse(value);
+              if (parsed == null || parsed <= 0) {
+                return 'Ingresa un monto válido y mayor a 0';
               }
               return null;
             },

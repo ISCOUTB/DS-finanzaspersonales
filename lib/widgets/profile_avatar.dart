@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ProfileAvatar extends StatefulWidget {
   final double radius;
   final VoidCallback? onTap;
-  const ProfileAvatar({Key? key, this.radius = 18, this.onTap}) : super(key: key);
+  const ProfileAvatar({super.key, this.radius = 18, this.onTap});
 
   @override
   State<ProfileAvatar> createState() => _ProfileAvatarState();
