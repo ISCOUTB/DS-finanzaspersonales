@@ -215,11 +215,11 @@ class _CategoriaFormState extends State<CategoriaForm> {
         dropdownColor: Colors.white,
         style: const TextStyle(color: Colors.black87),
         decoration: const InputDecoration(border: InputBorder.none),
-        items: ['ingreso', 'gastos'].map((type) {
+        items: ['ingreso', 'egreso'].map((type) {
           return DropdownMenuItem<String>(
             value: type,
             child: Text(
-              type == 'ingreso' ? 'Ingreso' : 'Gastos',
+              type == 'ingreso' ? 'Ingreso' : 'Gasto',
               style: const TextStyle(color: Colors.black87),
             ),
           );

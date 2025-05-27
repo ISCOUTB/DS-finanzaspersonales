@@ -84,11 +84,18 @@ class _FormGastosState extends State<FormGastos> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateSelectedCategoryIfNeeded();
+    // Eliminado: No recargar categorías aquí para evitar sobrescribir el estado y replicar la lógica de ingresos
+    // setState(() {
+    //   _categorias = CategoriaService.getCategoriasGastos();
+    //   _updateSelectedCategoryIfNeeded();
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Eliminar recarga aquí para evitar sobrescribir el estado
+    // _categorias = CategoriaService.getCategoriasGastos();
+    // _updateSelectedCategoryIfNeeded();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color.fromARGB(225, 47, 125, 121),
@@ -195,8 +202,7 @@ class _FormGastosState extends State<FormGastos> {
   }
 
   Widget _buildCategoryDropdown() {
-    // Elimina duplicados por nombre
-    final categoriasUnicas = _categorias.toSet().toList();
+    // Mostrar la lista en el orden original (predefinidas primero, personalizadas al final)
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -209,7 +215,7 @@ class _FormGastosState extends State<FormGastos> {
         dropdownColor: Colors.white,
         style: const TextStyle(color: Colors.black87),
         decoration: const InputDecoration(border: InputBorder.none),
-        items: categoriasUnicas.map((categoria) {
+        items: _categorias.map((categoria) {
           return DropdownMenuItem<Categoria>(
             value: categoria,
             child: Row(

@@ -12,6 +12,7 @@ class CategoriasPage extends StatefulWidget {
 
 class _CategoriasPageState extends State<CategoriasPage> {
   List<Categoria> _categorias = [];
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -26,8 +27,8 @@ class _CategoriasPageState extends State<CategoriasPage> {
   }
 
   void _editCategoria(Categoria categoria) async {
-    // Verificar si es una categoría predefinida
-    if (CategoriaService.esCategoriaPredefinda(categoria.nombre)) {
+    final esPredefinida = CategoriaService.esCategoriaPredefinda(categoria.nombre);
+    if (esPredefinida) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('No se pueden modificar las categorías predefinidas'),
@@ -37,15 +38,52 @@ class _CategoriasPageState extends State<CategoriasPage> {
       return;
     }
 
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CategoriaForm(categoria: categoria),
-      ),
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Editar o eliminar'),
+          content: Text('¿Qué deseas hacer con la categoría "${categoria.nombre}"?'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context, false); // Solo cerrar
+                final editResult = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CategoriaForm(categoria: categoria),
+                  ),
+                );
+                if (editResult == true) _loadCategorias();
+              },
+              child: const Text('Editar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true); // Eliminar
+              },
+              child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+          ],
+        );
+      },
     );
-
     if (result == true) {
-      _loadCategorias();
+      final eliminado = CategoriaService.eliminarCategoria(categoria.nombre);
+      if (eliminado) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Categoría eliminada exitosamente')),
+        );
+        _loadCategorias();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo eliminar la categoría'), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -64,6 +102,9 @@ class _CategoriasPageState extends State<CategoriasPage> {
 
   @override
   Widget build(BuildContext context) {
+    final categoriasFiltradas = _categorias.where((c) =>
+      c.nombre.toLowerCase().contains(_searchQuery.toLowerCase())
+    ).toList();
     return Scaffold(
       backgroundColor: const Color.fromARGB(225, 47, 125, 121),
       appBar: AppBar(
@@ -85,12 +126,33 @@ class _CategoriasPageState extends State<CategoriasPage> {
         ),
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Buscar categoría...',
+                  prefixIcon: const Icon(Icons.search, color: Color(0xFF368983)),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+              ),
+            ),
             Expanded(
               child: ListView.builder(
-                itemCount: _categorias.length,
+                itemCount: categoriasFiltradas.length,
                 padding: const EdgeInsets.all(16),
                 itemBuilder: (context, index) {
-                  final categoria = _categorias[index];
+                  final categoria = categoriasFiltradas[index];
                   return Card(
                     elevation: 2,
                     margin: const EdgeInsets.only(bottom: 12),
