@@ -27,12 +27,14 @@ class _TransferhistoryState extends State<Transferhistory> {
   void initState() {
     super.initState();
     _cargarTransacciones();
+    // Escuchar cambios globales para refrescar automáticamente
+    transaccionesActualizadas.addListener(_cargarTransacciones);
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _cargarTransacciones();
+  void dispose() {
+    transaccionesActualizadas.removeListener(_cargarTransacciones);
+    super.dispose();
   }
 
   Future<void> _cargarTransacciones() async {
@@ -336,7 +338,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                               ),
                               child: ListTile(
                                 onTap: () async {
-                                  await Navigator.push<bool>(
+                                  final result = await Navigator.push<bool>(
                                     context,
                                     MaterialPageRoute(
                                       builder: (detailContext) =>
@@ -352,6 +354,9 @@ class _TransferhistoryState extends State<Transferhistory> {
                                       ),
                                     ),
                                   );
+                                  // Refresca la lista también al volver de la pantalla de detalle
+                                  await _cargarTransacciones();
+                                  setState(() {});
                                 },
                                 leading: Container(
                                   width: 50,

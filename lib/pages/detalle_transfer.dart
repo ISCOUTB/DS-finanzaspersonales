@@ -3,18 +3,52 @@ import '../Modelos/transaccion.dart';
 import 'form_gastos.dart';
 import 'form_ingresos.dart';
 import '../Servicios/gestor_finanzas.dart';
+import '../pages/transfer_history.dart'; // Para acceder a transaccionesActualizadas
 
-class TransactionDetail extends StatelessWidget {
+class TransactionDetail extends StatefulWidget {
   final Transaccion transaccion;
   final Future<bool> Function()? onEdit;
   final Future<void> Function()? onDelete;
 
   const TransactionDetail({
-    Key? key,
+    super.key,
     required this.transaccion,
     this.onEdit,
     this.onDelete,
-  }) : super(key: key);
+  });
+
+  @override
+  State<TransactionDetail> createState() => _TransactionDetailState();
+}
+
+class _TransactionDetailState extends State<TransactionDetail> {
+  late Transaccion _transaccionActual;
+  late final GestorFinanzas _gestorFinanzas;
+  late final VoidCallback _notifierListener;
+
+  @override
+  void initState() {
+    super.initState();
+    _gestorFinanzas = GestorFinanzas();
+    _transaccionActual = widget.transaccion;
+    _notifierListener = () async {
+      await _gestorFinanzas.cargarTransacciones();
+      final actualizada = _gestorFinanzas.transacciones.firstWhere(
+        (t) => t.id == _transaccionActual.id,
+        orElse: () => _transaccionActual,
+      );
+      setState(() {
+        _transaccionActual = actualizada;
+      });
+    };
+    transaccionesActualizadas.addListener(_notifierListener);
+  }
+
+  @override
+  void dispose() {
+    transaccionesActualizadas.removeListener(_notifierListener);
+    super.dispose();
+  }
 
   Future<bool> _editarTransaccion(
     BuildContext context,
@@ -38,9 +72,8 @@ class TransactionDetail extends StatelessWidget {
     );
 
     if (result == true) {
-      // Actualizar directamente la transacción existente
-      final gestorFinanzas = GestorFinanzas();
-      await gestorFinanzas.actualizarTransaccion(transaccion);
+      await _gestorFinanzas.cargarTransacciones();
+      transaccionesActualizadas.value = !transaccionesActualizadas.value;
       return true;
     }
     return false;
@@ -48,32 +81,31 @@ class TransactionDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final transaccion = _transaccionActual;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalle de Transferencia'),
         actions: [
-          if (onEdit != null)
+          if (widget.onEdit != null)
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () async {
-                final result = await _editarTransaccion(context, transaccion);
+                final result = await _editarTransaccion(context, _transaccionActual);
                 if (result == true) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Transacción actualizada exitosamente'),
                     ),
                   );
-                  Navigator.of(
-                    context,
-                  ).pop(true); // Cierra la página de detalles si se actualizó
+                  // Ya no es necesario cerrar la pantalla, se actualiza automáticamente
                 }
               },
             ),
-          if (onDelete != null)
+          if (widget.onDelete != null)
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () async {
-                await onDelete!();
+                await widget.onDelete!();
               },
             ),
         ],
@@ -93,39 +125,39 @@ class TransactionDetail extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  transaccion.categoria.icono,
+                  _transaccionActual.categoria.icono,
                   style: const TextStyle(fontSize: 40),
                 ),
               ),
             ),
             const SizedBox(height: 15),
             Text(
-              transaccion.tipo == 'ingreso' ? 'Ingreso' : 'Egreso',
+              _transaccionActual.tipo == 'ingreso' ? 'Ingreso' : 'Egreso',
               style: const TextStyle(color: Colors.grey, fontSize: 16),
             ),
             const SizedBox(height: 10),
             Text(
-              '\$${transaccion.monto.toStringAsFixed(2)}',
+              '\$${_transaccionActual.monto.toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 40,
                 fontWeight: FontWeight.bold,
                 color:
-                    transaccion.tipo == 'ingreso' ? Colors.green : Colors.red,
+                    _transaccionActual.tipo == 'ingreso' ? Colors.green : Colors.red,
               ),
             ),
             const SizedBox(height: 30),
             _buildDetailRow(
               'Estado',
-              transaccion.tipo == 'ingreso' ? 'Ingreso' : 'Egreso',
+              _transaccionActual.tipo == 'ingreso' ? 'Ingreso' : 'Egreso',
             ),
-            _buildDetailRow('De', transaccion.categoria.nombre),
+            _buildDetailRow('De', _transaccionActual.categoria.nombre),
             _buildDetailRow(
               'Fecha',
-              '${transaccion.fecha.day.toString().padLeft(2, '0')}/${transaccion.fecha.month.toString().padLeft(2, '0')}/${transaccion.fecha.year}',
+              '${_transaccionActual.fecha.day.toString().padLeft(2, '0')}/${_transaccionActual.fecha.month.toString().padLeft(2, '0')}/${_transaccionActual.fecha.year}',
             ),
-            if (transaccion.descripcion != null &&
-                transaccion.descripcion!.isNotEmpty)
-              _buildDetailRow('Descripción', transaccion.descripcion!),
+            if (_transaccionActual.descripcion != null &&
+                _transaccionActual.descripcion!.isNotEmpty)
+              _buildDetailRow('Descripción', _transaccionActual.descripcion!),
             const Spacer(),
             // ...existing code for any buttons or actions...
           ],
