@@ -24,11 +24,37 @@ class MyApp extends StatefulWidget {
   final String initialRoute;
   const MyApp({super.key, required this.initialRoute});
 
+  static _MyAppState? of(BuildContext context) => context.findAncestorStateOfType<_MyAppState>();
+
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  void setThemeMode(ThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode();
+  }
+
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final darkMode = prefs.getBool('darkMode');
+    if (darkMode != null) {
+      setState(() {
+        _themeMode = darkMode ? ThemeMode.dark : ThemeMode.light;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -47,7 +73,36 @@ class _MyAppState extends State<MyApp> {
           selectedItemColor: Color(0xFF368983), // Color principal para ítem seleccionado
           unselectedItemColor: Color(0xFFB0B0B0), // Gris para ítems no seleccionados
         ),
+        scaffoldBackgroundColor: const Color(0xFFFAFAFA),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF075E54),
+          foregroundColor: Colors.white,
+          iconTheme: IconThemeData(color: Colors.white),
+          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        cardColor: Colors.grey[200],
       ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF121B22),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF202C33),
+          foregroundColor: Colors.white,
+          iconTheme: IconThemeData(color: Colors.white),
+          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        cardColor: Color(0xFF232D36),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF232D36),
+          selectedItemColor: Color(0xFF25D366),
+          unselectedItemColor: Color(0xFFB0B0B0),
+        ),
+        colorScheme: ColorScheme.dark(
+          primary: Color(0xFF25D366),
+          secondary: Color(0xFF075E54),
+        ),
+      ),
+      themeMode: _themeMode,
     );
   }
 }
@@ -176,10 +231,16 @@ class _FinanceBottomNavBar extends StatelessWidget {
       {'icon': Icons.bar_chart, 'label': 'Estadísticas'},
       {'icon': Icons.list, 'label': 'Registros'},
     ];
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final colorSelected = isDark ? const Color(0xFF25D366) : const Color(0xFF368983);
+    final colorUnselected = isDark ? const Color(0xFF232D36) : const Color(0xFFE8F5E9);
+    final colorIconSelected = Colors.white;
+    final colorIconUnselected = isDark ? const Color(0xFF25D366) : const Color(0xFF368983);
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF121B22) : Colors.white,
+        boxShadow: const [
           BoxShadow(
             color: Color(0x11000000),
             blurRadius: 8,
@@ -187,7 +248,7 @@ class _FinanceBottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(items.length, (i) {
@@ -203,10 +264,17 @@ class _FinanceBottomNavBar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: selected
-                        ? const Color(0xFF368983)
-                        : const Color(0xFFE8F5E9), // Verde muy claro para no seleccionados
+                    color: selected ? colorSelected : colorUnselected,
                     borderRadius: BorderRadius.circular(22),
+                    boxShadow: selected
+                        ? [
+                            BoxShadow(
+                              color: colorSelected.withOpacity(0.18),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : [],
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
                   child: Column(
@@ -214,15 +282,17 @@ class _FinanceBottomNavBar extends StatelessWidget {
                     children: [
                       Icon(
                         items[i]['icon'] as IconData,
-                        color: selected ? Colors.white : const Color(0xFF368983),
+                        color: selected ? colorIconSelected : colorIconUnselected,
+                        size: 28,
                       ),
                       const SizedBox(height: 2),
                       Text(
                         items[i]['label'] as String,
                         style: TextStyle(
-                          color: selected ? Colors.white : const Color(0xFF368983),
+                          color: selected ? colorIconSelected : colorIconUnselected,
                           fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                          fontSize: 13,
+                          fontSize: 14,
+                          letterSpacing: 0.2,
                         ),
                       ),
                     ],

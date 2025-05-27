@@ -368,6 +368,14 @@ class EstadisticasPageState extends State<EstadisticasPage>
         child: Center(child: Text('No hay transacciones para mostrar.')),
       );
     }
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final colorIngreso = isDark ? const Color(0xFF25D366) : Colors.green;
+    final colorEgreso = Colors.red;
+    final colorCardIngreso = isDark ? const Color(0xFF232D36) : const Color(0xFFD6ECEB);
+    final colorCardEgreso = isDark ? const Color(0xFF232D36) : const Color(0xFFF8F6FF);
+    final colorIconBg = isDark ? const Color(0xFF121B22) : Colors.white;
+    final colorIcon = isDark ? Colors.white : Colors.black87;
     // Ordenar por fecha descendente
     final lista = List<Transaccion>.from(transacciones)
       ..sort((a, b) => b.fecha.compareTo(a.fecha));
@@ -383,34 +391,51 @@ class EstadisticasPageState extends State<EstadisticasPage>
         ),
         ...lista.map((t) {
           final esIngreso = t.tipo == 'ingreso';
-          // Mostrar SIEMPRE el monto individual, con símbolo de peso y formato correcto
           return Container(
             margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
             decoration: BoxDecoration(
-              color: esIngreso ? Color(0xFFD6ECEB) : Color(0xFFF8F6FF),
+              color: esIngreso ? colorCardIngreso : colorCardEgreso,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade200),
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 18,
                 vertical: 6,
               ),
+              leading: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: colorIconBg,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Center(
+                  child: Text(
+                    t.categoria.icono,
+                    style: TextStyle(fontSize: 26, color: colorIcon),
+                  ),
+                ),
+              ),
               title: Text(
                 t.categoria.nombre,
-                style: const TextStyle(
+                style: theme.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
+                  color: isDark ? Colors.white : Colors.black,
                 ),
               ),
               subtitle: Text(
                 '${t.fecha.day}/${t.fecha.month}/${t.fecha.year}',
-                style: const TextStyle(fontSize: 13, color: Colors.black54),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 13,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
               ),
               trailing: Text(
-                (esIngreso ? '+ \$' : '- \$') + t.monto.toStringAsFixed(2),
+                (esIngreso ? '+ ' : '- ') + ' 24' + t.monto.toStringAsFixed(2),
                 style: TextStyle(
-                  color: esIngreso ? Colors.green : Colors.red,
+                  color: esIngreso ? colorIngreso : colorEgreso,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -918,6 +943,13 @@ class EstadisticasPageState extends State<EstadisticasPage>
     required List<double> ingresos,
     required List<double> egresos,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final colorIngreso = isDark ? const Color(0xFF25D366) : Colors.green;
+    final colorEgreso = Colors.red;
+    final colorCard = isDark ? const Color(0xFF232D36) : Colors.white;
+    final colorIconBg = isDark ? const Color(0xFF121B22) : Colors.white;
+    final colorIcon = isDark ? Colors.white : Colors.black87;
     return Padding(
       padding: const EdgeInsets.only(top: 18.0),
       child: Column(
@@ -933,48 +965,41 @@ class EstadisticasPageState extends State<EstadisticasPage>
             child: Row(
               children: List.generate(etiquetas.length, (i) {
                 return Container(
-                  margin: const EdgeInsets.only(right: 12),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 14,
-                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    color: colorCard,
+                    borderRadius: BorderRadius.circular(18),
                     boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.10),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
+                      if (!isDark)
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
                     ],
-                    border: Border.all(color: Colors.grey.shade200),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         etiquetas[i],
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Color(0xff009688),
+                          fontSize: 16,
+                          color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Icons.arrow_upward,
-                            color: Colors.green,
-                            size: 16,
-                          ),
+                          Icon(Icons.arrow_upward, color: colorIngreso, size: 18),
                           const SizedBox(width: 2),
                           Text(
                             ingresos[i].toStringAsFixed(0),
-                            style: const TextStyle(
-                              color: Colors.green,
+                            style: TextStyle(
+                              color: colorIngreso,
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
                             ),
@@ -984,16 +1009,12 @@ class EstadisticasPageState extends State<EstadisticasPage>
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Icons.arrow_downward,
-                            color: Colors.red,
-                            size: 16,
-                          ),
+                          Icon(Icons.arrow_downward, color: colorEgreso, size: 18),
                           const SizedBox(width: 2),
                           Text(
                             egresos[i].toStringAsFixed(0),
-                            style: const TextStyle(
-                              color: Colors.red,
+                            style: TextStyle(
+                              color: colorEgreso,
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
                             ),

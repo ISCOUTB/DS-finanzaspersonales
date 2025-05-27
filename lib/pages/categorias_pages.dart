@@ -105,10 +105,20 @@ class _CategoriasPageState extends State<CategoriasPage> {
     final categoriasFiltradas = _categorias.where((c) =>
       c.nombre.toLowerCase().contains(_searchQuery.toLowerCase())
     ).toList();
+
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final fondo = isDark ? const Color(0xFF121B22) : const Color.fromARGB(225, 47, 125, 121);
+    final cardColor = isDark ? const Color(0xFF232D36) : Colors.white;
+    final inputFill = isDark ? const Color(0xFF232D36) : Colors.grey[100]!;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final searchIconColor = isDark ? const Color(0xFF25D366) : const Color(0xFF368983);
+    final fabColor = isDark ? const Color(0xFF25D366) : const Color.fromARGB(225, 47, 125, 121);
+
     return Scaffold(
-      backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+      backgroundColor: fondo,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+        backgroundColor: fondo,
         elevation: 0,
         title: const Text(
           'Categorías',
@@ -117,9 +127,9 @@ class _CategoriasPageState extends State<CategoriasPage> {
       ),
       body: Container(
         margin: const EdgeInsets.only(top: 20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(30),
             topRight: Radius.circular(30),
           ),
@@ -129,11 +139,13 @@ class _CategoriasPageState extends State<CategoriasPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: TextField(
+                style: TextStyle(color: textColor),
                 decoration: InputDecoration(
                   hintText: 'Buscar categoría...',
-                  prefixIcon: const Icon(Icons.search, color: Color(0xFF368983)),
+                  hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black38),
+                  prefixIcon: Icon(Icons.search, color: searchIconColor),
                   filled: true,
-                  fillColor: Colors.grey[100],
+                  fillColor: inputFill,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide.none,
@@ -150,18 +162,19 @@ class _CategoriasPageState extends State<CategoriasPage> {
             Expanded(
               child: ListView.builder(
                 itemCount: categoriasFiltradas.length,
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 90), // padding inferior extra para FAB
                 itemBuilder: (context, index) {
                   final categoria = categoriasFiltradas[index];
                   return Card(
+                    color: cardColor,
                     elevation: 2,
                     margin: const EdgeInsets.only(bottom: 12),
                     child: ListTile(
                       leading: Text(
                         categoria.icono,
-                        style: const TextStyle(fontSize: 24),
+                        style: TextStyle(fontSize: 24, color: textColor),
                       ),
-                      title: Text(categoria.nombre),
+                      title: Text(categoria.nombre, style: TextStyle(color: textColor)),
                       subtitle: Text(
                         categoria.tipo == 'ingreso' ? 'Ingreso' : 'Gasto',
                         style: TextStyle(
@@ -171,7 +184,7 @@ class _CategoriasPageState extends State<CategoriasPage> {
                         ),
                       ),
                       trailing: IconButton(
-                        icon: const Icon(Icons.edit),
+                        icon: Icon(Icons.edit, color: textColor),
                         onPressed: () => _editCategoria(categoria),
                       ),
                     ),
@@ -183,7 +196,7 @@ class _CategoriasPageState extends State<CategoriasPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+        backgroundColor: fabColor,
         onPressed: _createCategoria,
         child: const Icon(Icons.add),
       ),

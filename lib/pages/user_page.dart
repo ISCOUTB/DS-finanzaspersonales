@@ -6,6 +6,7 @@ import 'principal_pages.dart';
 import 'registro_pages.dart';
 import '../Servicios/database_helper.dart';
 import '../widgets/profile_avatar.dart';
+import '../main.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -208,7 +209,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -217,17 +218,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ),
       body: Stack(
         children: [
-          // Fondo degradado
+          // Fondo degradado adaptado a modo oscuro/claro
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color.fromARGB(225, 47, 125, 121),
-                  Color.fromARGB(255, 246, 253, 250),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+            decoration: BoxDecoration(
+              gradient: Theme.of(context).brightness == Brightness.dark
+                  ? const LinearGradient(
+                      colors: [Color(0xFF232D36), Color(0xFF121B22)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    )
+                  : const LinearGradient(
+                      colors: [Color.fromARGB(225, 47, 125, 121), Color.fromARGB(255, 246, 253, 250)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
             ),
           ),
           // Contenido principal
@@ -297,6 +301,28 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     'Eliminar Información de la Cuenta',
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
+                ),
+                const SizedBox(height: 20),
+                // Switch para modo oscuro
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.dark_mode, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Color.fromARGB(225, 47, 125, 121)),
+                    const SizedBox(width: 10),
+                    Text('Modo oscuro', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Color.fromARGB(225, 47, 125, 121), fontSize: 16)),
+                    const SizedBox(width: 10),
+                    Switch(
+                      value: Theme.of(context).brightness == Brightness.dark,
+                      onChanged: (value) async {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('darkMode', value);
+                        MyApp.of(context)?.setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+                      },
+                      activeColor: Colors.white,
+                      inactiveThumbColor: Colors.white,
+                      inactiveTrackColor: Colors.grey,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 20),
               ],

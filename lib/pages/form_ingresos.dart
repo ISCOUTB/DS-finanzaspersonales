@@ -89,11 +89,18 @@ class _FormIngresosState extends State<FormIngresos> {
   @override
   Widget build(BuildContext context) {
     final bool isEditing = widget.transaccion != null;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final fondo = isDark ? const Color(0xFF121B22) : const Color.fromARGB(225, 47, 125, 121);
+    final cardColor = isDark ? theme.cardColor : Colors.white;
+    final labelColor = isDark ? Colors.white : Colors.black87;
+    final buttonColor = isDark ? const Color(0xFF25D366) : const Color.fromARGB(225, 47, 125, 121);
+    final cancelColor = isDark ? const Color(0xFF25D366) : const Color.fromARGB(225, 47, 125, 121);
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+      backgroundColor: fondo,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+        backgroundColor: fondo,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -108,9 +115,9 @@ class _FormIngresosState extends State<FormIngresos> {
         children: [
           Container(
             margin: const EdgeInsets.only(top: 20),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(30)),
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: const BorderRadius.all(Radius.circular(30)),
             ),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -120,17 +127,17 @@ class _FormIngresosState extends State<FormIngresos> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 10),
-                    _buildLabel('Categoría'),
-                    _buildCategoryDropdown(),
+                    _buildLabel('Categoría', labelColor),
+                    _buildCategoryDropdown(isDark, cardColor, labelColor),
                     const SizedBox(height: 20),
-                    _buildLabel('Cantidad'),
-                    _buildAmountRow(),
+                    _buildLabel('Cantidad', labelColor),
+                    _buildAmountRow(isDark, cardColor, labelColor),
                     const SizedBox(height: 20),
-                    _buildLabel('Fecha'),
-                    _buildDatePicker(),
+                    _buildLabel('Fecha', labelColor),
+                    _buildDatePicker(isDark, cardColor, labelColor),
                     const SizedBox(height: 20),
-                    _buildLabel('Descripción'),
-                    _buildNameField(),
+                    _buildLabel('Descripción', labelColor),
+                    _buildNameField(isDark, cardColor, labelColor),
                     const SizedBox(height: 150),
                   ],
                 ),
@@ -153,12 +160,7 @@ class _FormIngresosState extends State<FormIngresos> {
                     child: ElevatedButton(
                       onPressed: _saveTransaction,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(
-                          225,
-                          47,
-                          125,
-                          121,
-                        ),
+                        backgroundColor: buttonColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
@@ -177,8 +179,8 @@ class _FormIngresosState extends State<FormIngresos> {
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         isEditing ? 'Volver' : 'Cancelar',
-                        style: const TextStyle(
-                          color: Color.fromARGB(225, 47, 125, 121),
+                        style: TextStyle(
+                          color: cancelColor,
                         ),
                       ),
                     ),
@@ -192,20 +194,30 @@ class _FormIngresosState extends State<FormIngresos> {
     );
   }
 
-  Widget _buildCategoryDropdown() {
-    // Elimina duplicados por nombre
+  Widget _buildLabel(String text, Color? color) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontWeight: FontWeight.w600,
+        fontSize: 15,
+        color: color,
+      ),
+    );
+  }
+
+  Widget _buildCategoryDropdown(bool isDark, Color cardColor, Color labelColor) {
     final categoriasUnicas = _categorias.toSet().toList();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: isDark ? const Color(0xFF232D36) : Colors.grey[100],
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
       ),
       child: DropdownButtonFormField<Categoria>(
         value: _selectedCategory,
-        dropdownColor: Colors.white,
-        style: const TextStyle(color: Colors.black87),
+        dropdownColor: cardColor,
+        style: TextStyle(color: labelColor),
         decoration: const InputDecoration(border: InputBorder.none),
         items: categoriasUnicas.map((categoria) {
           return DropdownMenuItem<Categoria>(
@@ -230,26 +242,27 @@ class _FormIngresosState extends State<FormIngresos> {
     );
   }
 
-  Widget _buildAmountRow() {
+  Widget _buildAmountRow(bool isDark, Color cardColor, Color labelColor) {
     return Row(
       children: [
         Expanded(
           child: TextFormField(
             controller: _amountController,
-            style: const TextStyle(color: Colors.black87),
+            style: TextStyle(color: labelColor),
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: isDark ? const Color(0xFF232D36) : Colors.grey[100],
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey[300]!),
+                borderSide: BorderSide(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey[300]!),
+                borderSide: BorderSide(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
               ),
               hintText: '0.00',
+              hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black38),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -267,22 +280,22 @@ class _FormIngresosState extends State<FormIngresos> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: isDark ? const Color(0xFF232D36) : Colors.grey[100],
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.grey[300]!),
+            border: Border.all(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
           ),
-          child: const Text('COP', style: TextStyle(color: Colors.black87)),
+          child: Text('COP', style: TextStyle(color: labelColor)),
         ),
       ],
     );
   }
 
-  Widget _buildDatePicker() {
+  Widget _buildDatePicker(bool isDark, Color cardColor, Color labelColor) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: isDark ? const Color(0xFF232D36) : Colors.grey[100],
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
       ),
       child: InkWell(
         onTap: () async {
@@ -291,6 +304,12 @@ class _FormIngresosState extends State<FormIngresos> {
             initialDate: _selectedDate,
             firstDate: DateTime(2000),
             lastDate: DateTime(2100),
+            builder: (context, child) {
+              return Theme(
+                data: isDark ? ThemeData.dark() : ThemeData.light(),
+                child: child!,
+              );
+            },
           );
           if (picked != null) {
             setState(() => _selectedDate = picked);
@@ -303,9 +322,9 @@ class _FormIngresosState extends State<FormIngresos> {
             children: [
               Text(
                 '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
-                style: const TextStyle(color: Colors.black87),
+                style: TextStyle(color: labelColor, fontSize: 16),
               ),
-              Icon(Icons.calendar_today, color: Colors.grey[600]),
+              Icon(Icons.calendar_today, color: labelColor),
             ],
           ),
         ),
@@ -313,60 +332,37 @@ class _FormIngresosState extends State<FormIngresos> {
     );
   }
 
-  Widget _buildNameField() {
+  Widget _buildNameField(bool isDark, Color cardColor, Color labelColor) {
     return TextFormField(
       controller: _nameController,
-      style: const TextStyle(color: Colors.black87),
+      style: TextStyle(color: labelColor),
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.grey[100],
+        fillColor: isDark ? const Color(0xFF232D36) : Colors.grey[100],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
         ),
         hintText: 'Descripción',
+        hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black38),
       ),
       validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Por favor ingresa una descripción';
+        if (value != null && value.length > 100) {
+          return 'Máximo 100 caracteres';
         }
         return null;
       },
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.grey[800],
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
   String _getMonthName(int month) {
     const months = [
-      'enero',
-      'febrero',
-      'marzo',
-      'abril',
-      'mayo',
-      'junio',
-      'julio',
-      'agosto',
-      'septiembre',
-      'octubre',
-      'noviembre',
-      'diciembre',
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
     ];
     return months[month - 1];
   }

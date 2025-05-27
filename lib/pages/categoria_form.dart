@@ -96,11 +96,21 @@ class _CategoriaFormState extends State<CategoriaForm> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final fondo = isDark ? const Color(0xFF121B22) : const Color.fromARGB(225, 47, 125, 121);
+    final cardColor = isDark ? const Color(0xFF232D36) : Colors.white;
+    // Fix: define non-nullable color variables directly from theme logic
+    final Color inputFill = isDark ? const Color(0xFF232D36) : Colors.grey[100]!;
+    final Color border = isDark ? Colors.grey[700]! : Colors.grey[300]!;
+    final Color dropdown = isDark ? const Color(0xFF232D36) : Colors.white;
+    final Color buttonColor = isDark ? const Color(0xFF25D366) : const Color.fromARGB(225, 47, 125, 121);
+    final Color cancelColor = isDark ? const Color(0xFF25D366) : const Color.fromARGB(225, 47, 125, 121);
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+      backgroundColor: fondo,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+        backgroundColor: fondo,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -115,9 +125,9 @@ class _CategoriaFormState extends State<CategoriaForm> {
         children: [
           Container(
             margin: const EdgeInsets.only(top: 20),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(30)),
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: const BorderRadius.all(Radius.circular(30)),
             ),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -128,17 +138,17 @@ class _CategoriaFormState extends State<CategoriaForm> {
                   children: [
                     const SizedBox(height: 10),
                     _buildLabel('Nombre de la Categoría'),
-                    _buildNameField(),
+                    _buildNameField(isDark, inputFill, border),
                     const SizedBox(height: 20),
                     _buildLabel('Tipo de Categoría'),
-                    _buildTypeDropdown(),
+                    _buildTypeDropdown(isDark, inputFill, border, dropdown),
                     const SizedBox(height: 20),
                     _buildLabel('Ícono'),
-                    _buildIconDropdown(),
+                    _buildIconDropdown(isDark, inputFill, border, dropdown),
                     if (_selectedType == 'egreso') ...[
                       const SizedBox(height: 20),
                       _buildLabel('Presupuesto mensual (opcional)'),
-                      _buildPresupuestoField(),
+                      _buildPresupuestoField(isDark, inputFill, border),
                     ],
                     const SizedBox(height: 150),
                   ],
@@ -162,14 +172,14 @@ class _CategoriaFormState extends State<CategoriaForm> {
                     child: ElevatedButton(
                       onPressed: _saveCategory,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+                        backgroundColor: buttonColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
                       ),
-                      child: const Text(
-                        'Crear',
-                        style: TextStyle(color: Colors.white),
+                      child: Text(
+                        widget.categoria != null ? 'Guardar' : 'Crear',
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
@@ -179,9 +189,9 @@ class _CategoriaFormState extends State<CategoriaForm> {
                     height: 50,
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text(
+                      child: Text(
                         'Cancelar',
-                        style: TextStyle(color: Color.fromARGB(225, 47, 125, 121)),
+                        style: TextStyle(color: cancelColor),
                       ),
                     ),
                   ),
@@ -194,21 +204,39 @@ class _CategoriaFormState extends State<CategoriaForm> {
     );
   }
 
-  Widget _buildNameField() {
+  Widget _buildLabel(String text) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNameField(bool isDark, Color fillColor, Color borderColor) {
     return TextFormField(
       controller: _nameController,
-      style: const TextStyle(color: Colors.black87),
+      style: TextStyle(color: isDark ? Colors.white : Colors.black87),
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.grey[100],
+        fillColor: fillColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: borderColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: borderColor),
         ),
+        hintText: 'Ej: Sueldo',
+        hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black38),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -219,25 +247,25 @@ class _CategoriaFormState extends State<CategoriaForm> {
     );
   }
 
-  Widget _buildTypeDropdown() {
+  Widget _buildTypeDropdown(bool isDark, Color fillColor, Color borderColor, Color dropdownBg) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: fillColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: borderColor),
       ),
       child: DropdownButtonFormField<String>(
         value: _selectedType,
-        dropdownColor: Colors.white,
-        style: const TextStyle(color: Colors.black87),
+        dropdownColor: dropdownBg,
+        style: TextStyle(color: isDark ? Colors.white : Colors.black87),
         decoration: const InputDecoration(border: InputBorder.none),
         items: ['ingreso', 'egreso'].map((type) {
           return DropdownMenuItem<String>(
             value: type,
             child: Text(
               type == 'ingreso' ? 'Ingreso' : 'Gasto',
-              style: const TextStyle(color: Colors.black87),
+              style: TextStyle(color: isDark ? Colors.white : Colors.black87),
             ),
           );
         }).toList(),
@@ -250,25 +278,24 @@ class _CategoriaFormState extends State<CategoriaForm> {
     );
   }
 
-  Widget _buildIconDropdown() {
-    // Elimina duplicados
+  Widget _buildIconDropdown(bool isDark, Color fillColor, Color borderColor, Color dropdownBg) {
     final iconosUnicos = _iconOptions.toSet().toList();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: fillColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: borderColor),
       ),
       child: DropdownButtonFormField<String>(
         value: _selectedIcon,
-        dropdownColor: Colors.white,
-        style: const TextStyle(color: Colors.black87, fontSize: 20),
+        dropdownColor: dropdownBg,
+        style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 20),
         decoration: const InputDecoration(border: InputBorder.none),
         items: iconosUnicos.map((icon) {
           return DropdownMenuItem<String>(
             value: icon,
-            child: Text(icon, style: const TextStyle(fontSize: 20)),
+            child: Text(icon, style: TextStyle(fontSize: 20, color: isDark ? Colors.white : Colors.black87)),
           );
         }).toList(),
         onChanged: (String? value) {
@@ -280,23 +307,24 @@ class _CategoriaFormState extends State<CategoriaForm> {
     );
   }
 
-  Widget _buildPresupuestoField() {
+  Widget _buildPresupuestoField(bool isDark, Color fillColor, Color borderColor) {
     return TextFormField(
       controller: _presupuestoController,
       keyboardType: TextInputType.number,
-      style: const TextStyle(color: Colors.black87),
+      style: TextStyle(color: isDark ? Colors.white : Colors.black87),
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.grey[100],
+        fillColor: fillColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: borderColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: borderColor),
         ),
         hintText: 'Ej: 500000',
+        hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black38),
         suffixText: 'COP',
       ),
       validator: (value) {
@@ -308,20 +336,6 @@ class _CategoriaFormState extends State<CategoriaForm> {
         }
         return null;
       },
-    );
-  }
-
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.grey[800],
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
     );
   }
 }

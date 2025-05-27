@@ -280,12 +280,14 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
   @override
   Widget build(BuildContext context) {
     final balance = _calculateBalance();
-    // Colores originales
-    const fondoHeader = Color(0xff368983);
-    const fondoCard = Color.fromARGB(225, 47, 125, 121); // Color original de la tarjeta
-    const fondoBalance = Color(0xFFF8F6FF);
-    const colorIngresos = Color(0xFF4CAF50); // Verde original
-    const colorGastos = Color(0xFFE57373); // Rojo original
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    // Colores adaptados al tema
+    final fondoHeader = theme.appBarTheme.backgroundColor ?? (isDark ? const Color(0xFF202C33) : const Color(0xff368983));
+    final fondoCard = theme.cardColor;
+    final fondoBalance = theme.scaffoldBackgroundColor;
+    final colorIngresos = isDark ? const Color(0xFF25D366) : const Color(0xFF4CAF50);
+    final colorGastos = isDark ? const Color(0xFFE57373) : const Color(0xFFE57373);
 
     return Scaffold(
       backgroundColor: fondoBalance,
@@ -295,9 +297,9 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
             Container(
               width: double.infinity,
               height: 240,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: fondoHeader,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
                 ),
@@ -311,7 +313,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                       children: [
                         Text(
                           _getGreeting(),
-                          style: const TextStyle(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                             fontSize: 16,
                             color: Colors.white,
@@ -319,7 +321,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                         ),
                         Text(
                           _userName,
-                          style: const TextStyle(
+                          style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             fontSize: 20,
                             color: Colors.white,
@@ -337,29 +339,30 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                 height: 170,
                 width: MediaQuery.of(context).size.width * 0.9,
                 decoration: BoxDecoration(
-                  color: fondoCard, // Verde principal
+                  color: fondoCard,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.22), // Más oscura
+                      color: Colors.black.withOpacity(0.22),
                       blurRadius: 38,
                       spreadRadius: 6,
-                      offset: const Offset(0, 28), // Más desplazada
+                      offset: const Offset(0, 28),
                     ),
                   ],
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.65), // Borde blanco sutil
+                    color: Colors.white.withOpacity(0.65),
                     width: 1.4,
                   ),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF368983), Color(0xFF4CAF50)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  gradient: isDark
+                      ? null
+                      : const LinearGradient(
+                          colors: [Color(0xFF368983), Color(0xFF4CAF50)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                 ),
                 child: Stack(
                   children: [
-                    // Círculo decorativo grande
                     Positioned(
                       left: -60,
                       top: 30,
@@ -372,26 +375,11 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                         ),
                       ),
                     ),
-                    // Eliminado: círculo decorativo pequeño (sombra rara)
-                    // Positioned(
-                    //   right: -30,
-                    //   bottom: -20,
-                    //   child: Container(
-                    //     width: 70,
-                    //     height: 70,
-                    //     decoration: BoxDecoration(
-                    //       color: Colors.black.withOpacity(0.10),
-                    //       shape: BoxShape.circle,
-                    //     ),
-                    //   ),
-                    // ),
-                    // Chip de tarjeta en vez de wifi
                     Positioned(
                       right: 24,
                       top: 18,
                       child: CardChip(),
                     ),
-                    // Número de tarjeta y logo ficticio
                     Positioned(
                       left: 24,
                       top: 18,
@@ -401,7 +389,6 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                         ],
                       ),
                     ),
-                    // Contenido principal
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
                       child: Column(
@@ -468,7 +455,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: fondoCard,
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
@@ -482,44 +469,51 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: ['día', 'semana', 'mes', 'año'].map((filter) {
                       bool isSelected = _selectedFilter == filter;
-                      return InkWell(
-                        borderRadius: BorderRadius.circular(22),
-                        onTap: () => setState(() => _selectedFilter = filter),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 220),
                           curve: Curves.easeOutCubic,
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
                           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                           decoration: BoxDecoration(
-                            gradient: isSelected
+                            gradient: isSelected && !isDark
                                 ? const LinearGradient(
-                                    colors: [Color(0xFF368983), Color(0xFF4CAF50)],
+                                    colors: [Color(0xFF25D366), Color(0xFF128C7E)],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   )
                                 : null,
-                            color: isSelected ? null : Colors.transparent,
+                            color: isSelected
+                                ? (isDark ? theme.colorScheme.primary : null)
+                                : fondoCard,
                             borderRadius: BorderRadius.circular(22),
+                            border: Border.all(
+                              color: isSelected ? Colors.transparent : (isDark ? Colors.white : const Color(0xFF128C7E)),
+                              width: 1.5,
+                            ),
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
-                                      color: const Color(0xFF368983).withOpacity(0.18),
+                                      color: (isDark ? theme.colorScheme.primary : const Color(0xFF25D366)).withOpacity(0.13),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
                                   ]
                                 : [],
-                            border: isSelected
-                                ? null
-                                : Border.all(color: const Color(0xFF368983).withOpacity(0.13), width: 1.2),
                           ),
-                          child: Text(
-                            filter.toUpperCase(),
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : const Color(0xFF368983),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              letterSpacing: 1.1,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(22),
+                            onTap: () => setState(() => _selectedFilter = filter),
+                            child: Center(
+                              child: Text(
+                                filter.toUpperCase(),
+                                style: TextStyle(
+                                  color: isSelected ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF128C7E)),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  letterSpacing: 1.1,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -532,11 +526,11 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
             Transform.translate(
               offset: const Offset(0, -100),
               child: Container(
-                height: 390, // Más alto para cubrir todo el contenido
+                height: 390,
                 width: MediaQuery.of(context).size.width * 0.99,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: fondoCard,
                   borderRadius: BorderRadius.circular(36),
                   boxShadow: [
                     BoxShadow(
@@ -546,23 +540,23 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
                     ),
                   ],
                   border: Border.all(
-                    color: fondoCard.withOpacity(0.10),
+                    color: (isDark ? Colors.white : fondoHeader).withOpacity(0.10),
                     width: 1.2,
                   ),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 66), // Más espacio arriba
+                    const SizedBox(height: 66),
                     SizedBox(
-                      height: 120, // Gráfico más pequeño
+                      height: 120,
                       child: PieChart(
                         generatePieChartData(),
                         swapAnimationDuration: const Duration(milliseconds: 900),
                         swapAnimationCurve: Curves.easeInOutCubic,
                       ),
                     ),
-                    const SizedBox(height: 85), // Más espacio entre gráfico y totales
+                    const SizedBox(height: 85),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -635,7 +629,7 @@ class PrincipalPageState extends State<PrincipalPage> with WidgetsBindingObserve
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: fondoCard,
+        backgroundColor: fondoHeader,
         onPressed: _showTransactionDialog,
         tooltip: 'Agregar Transacción',
         child: const Icon(Icons.add, color: Colors.white),

@@ -156,30 +156,46 @@ class _TransferhistoryState extends State<Transferhistory> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final fondoHeader = isDark ? theme.scaffoldBackgroundColor : const Color(0xFF368983);
+    final fondoCard = isDark ? theme.cardColor : Colors.white;
+    final fondoBalance = isDark ? theme.scaffoldBackgroundColor : const Color(0xFF368983);
+    final colorPrimario = isDark ? theme.colorScheme.primary : Colors.white;
+    final colorSecundario = isDark ? const Color(0xFF232D36) : Colors.white;
+    final colorPillActiva = isDark ? theme.colorScheme.primary : const Color(0xFF368983);
+    final colorPillInactiva = isDark ? Colors.transparent : Colors.white;
+    final colorTextoPillActiva = Colors.white;
+    final colorTextoPillInactiva = isDark ? theme.colorScheme.primary : const Color(0xFF368983);
+    final colorIconoBusqueda = isDark ? theme.colorScheme.primary : Colors.white;
+    final colorBotonFecha = isDark ? theme.cardColor : Colors.white;
+    final colorIconoFecha = isDark ? theme.colorScheme.primary : const Color(0xFF368983);
+
     return Scaffold(
-      backgroundColor: const Color.fromARGB(225, 47, 125, 121),
+      backgroundColor: fondoBalance,
       body: SafeArea(
         child: Column(
           children: [
-            // Header compacto
-            Padding(
+            // Header compacto sólido
+            Container(
+              width: double.infinity,
+              color: fondoHeader,
               padding: const EdgeInsets.only(top: 18, left: 20, right: 20, bottom: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
                     'Historial de Transferencias',
-                    style: TextStyle(
-                      fontSize: 22,
+                    style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: colorPrimario,
                       letterSpacing: 0.2,
-                    ),
+                    ) ?? TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: colorPrimario),
                   ),
                 ],
               ),
             ),
-            // Buscador moderno con botón de fecha a la derecha
+            // Buscador con fondo blanco y borde redondeado
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
               child: Row(
@@ -187,7 +203,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: colorBotonFecha,
                         borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
@@ -200,8 +216,8 @@ class _TransferhistoryState extends State<Transferhistory> {
                       child: TextField(
                         decoration: InputDecoration(
                           hintText: 'Buscar transacción...',
-                          hintStyle: TextStyle(color: Colors.grey[500]),
-                          prefixIcon: const Icon(Icons.search, color: Color(0xFF368983)),
+                          hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black38),
+                          prefixIcon: Icon(Icons.search, color: colorIconoBusqueda),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 0),
                         ),
@@ -210,13 +226,14 @@ class _TransferhistoryState extends State<Transferhistory> {
                             _searchQuery = value;
                           });
                         },
+                        style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colorBotonFecha,
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
@@ -227,7 +244,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.date_range, color: Color(0xFF368983)),
+                      icon: Icon(Icons.date_range, color: colorIconoFecha),
                       tooltip: 'Filtrar por fecha',
                       onPressed: () async {
                         final picked = await showDateRangePicker(
@@ -257,7 +274,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                 ],
               ),
             ),
-            // Filtros pill modernos con degradado
+            // Pills con fondo sólido y borde, sin degradado
             Padding(
               padding: const EdgeInsets.only(left: 20, right: 20, top: 18, bottom: 8),
               child: Row(
@@ -277,22 +294,23 @@ class _TransferhistoryState extends State<Transferhistory> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            gradient: activo
+                            // Degradado visible solo en light mode y cuando está activo
+                            gradient: activo && !isDark
                                 ? const LinearGradient(
-                                    colors: [Color(0xFF368983), Color(0xFF4CAF50)],
+                                    colors: [Color(0xFF25D366), Color(0xFF128C7E)],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   )
                                 : null,
-                            color: activo ? null : Colors.white,
+                            color: activo
+                                ? (isDark ? colorPillActiva : null)
+                                : colorPillInactiva,
                             borderRadius: BorderRadius.circular(22),
-                            border: activo
-                                ? null
-                                : Border.all(color: const Color(0xFF368983).withOpacity(0.18), width: 1.2),
+                            border: Border.all(color: colorPillActiva, width: 1.2),
                             boxShadow: activo
                                 ? [
                                     BoxShadow(
-                                      color: const Color(0xFF368983).withOpacity(0.13),
+                                      color: colorPillActiva.withOpacity(0.13),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -303,7 +321,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                             child: Text(
                               filtro.toUpperCase(),
                               style: TextStyle(
-                                color: activo ? Colors.white : const Color(0xFF368983),
+                                color: activo ? colorTextoPillActiva : colorTextoPillInactiva,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
                                 letterSpacing: 1.1,
@@ -320,9 +338,9 @@ class _TransferhistoryState extends State<Transferhistory> {
             // Contenido principal
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                decoration: BoxDecoration(
+                  color: fondoCard,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
                 ),
                 child: Column(
                   children: [
@@ -341,12 +359,12 @@ class _TransferhistoryState extends State<Transferhistory> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
+                                color: isDark ? theme.colorScheme.surface : Colors.grey.shade100,
                                 borderRadius: BorderRadius.circular(15),
                               ),
                               child: ListTile(
                                 onTap: () async {
-                                  final result = await Navigator.push<bool>(
+                                  await Navigator.push<bool>(
                                     context,
                                     MaterialPageRoute(
                                       builder: (detailContext) =>
@@ -362,7 +380,6 @@ class _TransferhistoryState extends State<Transferhistory> {
                                       ),
                                     ),
                                   );
-                                  // Refresca la lista también al volver de la pantalla de detalle
                                   await _cargarTransacciones();
                                   setState(() {});
                                 },
@@ -370,12 +387,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                                   width: 50,
                                   height: 50,
                                   decoration: BoxDecoration(
-                                    color: const Color.fromARGB(
-                                      225,
-                                      47,
-                                      125,
-                                      121,
-                                    ).withOpacity(0.2),
+                                    color: colorSecundario,
                                     borderRadius: BorderRadius.circular(15),
                                   ),
                                   child: Center(
@@ -387,14 +399,16 @@ class _TransferhistoryState extends State<Transferhistory> {
                                 ),
                                 title: Text(
                                   transaccion.categoria.nombre,
-                                  style: const TextStyle(
+                                  style: theme.textTheme.bodyLarge?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
+                                    color: isDark ? Colors.white : Colors.black87,
                                   ),
                                 ),
                                 subtitle: Text(
                                   '${transaccion.fecha.day}/${transaccion.fecha.month}/${transaccion.fecha.year}',
-                                  style: TextStyle(color: Colors.grey[600]),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: isDark ? Colors.white70 : Colors.grey[600],
+                                  ),
                                 ),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -405,7 +419,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16,
                                         color: transaccion.tipo == 'ingreso'
-                                            ? Colors.green
+                                            ? (isDark ? const Color(0xFF25D366) : Colors.green)
                                             : Colors.red,
                                       ),
                                     ),

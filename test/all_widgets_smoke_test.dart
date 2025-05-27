@@ -49,6 +49,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: PresupuestosPage()),
     );
+    // Cambia el Dropdown a 'Por Categorías'
+    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Por Categorías').last);
+    await tester.pumpAndSettle();
     expect(find.textContaining('No hay presupuestos definidos para categorías.'), findsOneWidget);
   });
 

@@ -8,7 +8,7 @@ import '../lib/pages/presupuestos_categoria_page.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Drawer muestra Presupuestos por Categoría y navega correctamente', (WidgetTester tester) async {
+  testWidgets('Drawer muestra Presupuestos y navega correctamente', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -20,10 +20,10 @@ void main() {
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openDrawer();
     await tester.pumpAndSettle();
-    // Busca el ListTile de Presupuestos por Categoría
-    expect(find.text('Presupuestos por Categoría'), findsOneWidget);
+    // Busca el ListTile de Presupuestos
+    expect(find.text('Presupuestos'), findsOneWidget);
     // Toca el ListTile
-    await tester.tap(find.text('Presupuestos por Categoría'));
+    await tester.tap(find.text('Presupuestos'));
     await tester.pumpAndSettle();
     // Verifica que navega a la pantalla correcta
     expect(find.byType(PresupuestosPage), findsOneWidget);
