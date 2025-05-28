@@ -47,6 +47,7 @@ class _TransferhistoryState extends State<Transferhistory> {
 
   Future<void> _cargarTransacciones() async {
     await _gestorFinanzas.cargarTransacciones();
+    if (!mounted) return;
     setState(() {
       // Solo forzamos la reconstrucción, el filtrado se hace en _getFilteredTransacciones
     });
@@ -112,6 +113,7 @@ class _TransferhistoryState extends State<Transferhistory> {
 
     if (result == true) {
       await _cargarTransacciones(); // Recarga las transacciones si se editó algo
+      if (!mounted) return false;
       setState(() {}); // Fuerza la reconstrucción para reflejar los cambios
       // Notificar a la pantalla principal y estadísticas para recargar los datos
       PrincipalPage.globalKey.currentState?.cargarTransacciones();
@@ -144,6 +146,7 @@ class _TransferhistoryState extends State<Transferhistory> {
     if (confirm == true) {
       // Usa el método eliminarTransaccion del gestor para eliminar correctamente en BD y en memoria
       await _gestorFinanzas.eliminarTransaccion(transaccion.id);
+      if (!mounted) return;
       setState(() {
         _filtrarTransacciones();
       });

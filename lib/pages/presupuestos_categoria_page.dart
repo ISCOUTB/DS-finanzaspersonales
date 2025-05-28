@@ -4,7 +4,7 @@ import '../Servicios/gestor_finanzas.dart';
 
 // Servicio de sesión para presupuesto general (solo memoria, no persistente)
 class PresupuestoSession {
-  static double presupuestoGeneral = 60000;
+  static double presupuestoGeneral = 0; // Iniciar en 0, el usuario lo edita después
 }
 
 class PresupuestosPage extends StatefulWidget {

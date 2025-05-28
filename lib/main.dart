@@ -8,7 +8,6 @@ import 'pages/estadisticas.dart';
 import 'Servicios/database_helper.dart';
 import 'pages/user_page.dart';
 import 'widgets/profile_avatar.dart';
-import 'pages/metas_ahorro_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,7 +63,6 @@ class _MyAppState extends State<MyApp> {
       routes: {
         '/login': (context) => const PageRegistro(),
         '/home': (context) => MyHomePage(title: 'Finanse Tracker',),
-        '/metas-ahorro': (context) => const MetasAhorroPage(),
       },
       theme: ThemeData(
         brightness: Brightness.light,

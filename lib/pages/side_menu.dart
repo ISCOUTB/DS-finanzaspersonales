@@ -74,30 +74,6 @@ class SideMenu extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
-                  Icons.savings,
-                  color: isDark ? const Color(0xFF25D366) : const Color.fromARGB(225, 47, 125, 121),
-                ),
-              ),
-              title: const Text(
-                'Metas de Ahorro',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              onTap: () {
-                Navigator.pushNamed(context, '/metas-ahorro');
-              },
-            ),
-            const SizedBox(height: 10),
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF232D36) : const Color.fromARGB(225, 47, 125, 121).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
                   Icons.pie_chart,
                   color: isDark ? const Color(0xFF25D366) : const Color.fromARGB(225, 47, 125, 121),
                 ),
