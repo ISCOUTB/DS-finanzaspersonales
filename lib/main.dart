@@ -267,7 +267,7 @@ class _FinanceBottomNavBar extends StatelessWidget {
                     boxShadow: selected
                         ? [
                             BoxShadow(
-                              color: colorSelected.withOpacity(0.18),
+                              color: colorSelected.withAlpha((0.18 * 255).toInt()),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
