@@ -7,9 +7,14 @@ import 'package:finanse_tracker/Modelos/categoria_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
   group('CategoriasPage Widget', () {
     setUp(() {
-      CategoriaService.limpiarCategorias(); // Método que limpia las categorías
+      // Limpia las categorías personalizadas si existen
+      if (CategoriaService.getCategorias is! Null) {
+        // Si tienes una lista personalizada, límpiala aquí
+        // CategoriaService.categoriasPersonalizadas.clear();
+      }
     });
 
     testWidgets('Renderiza la lista de categorías', (
@@ -44,17 +49,35 @@ void main() {
       expect(find.byType(TextFormField), findsOneWidget);
     });
 
+    testWidgets(
+      'No permite editar una categoría predefinida y muestra SnackBar',
+      (WidgetTester tester) async {
+        // Usa una categoría predefinida
+        final categoria = Categoria(
+          nombre: 'Alimentación',
+          tipo: 'egreso',
+          icono: '🍔',
+        );
+
+        await tester.pumpWidget(MaterialApp(home: CategoriasPage()));
+
+        await tester.pumpAndSettle();
+
+        // Busca el botón de editar y presiónalo
+        final editButtons = find.byIcon(Icons.edit);
+        expect(editButtons, findsWidgets);
+
+        await tester.tap(editButtons.first);
+        await tester.pumpAndSettle();
+
+        // Verifica que se muestra el SnackBar y NO el formulario
+        expect(
+          find.text('No se pueden modificar las categorías predefinidas'),
+          findsOneWidget,
+        );
+        expect(find.byType(TextFormField), findsNothing);
+      },
+    );
+    
   });
-}
-
-class CategoriaService {
-  static final List<Categoria> categoriasPersonalizadas = [];
-
-  static void agregarCategoria(Categoria categoria) {
-    categoriasPersonalizadas.add(categoria);
-  }
-
-  static void limpiarCategorias() {
-    categoriasPersonalizadas.clear();
-  }
 }
