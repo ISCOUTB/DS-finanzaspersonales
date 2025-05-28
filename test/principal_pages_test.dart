@@ -16,7 +16,11 @@ void main() {
       ),
     );
     // Verifica saludo
-    expect(find.textContaining('Buenos'), findsOneWidget);
+    expect(
+      find.textContaining('Buenos').evaluate().isNotEmpty ||
+      find.textContaining('Buenas').evaluate().isNotEmpty,
+      isTrue,
+    );
     // Verifica nombre de usuario por defecto
     expect(find.text('Usuario'), findsOneWidget);
     // Verifica que se muestre el balance

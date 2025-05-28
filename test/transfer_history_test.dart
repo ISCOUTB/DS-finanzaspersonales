@@ -15,6 +15,7 @@ void main() {
     expect(find.text('TODAS'), findsOneWidget);
     expect(find.text('INGRESOS'), findsOneWidget);
     expect(find.text('GASTOS'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 
   testWidgets('El buscador aparece y permite escribir', (WidgetTester tester) async {
@@ -23,11 +24,13 @@ void main() {
     expect(searchField, findsOneWidget);
     await tester.enterText(searchField, 'comida');
     expect(find.text('comida'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 
   testWidgets('El botón de filtro de fecha aparece', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(home: Transferhistory()));
     expect(find.byIcon(Icons.date_range), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 
   testWidgets('Cambia el filtro al tocar un pill', (WidgetTester tester) async {
@@ -36,11 +39,13 @@ void main() {
     await tester.pumpAndSettle();
     // El pill activo debe ser GASTOS
     expect(find.text('GASTOS'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 
   testWidgets('Muestra mensaje vacío si no hay transacciones', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(home: Transferhistory()));
     // No hay transacciones, la lista estará vacía
     expect(find.byType(ListTile), findsNothing);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 }
