@@ -2,10 +2,12 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../Modelos/transaccion.dart';
 import '../Modelos/categoria.dart';
+import 'package:logging/logging.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
+  final _logger = Logger('DatabaseHelper');
 
   factory DatabaseHelper() => _instance;
 
@@ -77,9 +79,9 @@ class DatabaseHelper {
 
   Future<void> deleteAllTransacciones() async {
   final db = await database;
-  print('Eliminando todas las transacciones...');
+  _logger.severe('Eliminando todas las transacciones...');
   await db.delete('transacciones');
-  print('Todas las transacciones han sido eliminadas.');
+  _logger.severe('Todas las transacciones han sido eliminadas.');
   }
 
   Future<void> updateTransaccion(Transaccion transaccion) async {
@@ -127,7 +129,7 @@ class DatabaseHelper {
         );
       });
     } catch (e) {
-      print('Error en getTransaccionesPorAnio: $e');
+      _logger.severe('Error en getTransaccionesPorAnio: $e');
       return [];
     }
   }

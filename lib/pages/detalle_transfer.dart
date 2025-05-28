@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../Modelos/transaccion.dart';
 import 'form_gastos.dart';
 import 'form_ingresos.dart';
-import '../Servicios/gestor_finanzas.dart';
 
 class TransactionDetail extends StatelessWidget {
   final Transaccion transaccion;
@@ -10,11 +9,11 @@ class TransactionDetail extends StatelessWidget {
   final Future<void> Function()? onDelete;
 
   const TransactionDetail({
-    Key? key,
+    super.key,
     required this.transaccion,
     this.onEdit,
     this.onDelete,
-  }) : super(key: key);
+  });
 
   Future<bool> _editarTransaccion(
     BuildContext context,
@@ -35,6 +34,7 @@ class TransactionDetail extends StatelessWidget {
 
     if (result == true) {
       // Regresa a la pantalla anterior y notifica que hubo cambios
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pop(true);
       return true;
     }
@@ -82,7 +82,7 @@ class TransactionDetail extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: const Color(0xff368983).withOpacity(0.2),
+                color: const Color(0xff368983).withValues(alpha: (51)),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Center(

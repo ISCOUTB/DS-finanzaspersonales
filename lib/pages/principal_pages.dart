@@ -216,7 +216,7 @@ class PrincipalPageState extends State<PrincipalPage>
       mainAxisSize: MainAxisSize.min,
       children: [
         CircleAvatar(
-          backgroundColor: color.withOpacity(0.15),
+          backgroundColor: color.withValues(alpha: (255 * 0.15)),
           radius: 18,
           child: Icon(icon, color: color, size: 22),
         ),
@@ -255,19 +255,28 @@ class PrincipalPageState extends State<PrincipalPage>
                 ),
                 onPressed: () async {
                   final navContext = Navigator.of(context);
+                  final scaffoldMessenger = ScaffoldMessenger.of(
+                    context,
+                  ); // Guarda la referencia ANTES del await
+
                   Navigator.pop(context);
                   final result = await navContext.push(
                     MaterialPageRoute(builder: (context) => const FormGastos()),
                   );
+
                   if (result == true && mounted) {
                     await cargarTransacciones();
-                    ScaffoldMessenger.of(navContext.context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Gasto agregado correctamente'),
-                      ),
-                    );
+                    if (mounted) {
+                      scaffoldMessenger.showSnackBar(
+                        // Usa la referencia guardada
+                        const SnackBar(
+                          content: Text('Gasto agregado correctamente'),
+                        ),
+                      );
+                    }
                   }
                 },
+
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: const [
@@ -291,19 +300,27 @@ class PrincipalPageState extends State<PrincipalPage>
                 ),
                 onPressed: () async {
                   final navContext = Navigator.of(context);
+                  final scaffoldMessenger = ScaffoldMessenger.of(
+                    context,
+                  ); // Guarda la referencia ANTES del await
+
                   Navigator.pop(context);
                   final result = await navContext.push(
                     MaterialPageRoute(
                       builder: (context) => const FormIngresos(),
                     ),
                   );
+
                   if (result == true && mounted) {
                     await cargarTransacciones();
-                    ScaffoldMessenger.of(navContext.context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Ingreso agregado correctamente'),
-                      ),
-                    );
+                    if (mounted) {
+                      scaffoldMessenger.showSnackBar(
+                        // Usa la referencia guardada
+                        const SnackBar(
+                          content: Text('Ingreso agregado correctamente'),
+                        ),
+                      );
+                    }
                   }
                 },
                 child: Row(
@@ -536,13 +553,13 @@ class PrincipalPageState extends State<PrincipalPage>
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withValues(alpha: (20)),
                       blurRadius: 22,
                       offset: const Offset(0, 10),
                     ),
                   ],
                   border: Border.all(
-                    color: fondoCard.withOpacity(0.07),
+                    color: fondoCard.withValues(alpha: (18)),
                     width: 1.2,
                   ),
                 ),
@@ -638,7 +655,7 @@ class PrincipalPageState extends State<PrincipalPage>
       children: [
         CircleAvatar(
           radius: 13,
-          backgroundColor: color.withOpacity(0.18),
+          backgroundColor: color.withValues(alpha: (46)),
           child: Icon(icon, color: color, size: 19),
         ),
         const SizedBox(width: 7),
@@ -680,9 +697,9 @@ class PrincipalPageState extends State<PrincipalPage>
           width: 22,
           height: 22,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.18),
+            color: color.withValues(alpha: (46)),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: color.withOpacity(0.5), width: 1),
+            border: Border.all(color: color.withValues(alpha: (13)), width: 1),
           ),
           child: Center(child: Icon(icon, color: color, size: 18)),
         ),

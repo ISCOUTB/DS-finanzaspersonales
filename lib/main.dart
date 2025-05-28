@@ -35,7 +35,7 @@ class _MyAppState extends State<MyApp> {
       initialRoute: widget.initialRoute,
       routes: {
         '/login': (context) => const PageRegistro(),
-        '/home': (context) => MyHomePage(title: 'Finanse Tracker',),
+        '/home': (context) => const MyHomePage(title: 'Finanse Tracker',),
       },
       theme: ThemeData(
         brightness: Brightness.light,
@@ -58,8 +58,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final GlobalKey<PrincipalPageState> _principalKey = PrincipalPage.globalKey;
-  final GlobalKey<EstadisticasPageState> _estadisticasKey = EstadisticasPage.globalKey;
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int _selectedIndex = 0;

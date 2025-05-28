@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../Modelos/categoria.dart';
 import '../Modelos/transaccion.dart';
 import '../Modelos/categoria_service.dart';
-import '../Servicios/gestor_finanzas.dart';
 import 'package:uuid/uuid.dart';
 import '../Servicios/database_helper.dart';
 
@@ -61,6 +60,10 @@ class _FormIngresosState extends State<FormIngresos> {
 
       final dbHelper = DatabaseHelper();
 
+      // Guarda las referencias ANTES del await
+      final navigator = Navigator.of(context);
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+
       try {
         if (widget.transaccion != null) {
           // Actualizar transacción existente
@@ -70,14 +73,18 @@ class _FormIngresosState extends State<FormIngresos> {
           await dbHelper.insertTransaccion(nuevaTransaccion);
         }
 
-        Navigator.pop(
-          context,
-          true,
-        ); // Retorna `true` para indicar que se guardó
+        // Verifica si el widget sigue montado antes de usar las referencias
+        if (mounted) {
+          navigator.pop(true); // Solo el resultado, no el contexto
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al guardar la transacción: $e')),
-        );
+        // Verifica si el widget sigue montado antes de mostrar el SnackBar
+        if (mounted) {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(content
+            : Text('Error al guardar la transacción: $e')),
+          );
+        }
       }
     }
   }

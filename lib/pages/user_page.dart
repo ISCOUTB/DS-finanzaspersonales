@@ -46,7 +46,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
       PrincipalPage.globalKey.currentState!.loadUserName();
     }
 
-    Navigator.pop(context); // Cerrar el diálogo
+    // Verificar si el widget sigue montado antes de usar context
+    if (mounted) {
+      Navigator.pop(context); // Cerrar el diálogo
+    }
   }
 
   Future<void> _updateProfileImage(File newImage) async {
@@ -158,7 +161,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Future<void> _deleteAccountData() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Elimina todos los datos almacenados en SharedPreferences
+    await prefs
+        .clear(); // Elimina todos los datos almacenados en SharedPreferences
 
     // Elimina todos los registros de la base de datos
     final dbHelper = DatabaseHelper();
@@ -238,6 +242,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             profileImage != null
                                 ? FileImage(profileImage!)
                                 : null,
+                        backgroundColor: const Color.fromARGB(
+                          225,
+                          47,
+                          125,
+                          121,
+                        ),
                         child:
                             profileImage == null
                                 ? const Icon(
@@ -246,12 +256,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                   color: Colors.white,
                                 )
                                 : null,
-                        backgroundColor: const Color.fromARGB(
-                          225,
-                          47,
-                          125,
-                          121,
-                        ),
                       ),
                       CircleAvatar(
                         radius: 20,
