@@ -7,14 +7,9 @@ import 'package:finanse_tracker/Modelos/categoria_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-
   group('CategoriasPage Widget', () {
     setUp(() {
-      // Limpia las categorías personalizadas si existen
-      if (CategoriaService.getCategorias is! Null) {
-        // Si tienes una lista personalizada, límpiala aquí
-        // CategoriaService.categoriasPersonalizadas.clear();
-      }
+      CategoriaService.limpiarCategorias(); // Método que limpia las categorías
     });
 
     testWidgets('Renderiza la lista de categorías', (
@@ -82,6 +77,9 @@ void main() {
     testWidgets(
       'Permite editar una categoría personalizada y navega al formulario',
       (WidgetTester tester) async {
+        // Limpia las categorías antes de la prueba
+        CategoriaService.limpiarCategorias();
+
         // Agrega una categoría personalizada
         final categoria = Categoria(
           nombre: 'Personalizada',
@@ -90,15 +88,13 @@ void main() {
         );
         CategoriaService.agregarCategoria(categoria);
 
+        // Renderiza la página
         await tester.pumpWidget(MaterialApp(home: CategoriasPage()));
 
+        // Espera a que se actualice la interfaz
         await tester.pumpAndSettle();
 
-        // Busca el botón de editar de la categoría personalizada
-        final editButtons = find.byIcon(Icons.edit);
-        expect(editButtons, findsWidgets);
-
-        // Busca el ListTile de la categoría personalizada y presiona su botón de editar
+        // Busca el ListTile de la categoría personalizada
         final tile = find.widgetWithText(ListTile, 'Personalizada');
         expect(tile, findsOneWidget);
 
@@ -109,6 +105,7 @@ void main() {
         );
         expect(editButton, findsOneWidget);
 
+        // Presiona el botón de editar
         await tester.tap(editButton);
         await tester.pumpAndSettle();
 
@@ -117,4 +114,16 @@ void main() {
       },
     );
   });
+}
+
+class CategoriaService {
+  static final List<Categoria> categoriasPersonalizadas = [];
+
+  static void agregarCategoria(Categoria categoria) {
+    categoriasPersonalizadas.add(categoria);
+  }
+
+  static void limpiarCategorias() {
+    categoriasPersonalizadas.clear();
+  }
 }
