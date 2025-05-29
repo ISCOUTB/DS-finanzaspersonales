@@ -163,10 +163,10 @@ class _TransferhistoryState extends State<Transferhistory> {
             // Header
             Padding(
               padding: const EdgeInsets.all(20),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                    Text(
                     'Historial de Transferencias',
                     style: TextStyle(
                       fontSize: 20,
@@ -324,9 +324,15 @@ class _TransferhistoryState extends State<Transferhistory> {
                                               );
                                             },
                                             onDelete: () async {
-                                              final navigator = Navigator.of(detailContext); // Guarda la referencia al Navigator antes del await
-                                              await _eliminarTransaccion(transaccion);
-                                              navigator.pop(false); // Usa la referencia guardada
+                                              final navigator = Navigator.of(
+                                                detailContext,
+                                              ); // Guarda la referencia al Navigator antes del await
+                                              await _eliminarTransaccion(
+                                                transaccion,
+                                              );
+                                              navigator.pop(
+                                                false,
+                                              ); // Usa la referencia guardada
                                             },
                                           ),
                                     ),

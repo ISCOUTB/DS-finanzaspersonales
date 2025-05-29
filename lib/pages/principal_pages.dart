@@ -323,9 +323,9 @@ class PrincipalPageState extends State<PrincipalPage>
                     }
                   }
                 },
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  children: const [
+                  children: [
                     Icon(Icons.trending_up, color: Colors.green, size: 30),
                     SizedBox(width: 20),
                     Text(
@@ -370,9 +370,7 @@ class PrincipalPageState extends State<PrincipalPage>
       121,
     ); // Color original de la tarjeta
     const fondoBalance = Color(0xFFF8F6FF);
-    const colorTextoBalance = Color(
-      0xff368983,
-    ); // Color original del texto de balance
+    const colorTextoBalance = Color(0xff368983);
     const colorIngresos = Color(0xFF4CAF50); // Verde original
     const colorGastos = Color(0xFFE57373); // Rojo original
 

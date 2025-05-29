@@ -239,9 +239,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       CircleAvatar(
                         radius: 70,
                         backgroundImage:
-                            profileImage != null
-                                ? FileImage(profileImage!)
-                                : null,
+                            profileImage != null ? FileImage(profileImage!) : null,
                         backgroundColor: const Color.fromARGB(
                           225,
                           47,
@@ -251,16 +249,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         child:
                             profileImage == null
                                 ? const Icon(
-                                  Icons.person,
-                                  size: 70,
-                                  color: Colors.white,
-                                )
+                                    Icons.person,
+                                    size: 70,
+                                    color: Colors.white,
+                                  )
                                 : null,
                       ),
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 20,
                         backgroundColor: Colors.white,
-                        child: const Icon(
+                        child: Icon(
                           Icons.camera_alt,
                           color: Color.fromARGB(225, 47, 125, 121),
                         ),
