@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../Modelos/categoria.dart';
 import '../Modelos/transaccion.dart';
 import '../Servicios/gestor_finanzas.dart';
 
@@ -9,7 +8,7 @@ enum FiltroTiempo { dia, semana, mes, anio }
 class EstadisticasPage extends StatefulWidget {
   final GestorFinanzas? gestorFinanzas; // Añade este parámetro opcional
   // Modifica el constructor para aceptar gestorFinanzas
-  const EstadisticasPage({Key? key, this.gestorFinanzas}) : super(key: key);
+  const EstadisticasPage({super.key, this.gestorFinanzas});
 
   // Si usas una GlobalKey estática, mantenla:
   static final GlobalKey<EstadisticasPageState> globalKey =
@@ -22,7 +21,8 @@ class EstadisticasPage extends StatefulWidget {
 class EstadisticasPageState extends State<EstadisticasPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late GestorFinanzas _gestor; // IMPORTANTE: Ya no es 'final' e inicializado aquí directamente
+  late GestorFinanzas
+  _gestor; // IMPORTANTE: Ya no es 'final' e inicializado aquí directamente
   List<Transaccion> _transacciones = [];
   FiltroTiempo _filtroSeleccionado = FiltroTiempo.mes;
   int _anioSeleccionado = DateTime.now().year;
@@ -35,7 +35,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
   void initState() {
     super.initState();
     // Usa el gestor inyectado desde el widget, o crea uno nuevo si no se proveyó
-    _gestor = widget.gestorFinanzas ?? GestorFinanzas(); 
+    _gestor = widget.gestorFinanzas ?? GestorFinanzas();
 
     _tabController = TabController(length: 2, vsync: this);
     cargarDatos();
@@ -56,7 +56,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
       });
     }
   }
-  
+
   // Método para actualizar gráficos (ejemplo, ajusta según tu código)
   void _actualizarGraficos() {
     _calcularTotalesBarras(_filtrarTransacciones(_filtroSeleccionado));
@@ -330,7 +330,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       elevation: 10,
-      shadowColor: Colors.black.withOpacity(0.15),
+      shadowColor: Colors.black.withAlpha((0.15 * 255).toInt()),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: SizedBox(
@@ -597,7 +597,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
                       borderRadius: BorderRadius.circular(20),
                     ),
                     elevation: 10,
-                    shadowColor: Colors.black.withOpacity(0.15),
+                    shadowColor: Colors.black.withAlpha((0.15 * 255).toInt()),
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
                       child: Column(
@@ -657,7 +657,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
                       borderRadius: BorderRadius.circular(20),
                     ),
                     elevation: 10,
-                    shadowColor: Colors.black.withOpacity(0.15),
+                    shadowColor: Colors.black.withAlpha((0.15 * 255).toInt()),
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
                       child: Column(
@@ -932,8 +932,12 @@ class EstadisticasPageState extends State<EstadisticasPage>
             show: true,
             gradient: LinearGradient(
               colors: [
-                const Color(0xff009688).withOpacity(0.25),
-                Colors.white.withOpacity(0.0),
+                const Color(0xff009688).withAlpha(
+                  (0.25 * 255).toInt(),
+                ), // Convierte la opacidad a un valor de 0 a 255
+                Colors.white.withAlpha(
+                  (0.0 * 255).toInt(),
+                ), // Convierte la opacidad a un valor de 0 a 255
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -1022,7 +1026,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
         horizontalInterval: maxY ~/ 4 > 0 ? maxY / 4 : 1,
         getDrawingHorizontalLine:
             (value) =>
-                FlLine(color: Colors.grey.withOpacity(0.15), strokeWidth: 1),
+                FlLine(color: Colors.grey.withAlpha((0.15 * 255).toInt()), strokeWidth: 1),
       ),
     );
   }
@@ -1058,7 +1062,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.10),
+                        color: Colors.grey.withAlpha((0.10 * 255).toInt()),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),

@@ -111,8 +111,8 @@ class _TransferhistoryState extends State<Transferhistory> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Eliminar'),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Eliminar'),
           ),
         ],
       ),
@@ -307,7 +307,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                                       47,
                                       125,
                                       121,
-                                    ).withOpacity(0.2),
+                                    ).withAlpha((0.2 * 255).toInt()),
                                     borderRadius: BorderRadius.circular(15),
                                   ),
                                   child: Center(

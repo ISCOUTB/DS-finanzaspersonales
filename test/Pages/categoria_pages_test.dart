@@ -78,6 +78,6 @@ void main() {
         expect(find.byType(TextFormField), findsNothing);
       },
     );
-    
+
   });
 }
