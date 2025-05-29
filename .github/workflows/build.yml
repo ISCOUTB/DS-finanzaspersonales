@@ -10,10 +10,11 @@ on:
 jobs:
   sonarqube:
     name: SonarCloud Analysis
-    runs-on: ubuntu-latest  # ✅ Cambiado de windows-latest a ubuntu-latest
+    runs-on: ubuntu-latest
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_HOST_URL: 'https://sonarcloud.io'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,8 +24,7 @@ jobs:
       - name: Cache Flutter dependencies
         uses: actions/cache@v3
         with:
-          path: |
-            ~/.pub-cache
+          path: ~/.pub-cache
           key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-flutter-
@@ -32,8 +32,7 @@ jobs:
       - name: Cache Gradle dependencies
         uses: actions/cache@v3
         with:
-          path: |
-            ~/.gradle/caches
+          path: ~/.gradle/caches
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             gradle-${{ runner.os }}-
@@ -69,6 +68,13 @@ jobs:
           echo "Primeras líneas del archivo lcov.info:"
           head -n 20 coverage/lcov.info
 
+      - name: Download Dart Sonar Analyzer
+        run: |
+          mkdir -p .dart-sonar
+          curl -sL https://github.com/SonarSource/sonar-dart/releases/latest/download/dart-sonar-linux -o .dart-sonar/dart-sonar
+          chmod +x .dart-sonar/dart-sonar
+          echo "DART_ANALYZER_PATH=$(pwd)/.dart-sonar/dart-sonar" >> $GITHUB_ENV
+
       - name: Run SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
@@ -79,5 +85,6 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
+            -Dsonar.dart.analyzerPath=${{ env.DART_ANALYZER_PATH }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
