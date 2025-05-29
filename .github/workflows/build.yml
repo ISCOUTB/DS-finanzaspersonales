@@ -57,22 +57,21 @@ jobs:
       - name: Run tests with coverage
         run: |
           flutter test --coverage
-          echo "Coverage generated, checking file..."
-          if exist coverage\lcov.info (
-            echo "LCOV file found, size:"
-            dir coverage\lcov.info
-            echo "Sample content:"
-            powershell "Get-Content coverage\lcov.info | Select-Object -First 5"
-          ) else (
-            echo "ERROR: No coverage file generated!"
+          Write-Host "Coverage generated, checking file..."
+          if (Test-Path "coverage\lcov.info") {
+            Write-Host "LCOV file found, size:"
+            Get-ChildItem "coverage\lcov.info"
+            Write-Host "Sample content:"
+            Get-Content "coverage\lcov.info" | Select-Object -First 5
+          } else {
+            Write-Host "ERROR: No coverage file generated!"
             exit 1
-          )
+          }
 
       # FIX CRÍTICO: Convertir paths absolutos en lcov.info
       - name: Fix LCOV file paths for SonarCloud
         run: |
-          powershell -Command "
-          $content = Get-Content coverage\lcov.info
+          $content = Get-Content "coverage\lcov.info"
           $fixed = $content | ForEach-Object {
             if ($_ -match '^SF:') {
               # Extraer solo el nombre del archivo relativo desde lib/
@@ -88,25 +87,22 @@ jobs:
               $_
             }
           }
-          $fixed | Set-Content coverage\lcov.info
-          "
-          echo "LCOV paths fixed. New content sample:"
-          powershell "Get-Content coverage\lcov.info | Select-Object -First 10"
+          $fixed | Set-Content "coverage\lcov.info"
+          Write-Host "LCOV paths fixed. New content sample:"
+          Get-Content "coverage\lcov.info" | Select-Object -First 10
 
       # Verificar formato final
       - name: Verify LCOV format
         run: |
-          echo "Final LCOV content check:"
-          powershell "
-          $content = Get-Content coverage\lcov.info
+          Write-Host "Final LCOV content check:"
+          $content = Get-Content "coverage\lcov.info"
           $sfLines = $content | Where-Object { $_ -match '^SF:' } | Select-Object -First 5
-          Write-Host 'SF lines found:'
+          Write-Host "SF lines found:"
           $sfLines | ForEach-Object { Write-Host $_ }
           
           $daLines = $content | Where-Object { $_ -match '^DA:' } | Select-Object -First 5  
-          Write-Host 'DA lines found:'
+          Write-Host "DA lines found:"
           $daLines | ForEach-Object { Write-Host $_ }
-          "
 
       - name: Install SonarQube Build Wrapper
         uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v5
