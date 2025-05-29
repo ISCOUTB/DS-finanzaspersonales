@@ -1,16 +1,15 @@
-name: Build and SonarQube Analysis
+name: Build and SonarCloud Analysis
 
 on:
   push:
     branches:
       - master
-      - APP
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
   sonarqube:
-    name: SonarQube Analysis
+    name: SonarCloud Analysis
     runs-on: windows-latest
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -19,12 +18,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Evita clones superficiales para un mejor análisis
+          fetch-depth: 0
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.pub-cache
+          path: |
+            ~/.pub-cache
           key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-flutter-
@@ -32,7 +32,8 @@ jobs:
       - name: Cache Gradle dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.gradle/caches
+          path: |
+            ~/.gradle/caches
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             gradle-${{ runner.os }}-
@@ -42,7 +43,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'  # Usa el caché de Gradle para evitar instalaciones repetidas
+          cache: 'gradle'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -58,18 +59,25 @@ jobs:
       - name: Build WEB
         run: flutter build web
 
-      - name: Coverage file
+      - name: Run tests with coverage
         run: flutter test --coverage
-      
-      - name: Install SonarQube Build Wrapper
-        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v5
 
-      - name: Run SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: 'https://sonarcloud.io'
+      - name: Check coverage report
+        run: |
+          echo "Contenido de la carpeta coverage:"
+          ls -la coverage
+          echo "Primeras líneas del archivo lcov.info:"
+          head -n 20 coverage/lcov.info
+
+      - name: Run SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
         with:
           args: >
+            -Dsonar.projectKey=ISCOUTB_DS-finanzaspersonales
+            -Dsonar.organization=isco-utb
             -Dsonar.sources=lib
-            -Dsonar.cfamily.compile-commands=build-wrapper-output/compile_commands.json
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
