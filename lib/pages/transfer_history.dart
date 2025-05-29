@@ -62,60 +62,85 @@ class _TransferhistoryState extends State<Transferhistory> {
   List<Transaccion> _getFilteredTransacciones() {
     List<Transaccion> filtered = _filtrarTransacciones();
     if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((t) =>
-        t.categoria.nombre.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        t.monto.toString().contains(_searchQuery) ||
-        (t.descripcion ?? '').toLowerCase().contains(_searchQuery.toLowerCase())
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (t) =>
+                    t.categoria.nombre.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ||
+                    t.monto.toString().contains(_searchQuery) ||
+                    (t.descripcion ?? '').toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ),
+              )
+              .toList();
     }
     if (_selectedDateRange != null) {
-      filtered = filtered.where((t) =>
-        t.fecha.isAfter(_selectedDateRange!.start.subtract(const Duration(days: 1))) &&
-        t.fecha.isBefore(_selectedDateRange!.end.add(const Duration(days: 1)))
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (t) =>
+                    t.fecha.isAfter(
+                      _selectedDateRange!.start.subtract(
+                        const Duration(days: 1),
+                      ),
+                    ) &&
+                    t.fecha.isBefore(
+                      _selectedDateRange!.end.add(const Duration(days: 1)),
+                    ),
+              )
+              .toList();
     }
     return filtered;
   }
 
   Future<bool> _editarTransaccion(Transaccion transaccion) async {
-  final result = await Navigator.push<bool>(
-    context,
-    MaterialPageRoute(
-      builder: (context) {
-        if (transaccion.tipo == 'ingreso') {
-          return FormIngresos(transaccion: transaccion); // Navega al formulario de ingresos
-        } else {
-          return FormGastos(transaccion: transaccion); // Navega al formulario de gastos
-        }
-      },
-    ),
-  );
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          if (transaccion.tipo == 'ingreso') {
+            return FormIngresos(
+              transaccion: transaccion,
+            ); // Navega al formulario de ingresos
+          } else {
+            return FormGastos(
+              transaccion: transaccion,
+            ); // Navega al formulario de gastos
+          }
+        },
+      ),
+    );
 
-  if (result == true) {
-    await _cargarTransacciones(); // Recarga las transacciones si se editó algo
-    return true;
+    if (result == true) {
+      await _cargarTransacciones(); // Recarga las transacciones si se editó algo
+      return true;
+    }
+    return false;
   }
-  return false;
-}
 
   Future<void> _eliminarTransaccion(Transaccion transaccion) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar transacción'),
-        content: const Text('¿Estás seguro de que deseas eliminar esta transacción?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Eliminar transacción'),
+            content: const Text(
+              '¿Estás seguro de que deseas eliminar esta transacción?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Eliminar'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
     );
     if (confirm == true) {
       // Usa el método eliminarTransaccion del gestor para eliminar correctamente en BD y en memoria
@@ -161,9 +186,14 @@ class _TransferhistoryState extends State<Transferhistory> {
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: 'Buscar transacción...',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 0,
+                          horizontal: 12,
+                        ),
                       ),
                       onChanged: (value) {
                         setState(() {
@@ -174,7 +204,10 @@ class _TransferhistoryState extends State<Transferhistory> {
                   ),
                   const SizedBox(width: 10),
                   IconButton(
-                    icon: const Icon(Icons.date_range, color: Color.fromARGB(225, 47, 125, 121)),
+                    icon: const Icon(
+                      Icons.date_range,
+                      color: Color.fromARGB(225, 47, 125, 121),
+                    ),
                     tooltip: 'Filtrar por fecha',
                     onPressed: () async {
                       final picked = await showDateRangePicker(
@@ -219,43 +252,43 @@ class _TransferhistoryState extends State<Transferhistory> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children:
                             ['Todas', 'Ingresos', 'Gastos'].map((filtro) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _filtroActual = filtro;
-                                // _transacciones = _filtrarTransacciones(); // Ya no es necesario, usamos _getFilteredTransacciones()
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color:
-                                    _filtroActual == filtro
-                                        ? const Color.fromARGB(
-                                            225,
-                                            47,
-                                            125,
-                                            121,
-                                          )
-                                        : Colors.grey.withAlpha(26),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                filtro,
-                                style: TextStyle(
-                                  color:
-                                      _filtroActual == filtro
-                                          ? Colors.white
-                                          : Colors.grey[800],
-                                  fontWeight: FontWeight.w500,
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _filtroActual = filtro;
+                                    // _transacciones = _filtrarTransacciones(); // Ya no es necesario, usamos _getFilteredTransacciones()
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        _filtroActual == filtro
+                                            ? const Color.fromARGB(
+                                              225,
+                                              47,
+                                              125,
+                                              121,
+                                            )
+                                            : Colors.grey.withAlpha(26),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    filtro,
+                                    style: TextStyle(
+                                      color:
+                                          _filtroActual == filtro
+                                              ? Colors.white
+                                              : Colors.grey[800],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                              );
+                            }).toList(),
                       ),
                     ),
                     // Lista de transacciones con animación
@@ -266,7 +299,8 @@ class _TransferhistoryState extends State<Transferhistory> {
                           key: ValueKey(_getFilteredTransacciones().length),
                           itemCount: _getFilteredTransacciones().length,
                           itemBuilder: (context, index) {
-                            final transaccion = _getFilteredTransacciones()[index];
+                            final transaccion =
+                                _getFilteredTransacciones()[index];
                             return Container(
                               margin: const EdgeInsets.symmetric(
                                 horizontal: 20,
@@ -281,17 +315,23 @@ class _TransferhistoryState extends State<Transferhistory> {
                                   final result = await Navigator.push<bool>(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (detailContext) =>
-                                          TransactionDetail(
-                                        transaccion: transaccion,
-                                        onEdit: () async {
-                                          return await _editarTransaccion(transaccion);
-                                        },
-                                        onDelete: () async {
-                                          await _eliminarTransaccion(transaccion);
-                                          Navigator.of(detailContext).pop(false);
-                                        },
-                                      ),
+                                      builder:
+                                          (detailContext) => TransactionDetail(
+                                            transaccion: transaccion,
+                                            onEdit: () async {
+                                              return await _editarTransaccion(
+                                                transaccion,
+                                              );
+                                            },
+                                            onDelete: () async {
+                                              await _eliminarTransaccion(
+                                                transaccion,
+                                              );
+                                              Navigator.of(
+                                                detailContext,
+                                              ).pop(false);
+                                            },
+                                          ),
                                     ),
                                   );
                                   if (result == true) {
@@ -307,7 +347,7 @@ class _TransferhistoryState extends State<Transferhistory> {
                                       47,
                                       125,
                                       121,
-                                    ).withAlpha((0.2 * 255).toInt()),
+                                    ).withAlpha((0.15 * 255).toInt()),
                                     borderRadius: BorderRadius.circular(15),
                                   ),
                                   child: Center(
@@ -336,9 +376,10 @@ class _TransferhistoryState extends State<Transferhistory> {
                                       style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16,
-                                        color: transaccion.tipo == 'ingreso'
-                                            ? Colors.green
-                                            : Colors.red,
+                                        color:
+                                            transaccion.tipo == 'ingreso'
+                                                ? Colors.green
+                                                : Colors.red,
                                       ),
                                     ),
                                   ],

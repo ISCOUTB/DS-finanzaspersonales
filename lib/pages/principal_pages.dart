@@ -277,9 +277,9 @@ class PrincipalPageState extends State<PrincipalPage>
                   }
                 },
 
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  children: const [
+                  children: [
                     Icon(Icons.trending_down, color: Colors.red, size: 30),
                     SizedBox(width: 20),
                     Text(
@@ -591,7 +591,7 @@ class PrincipalPageState extends State<PrincipalPage>
                               letterSpacing: 0.5,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             '', // Aquí puedes poner el valor real si lo deseas
                             style: const TextStyle(

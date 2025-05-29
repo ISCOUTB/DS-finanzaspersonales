@@ -20,12 +20,12 @@ class EstadisticasPage extends StatefulWidget {
 
 class EstadisticasPageState extends State<EstadisticasPage>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  //late TabController _tabController;
   late GestorFinanzas
   _gestor; // IMPORTANTE: Ya no es 'final' e inicializado aquí directamente
   List<Transaccion> _transacciones = [];
   FiltroTiempo _filtroSeleccionado = FiltroTiempo.mes;
-  int _anioSeleccionado = DateTime.now().year;
+  // int _anioSeleccionado = DateTime.now().year;
 
   List<String> _etiquetasBarras = [];
   List<double> _totalesIngresos = [];
@@ -37,7 +37,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
     // Usa el gestor inyectado desde el widget, o crea uno nuevo si no se proveyó
     _gestor = widget.gestorFinanzas ?? GestorFinanzas();
 
-    _tabController = TabController(length: 2, vsync: this);
+    //_tabController = TabController(length: 2, vsync: this);
     cargarDatos();
   }
 
@@ -444,7 +444,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
           return Container(
             margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
             decoration: BoxDecoration(
-              color: esIngreso ? Color(0xFFD6ECEB) : Color(0xFFF8F6FF),
+              color: esIngreso ? const Color(0xFFD6ECEB) : const Color(0xFFF8F6FF),
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: Colors.grey.shade200),
             ),
@@ -799,10 +799,10 @@ class EstadisticasPageState extends State<EstadisticasPage>
                               },
                             ),
                           ),
-                          topTitles: AxisTitles(
+                          topTitles: const AxisTitles(
                             sideTitles: SideTitles(showTitles: false),
                           ),
-                          rightTitles: AxisTitles(
+                          rightTitles: const AxisTitles(
                             sideTitles: SideTitles(showTitles: false),
                           ),
                         ),
@@ -815,7 +815,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
                               _calcularIntervaloY(), // Usa el mismo intervalo para las líneas horizontales
                           getDrawingHorizontalLine:
                               (value) => FlLine(
-                                color: Colors.grey.withOpacity(0.15),
+                                color: Colors.grey.withAlpha((0.15 * 255).toInt()),
                                 strokeWidth: 1,
                               ),
                         ),
