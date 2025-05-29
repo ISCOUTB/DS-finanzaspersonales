@@ -10,7 +10,7 @@ on:
 jobs:
   sonarqube:
     name: SonarCloud Analysis
-    runs-on: windows-latest
+    runs-on: ubuntu-latest  # ✅ Cambiado de windows-latest a ubuntu-latest
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_HOST_URL: 'https://sonarcloud.io'
@@ -63,12 +63,11 @@ jobs:
         run: flutter test --coverage
 
       - name: Check coverage report
-        shell: pwsh
         run: |
-          Write-Host "Contenido de la carpeta coverage:"
-          Get-ChildItem -Recurse coverage
-          Write-Host "Primeras líneas del archivo lcov.info:"
-          Get-Content coverage/lcov.info -TotalCount 20
+          echo "Contenido de la carpeta coverage:"
+          ls -la coverage
+          echo "Primeras líneas del archivo lcov.info:"
+          head -n 20 coverage/lcov.info
 
       - name: Run SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
