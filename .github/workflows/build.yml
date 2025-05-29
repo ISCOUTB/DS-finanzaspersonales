@@ -117,7 +117,7 @@ jobs:
             -Dsonar.sources=lib
             -Dsonar.tests=test
             -Dsonar.coverageReportPaths=coverage/lcov.info
-            -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
+            -Dsonar.dart.lcov.reportPaths=coverage/lcov.info
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.verbose=true
             -Dsonar.qualitygate.wait=false
