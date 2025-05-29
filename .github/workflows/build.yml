@@ -62,7 +62,7 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
-      - name: Check coverage report exists
+      - name: Check coverage report
         run: |
           echo "Contenido de la carpeta coverage:"
           ls -la coverage
@@ -70,13 +70,14 @@ jobs:
           head -n 20 coverage/lcov.info
 
       - name: Run SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v1.1.0
+        uses: SonarSource/sonarcloud-github-action@v2
         with:
           args: >
             -Dsonar.projectKey=ISCOUTB_DS-finanzaspersonales
             -Dsonar.organization=isco-utb
-            -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=lib
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sourceEncoding=UTF-8
             -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
