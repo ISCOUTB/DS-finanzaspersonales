@@ -7,10 +7,13 @@ import '../Servicios/gestor_finanzas.dart';
 enum FiltroTiempo { dia, semana, mes, anio }
 
 class EstadisticasPage extends StatefulWidget {
+  final GestorFinanzas? gestorFinanzas; // Añade este parámetro opcional
+  // Modifica el constructor para aceptar gestorFinanzas
+  const EstadisticasPage({Key? key, this.gestorFinanzas}) : super(key: key);
+
+  // Si usas una GlobalKey estática, mantenla:
   static final GlobalKey<EstadisticasPageState> globalKey =
       GlobalKey<EstadisticasPageState>();
-
-  const EstadisticasPage({super.key});
 
   @override
   EstadisticasPageState createState() => EstadisticasPageState();
@@ -18,13 +21,11 @@ class EstadisticasPage extends StatefulWidget {
 
 class EstadisticasPageState extends State<EstadisticasPage>
     with SingleTickerProviderStateMixin {
-  final GestorFinanzas _gestor = GestorFinanzas();
-  int _anioSeleccionado = DateTime.now().year;
-  List<Transaccion> _transacciones = [];
-
-  FiltroTiempo _filtroSeleccionado = FiltroTiempo.mes;
-
   late TabController _tabController;
+  late GestorFinanzas _gestor; // IMPORTANTE: Ya no es 'final' e inicializado aquí directamente
+  List<Transaccion> _transacciones = [];
+  FiltroTiempo _filtroSeleccionado = FiltroTiempo.mes;
+  int _anioSeleccionado = DateTime.now().year;
 
   List<String> _etiquetasBarras = [];
   List<double> _totalesIngresos = [];
@@ -33,6 +34,9 @@ class EstadisticasPageState extends State<EstadisticasPage>
   @override
   void initState() {
     super.initState();
+    // Usa el gestor inyectado desde el widget, o crea uno nuevo si no se proveyó
+    _gestor = widget.gestorFinanzas ?? GestorFinanzas(); 
+
     _tabController = TabController(length: 2, vsync: this);
     cargarDatos();
   }
@@ -45,9 +49,18 @@ class EstadisticasPageState extends State<EstadisticasPage>
 
   Future<void> cargarDatos() async {
     await _gestor.cargarTransacciones();
-    setState(() {
-      _transacciones = _gestor.transacciones;
-    });
+    if (mounted) {
+      setState(() {
+        _transacciones = _gestor.transacciones;
+        _actualizarGraficos(); // Asumiendo que tienes este método
+      });
+    }
+  }
+  
+  // Método para actualizar gráficos (ejemplo, ajusta según tu código)
+  void _actualizarGraficos() {
+    _calcularTotalesBarras(_filtrarTransacciones(_filtroSeleccionado));
+    // Llama a otros cálculos que dependan de los datos actualizados
   }
 
   List<Transaccion> _filtrarTransacciones(FiltroTiempo filtro) {
