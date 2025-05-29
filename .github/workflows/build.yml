@@ -1,46 +1,83 @@
-name: Build and Analyze
+name: Build and SonarCloud Analysis
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
+    types: [opened, synchronize, reopened]
 
 jobs:
-  analyze:
-    name: Analyze with SonarCloud
-    runs-on: ubuntu-latest
-
+  sonarqube:
+    name: SonarCloud Analysis
+    runs-on: windows-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: 'https://sonarcloud.io'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0' 
+          flutter-version: '3.29.2'
+
+      - name: Verify Flutter installation
+        run: flutter doctor
 
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Build WEB
+        run: flutter build web
+
       - name: Run tests with coverage
-        run: |
-          flutter test --coverage
-          genhtml coverage/lcov.info -o coverage/html
+        run: flutter test --coverage
 
-      - name: Download Dart Sonar Analyzer
+      - name: Check coverage report
         run: |
-          mkdir -p .dart-sonar
-          curl -sL https://github.com/insideapp-oss/sonar-dart/releases/latest/download/dart-sonar-linux -o .dart-sonar/dart-sonar
-          chmod +x .dart-sonar/dart-sonar
+          echo "Contenido de la carpeta coverage:"
+          ls -la coverage
+          echo "Primeras líneas del archivo lcov.info:"
+          head -n 20 coverage/lcov.info
 
-      - name: Run SonarCloud Analysis
-        run: |
-          .dart-sonar/dart-sonar analyze \
-            --source lib \
-            --coverage coverage/lcov.info \
-            --project-key ISCOUTB_DS-finanzaspersonales \
-            --organization isco-utb \
-            --token $SONAR_TOKEN
+      - name: Run SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          args: >
+            -Dsonar.projectKey=ISCOUTB_DS-finanzaspersonales
+            -Dsonar.organization=isco-utb
+            -Dsonar.sources=lib
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
