@@ -59,21 +59,7 @@ jobs:
           flutter test --coverage
           echo "Coverage file generated:"
           dir coverage
-          if exist coverage\lcov.info (
-            echo "LCOV file exists and has size:"
-            dir coverage\lcov.info
-            echo "First 20 lines of lcov.info:"
-            powershell "Get-Content coverage\lcov.info | Select-Object -First 20"
-          ) else (
-            echo "ERROR: lcov.info file not found!"
-            exit 1
-          )
-
-      # Convertir paths en lcov.info para Windows (fix paths)
-      - name: Fix LCOV paths for Windows
-        run: |
-          powershell -Command "(Get-Content coverage\lcov.info) -replace '\\/', '\' | Set-Content coverage\lcov.info"
-          echo "LCOV paths fixed for Windows"
+          type coverage\lcov.info
 
       # Debug para verificar archivos
       - name: Debug coverage files
@@ -82,7 +68,7 @@ jobs:
           dir
           echo "Coverage directory:"
           dir coverage
-          echo "Coverage file content (first 10 lines after fix):"
+          echo "Coverage file content (first 10 lines):"
           powershell "Get-Content coverage\lcov.info | Select-Object -First 10"
 
       - name: Install SonarQube Build Wrapper
@@ -96,9 +82,5 @@ jobs:
         with:
           args: >
             -Dsonar.sources=lib
-            -Dsonar.tests=test
             -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
-            -Dsonar.coverage.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.config.dart
-            -Dsonar.test.exclusions=**/*.g.dart,**/*.freezed.dart,**/*.config.dart
             -Dsonar.verbose=true
-            -Dsonar.qualitygate.wait=false
