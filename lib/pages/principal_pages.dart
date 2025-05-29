@@ -594,10 +594,10 @@ class PrincipalPageState extends State<PrincipalPage>
                           const SizedBox(height: 4),
                           Text(
                             '', // Aquí puedes poner el valor real si lo deseas
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.bold,
-                              color: colorTextoBalance,
+                              color: colorTextoBalance, // Esto no puede ser const si colorTextoBalance no lo es
                               letterSpacing: 0.5,
                             ),
                           ),

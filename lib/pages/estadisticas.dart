@@ -755,8 +755,9 @@ class EstadisticasPageState extends State<EstadisticasPage>
                               interval:
                                   _calcularIntervaloY(), // Calcula un intervalo adecuado
                               getTitlesWidget: (value, meta) {
-                                if (value % 1 != 0)
+                                if (value % 1 != 0) {
                                   return const SizedBox.shrink(); // Muestra solo números enteros
+                                }
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 8),
                                   child: Text(

@@ -324,12 +324,9 @@ class _TransferhistoryState extends State<Transferhistory> {
                                               );
                                             },
                                             onDelete: () async {
-                                              await _eliminarTransaccion(
-                                                transaccion,
-                                              );
-                                              Navigator.of(
-                                                detailContext,
-                                              ).pop(false);
+                                              final navigator = Navigator.of(detailContext); // Guarda la referencia al Navigator antes del await
+                                              await _eliminarTransaccion(transaccion);
+                                              navigator.pop(false); // Usa la referencia guardada
                                             },
                                           ),
                                     ),
