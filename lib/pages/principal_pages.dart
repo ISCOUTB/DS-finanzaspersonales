@@ -139,7 +139,7 @@ class PrincipalPageState extends State<PrincipalPage>
 
     return PieChartData(
       sectionsSpace: 2,
-      centerSpaceRadius: 60,
+      centerSpaceRadius: 55,
       startDegreeOffset: -90,
       sections: [
         PieChartSectionData(
@@ -149,9 +149,9 @@ class PrincipalPageState extends State<PrincipalPage>
               total == 0
                   ? ''
                   : '${(ingresos / total * 100).toStringAsFixed(1)}%',
-          radius: 70,
+          radius: 69,
           titleStyle: const TextStyle(
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             shadows: [
@@ -170,16 +170,16 @@ class PrincipalPageState extends State<PrincipalPage>
                     color: ingresoColor,
                     label: 'Ingresos',
                   ),
-          badgePositionPercentageOffset: .92,
+          badgePositionPercentageOffset: .7,
         ),
         PieChartSectionData(
           color: gastoColor,
           value: gastos,
           title:
               total == 0 ? '' : '${(gastos / total * 100).toStringAsFixed(1)}%',
-          radius: 70,
+          radius: 69,
           titleStyle: const TextStyle(
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             shadows: [
@@ -198,7 +198,7 @@ class PrincipalPageState extends State<PrincipalPage>
                     color: gastoColor,
                     label: 'Gastos',
                   ),
-          badgePositionPercentageOffset: .92,
+          badgePositionPercentageOffset: .65,
         ),
       ],
       borderData: FlBorderData(show: false),
@@ -217,16 +217,16 @@ class PrincipalPageState extends State<PrincipalPage>
       children: [
         CircleAvatar(
           backgroundColor: color.withValues(alpha: (255 * 0.15)),
-          radius: 18,
+          radius: 10,
           child: Icon(icon, color: color, size: 22),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 1),
         Text(
           label,
           style: TextStyle(
             color: color,
             fontWeight: FontWeight.w600,
-            fontSize: 12,
+            fontSize: 11,
           ),
         ),
       ],
@@ -329,7 +329,7 @@ class PrincipalPageState extends State<PrincipalPage>
                     Icon(Icons.trending_up, color: Colors.green, size: 30),
                     SizedBox(width: 20),
                     Text(
-                      'Ingresos',
+                      'ingresos',
                       style: TextStyle(fontSize: 24, color: Colors.white),
                     ),
                   ],
@@ -361,37 +361,33 @@ class PrincipalPageState extends State<PrincipalPage>
   @override
   Widget build(BuildContext context) {
     final balance = _calculateBalance();
-    // Colores originales
     const fondoHeader = Color(0xff368983);
-    const fondoCard = Color.fromARGB(
-      225,
-      47,
-      125,
-      121,
-    ); // Color original de la tarjeta
+    const fondoCard = Color.fromARGB(225, 47, 125, 121);
     const fondoBalance = Color(0xFFF8F6FF);
-    const colorTextoBalance = Color(0xff368983);
-    const colorIngresos = Color(0xFF4CAF50); // Verde original
-    const colorGastos = Color(0xFFE57373); // Rojo original
+    const colorIngresos = Color(0xFF4CAF50);
+    const colorGastos = Color(0xFFE57373);
 
     return Scaffold(
       backgroundColor: fondoBalance,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              height: 240,
-              decoration: const BoxDecoration(
-                color: fondoHeader,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Padding(
+            // Usar Stack para superponer tarjeta de balance sobre el header
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Header
+                Container(
+                  width: double.infinity,
+                  height: 180,
+                  decoration: const BoxDecoration(
+                    color: fondoHeader,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Padding(
                     padding: const EdgeInsets.only(top: 35, left: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,218 +411,225 @@ class PrincipalPageState extends State<PrincipalPage>
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            Transform.translate(
-              offset: const Offset(0, -130),
-              child: Container(
-                height: 170,
-                width: MediaQuery.of(context).size.width * 0.9,
-                decoration: BoxDecoration(
-                  color: fondoCard,
-                  borderRadius: BorderRadius.circular(15),
                 ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Total Balance',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: const Icon(
-                              Icons.arrow_downward,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
+                
+                // Tarjeta de balance posicionada sobre el header
+                Positioned(
+                  top: 120, // Ajusta esta posición según necesites
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      height: 170,
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      decoration: BoxDecoration(
+                        color: fondoCard,
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                    ),
-                    const SizedBox(height: 7),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 15),
-                      child: Row(
-                        children: [
-                          Text(
-                            '${balance['balance']?.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 25,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 25),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildBalanceItem(
-                            icon: Icons.arrow_upward,
-                            title: 'Ingresos',
-                            amount:
-                                balance['ingresos']?.toStringAsFixed(2) ??
-                                '0.00',
-                            isIncome: true,
-                            color: colorIngresos,
-                          ),
-                          _buildBalanceItem(
-                            icon: Icons.arrow_downward,
-                            title: 'Gastos',
-                            amount:
-                                balance['gastos']?.toStringAsFixed(2) ??
-                                '-0.00',
-                            isIncome: false,
-                            color: colorGastos,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Transform.translate(
-              offset: const Offset(0, -110),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children:
-                      ['día', 'semana', 'mes', 'año'].map((filter) {
-                        bool isSelected = _selectedFilter == filter;
-                        return GestureDetector(
-                          onTap: () async {
-                            setState(() {
-                              _selectedFilter = filter;
-                            });
-                            await cargarTransacciones(); // <-- Esto recarga los datos cada vez que cambias el filtro
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  isSelected ? fondoCard : Colors.transparent,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              filter,
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.grey,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                ),
-              ),
-            ),
-            Transform.translate(
-              offset: const Offset(0, -110),
-              child: Container(
-                height: 390,
-                width: MediaQuery.of(context).size.width * 0.99,
-                margin: const EdgeInsets.only(bottom: 32),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(32),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: (20)),
-                      blurRadius: 22,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                  border: Border.all(
-                    color: fondoCard.withValues(alpha: (18)),
-                    width: 1.2,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      height: 120,
-                      child: PieChart(
-                        generatePieChartData(),
-                        swapAnimationDuration: const Duration(
-                          milliseconds: 900,
-                        ),
-                        swapAnimationCurve: Curves.easeInOutCubic,
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 0, bottom: 2),
                       child: Column(
                         children: [
-                          const Text(
-                            'Total',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.black54,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.5,
+                          // Contenido de la tarjeta de balance sin cambios
+                          const SizedBox(height: 10),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Total Balance',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {},
+                                  child: const Icon(
+                                    Icons.arrow_downward,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '', // Aquí puedes poner el valor real si lo deseas
-                            style: TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                              color: colorTextoBalance, // Esto no puede ser const si colorTextoBalance no lo es
-                              letterSpacing: 0.5,
+                          const SizedBox(height: 7),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 15),
+                            child: Row(
+                              children: [
+                                Text(
+                                  '${balance['balance']?.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 25,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 25),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildBalanceItem(
+                                  icon: Icons.arrow_upward,
+                                  title: 'Ingresos',
+                                  amount:
+                                      balance['ingresos']?.toStringAsFixed(2) ?? '0.00',
+                                  isIncome: true,
+                                  color: colorIngresos,
+                                ),
+                                _buildBalanceItem(
+                                  icon: Icons.arrow_downward,
+                                  title: 'Gastos',
+                                  amount:
+                                      balance['gastos']?.toStringAsFixed(2) ?? '-0.00',
+                                  isIncome: false,
+                                  color: colorGastos,
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        top: 18,
-                        left: 16,
-                        right: 16,
-                        bottom: 16,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildLegendItem(
-                            color: colorIngresos,
-                            label: 'Ingresos',
-                            icon: Icons.arrow_upward,
-                          ),
-                          _buildLegendItem(
-                            color: colorGastos,
-                            label: 'Gastos',
-                            icon: Icons.arrow_downward,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
+              ],
+            ),
+            
+            // Añadir espacio para compensar por la tarjeta que sobresale
+            const SizedBox(height: 110),
+            
+            // El resto de los widgets
+            // Filtros
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: ['día', 'semana', 'mes', 'año'].map((filter) {
+                  bool isSelected = _selectedFilter == filter;
+                  return GestureDetector(
+                    onTap: () async {
+                      setState(() {
+                        _selectedFilter = filter;
+                      });
+                      await cargarTransacciones();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected ? fondoCard : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        filter,
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.grey,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            
+            // Gráfico de balance
+            Container(
+              margin: const EdgeInsets.fromLTRB(8, 20, 8, 20),
+              height: 350,
+              width: MediaQuery.of(context).size.width * 0.97,
+              clipBehavior: Clip.none, // Asegura que el contenido no se desborde
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+                border: Border.all(
+                  color: fondoCard.withValues(alpha: 0.1),
+                  width: 1.0,
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 190,
+                    child: PieChart(
+                      generatePieChartData(),
+                      swapAnimationDuration: const Duration(milliseconds: 900),
+                      swapAnimationCurve: Curves.easeInOutCubic,
+                    ),
+                  ),
+                  //const SizedBox(height: 20),
+                  /*Padding(
+                    padding: const EdgeInsets.only(top: 0, bottom: 2),
+                    child: Column(
+                      children: [
+                        const Text(
+                          '',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '', // Aquí puedes poner el valor real si lo deseas
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                colorTextoBalance, // Esto no puede ser const si colorTextoBalance no lo es
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),*/
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 20,
+                      left: 16,
+                      right: 16,
+                      bottom: 16,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildLegendItem(
+                          color: colorIngresos,
+                          label: 'Ingresos',
+                          icon: Icons.arrow_upward,
+                        ),
+                        _buildLegendItem(
+                          color: colorGastos,
+                          label: 'Gastos',
+                          icon: Icons.arrow_downward,
+                        ),
+                      ],
+                    ),
+                  ),
+                  //const SizedBox(height: 30),
+                ],
               ),
             ),
             // Eliminar campo de búsqueda, filtro de fechas y lista filtrada de la principal
@@ -695,9 +698,9 @@ class PrincipalPageState extends State<PrincipalPage>
           width: 22,
           height: 22,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: (46)),
+            color: color.withValues(alpha: 0.18),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: color.withValues(alpha: (13)), width: 1),
+            border: Border.all(color: color.withValues(alpha: 0.05), width: 1),
           ),
           child: Center(child: Icon(icon, color: color, size: 18)),
         ),

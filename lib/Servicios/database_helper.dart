@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
+  Database? _testDatabase;
   final _logger = Logger('DatabaseHelper');
 
   factory DatabaseHelper() => _instance;
@@ -14,6 +15,9 @@ class DatabaseHelper {
   DatabaseHelper._internal();
 
   Future<Database> get database async {
+    if (_testDatabase != null) {
+      return _testDatabase!; // Usar base de datos de prueba si está configurada
+    }
     _database ??= await _initDatabase();
     return _database!;
   }
@@ -132,5 +136,15 @@ class DatabaseHelper {
       _logger.severe('Error en getTransaccionesPorAnio: $e');
       return [];
     }
+  }
+
+  // Método para configurar base de datos de prueba
+  void setTestDatabase(Database testDb) {
+    _testDatabase = testDb;
+  }
+
+  // Método para limpiar configuración de prueba
+  void clearTestDatabase() {
+    _testDatabase = null;
   }
 }
