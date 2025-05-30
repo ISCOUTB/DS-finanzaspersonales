@@ -25,6 +25,7 @@ void main() {
     expect(find.text('Usuario'), findsOneWidget);
     // Verifica que se muestre el balance
     expect(find.text('Total Balance'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 
   testWidgets('PrincipalPage muestra filtros de periodo', (WidgetTester tester) async {
@@ -38,6 +39,7 @@ void main() {
     expect(find.text('SEMANA'), findsOneWidget);
     expect(find.text('MES'), findsOneWidget);
     expect(find.text('AÑO'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 
   testWidgets('PrincipalPage muestra gráfico de pastel', (WidgetTester tester) async {
@@ -48,6 +50,7 @@ void main() {
     );
     // Verifica que el gráfico de pastel esté presente
     expect(find.byWidgetPredicate((widget) => widget.runtimeType.toString() == 'PieChart'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 
   testWidgets('PrincipalPage muestra botón para agregar transacción', (WidgetTester tester) async {
@@ -63,5 +66,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Gastos'), findsOneWidget);
     expect(find.text('Ingresos'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 }
