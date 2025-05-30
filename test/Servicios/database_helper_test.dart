@@ -5,12 +5,10 @@ import 'package:finanse_tracker/Modelos/categoria.dart';
 import 'package:finanse_tracker/Servicios/database_helper.dart';
 
 void main() {
-  // Inicializar sqflite para pruebas con FFI
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
 
   final dbHelper = DatabaseHelper();
-
   final testCategoria = Categoria(
     nombre: 'TestCategoria',
     tipo: 'ingreso',
@@ -22,11 +20,7 @@ void main() {
     tipo: 'ingreso',
     monto: 123.45,
     fecha: DateTime(2024, 5, 26, 12, 0),
-    categoria: Categoria(
-      nombre: 'TestCategoria',
-      tipo: 'ingreso',
-      icono: '💡',
-    ),
+    categoria: Categoria(nombre: 'TestCategoria', tipo: 'ingreso', icono: '💡'),
     descripcion: 'Test transacción',
   );
 
@@ -34,18 +28,21 @@ void main() {
     await dbHelper.deleteAllTransacciones();
   });
 
-  test('insertTransaccion y getTransacciones funcionan correctamente', () async {
-    await dbHelper.insertTransaccion(testTransaccion);
-    final transacciones = await dbHelper.getTransacciones();
-    expect(transacciones, isNotEmpty);
-    final t = transacciones.first;
-    expect(t.id, testTransaccion.id);
-    expect(t.tipo, testTransaccion.tipo);
-    expect(t.monto, testTransaccion.monto);
-    expect(t.fecha, testTransaccion.fecha);
-    expect(t.categoria.nombre, testTransaccion.categoria.nombre);
-    expect(t.descripcion, testTransaccion.descripcion);
-  });
+  test(
+    'insertTransaccion y getTransacciones funcionan correctamente',
+    () async {
+      await dbHelper.insertTransaccion(testTransaccion);
+      final transacciones = await dbHelper.getTransacciones();
+      expect(transacciones, isNotEmpty);
+      final t = transacciones.first;
+      expect(t.id, testTransaccion.id);
+      expect(t.tipo, testTransaccion.tipo);
+      expect(t.monto, testTransaccion.monto);
+      expect(t.fecha, testTransaccion.fecha);
+      expect(t.categoria.nombre, testTransaccion.categoria.nombre);
+      expect(t.descripcion, testTransaccion.descripcion);
+    },
+  );
 
   test('updateTransaccion actualiza correctamente', () async {
     await dbHelper.insertTransaccion(testTransaccion);
@@ -112,5 +109,14 @@ void main() {
     expect(result2023.first.id, '2023-id');
     expect(result2024.length, 1);
     expect(result2024.first.id, '2024-id');
+  });
+
+  // Nueva prueba para manejo de errores en getTransaccionesPorAnio
+  test('getTransaccionesPorAnio maneja errores correctamente', () async {
+    final db = await dbHelper.database;
+    await db.close(); // Forzar error cerrando la base de datos
+
+    final result = await dbHelper.getTransaccionesPorAnio(2023);
+    expect(result, isEmpty);
   });
 }
