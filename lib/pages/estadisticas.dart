@@ -46,14 +46,24 @@ class EstadisticasPageState extends State<EstadisticasPage>
     super.didChangeDependencies();
     cargarDatos(); // Recargar datos al navegar a la página
   }
-
   Future<void> cargarDatos() async {
-    await _gestor.cargarTransacciones();
-    if (mounted) {
-      setState(() {
-        _transacciones = _gestor.transacciones;
-        _actualizarGraficos(); // Asumiendo que tienes este método
-      });
+    try {
+      await _gestor.cargarTransacciones();
+      if (mounted) {
+        setState(() {
+          _transacciones = _gestor.transacciones;
+          _actualizarGraficos(); // Asumiendo que tienes este método
+        });
+      }
+    } catch (e) {
+      // Manejar errores silenciosamente o mostrar un mensaje de error
+      if (mounted) {
+        setState(() {
+          _transacciones = []; // Lista vacía en caso de error
+        });
+      }
+      // Opcionalmente, podrías mostrar un SnackBar o log el error
+      print('Error cargando datos: $e');
     }
   }
 
