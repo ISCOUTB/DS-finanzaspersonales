@@ -268,7 +268,7 @@ void main() {
                 context,
                 MaterialPageRoute(builder: (_) => FormIngresos()),
               );
-              navigatorPopped = true;
+              navigatorPopped = result == true; // Usar la variable
             },
             child: Text('Abrir Form'),
           ),

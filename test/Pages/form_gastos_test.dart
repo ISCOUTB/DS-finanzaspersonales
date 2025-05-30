@@ -8,24 +8,25 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  
+
   // Necesario para tests con sqflite en entorno no-Android/iOS
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
 
   // Categorías de prueba - usar las mismas que CategoriaService
   final List<Categoria> categoriasTest = CategoriaService.getCategoriasGastos();
-  final categoriaComida = categoriasTest.first; // Asumimos que hay al menos una categoría
+  final categoriaComida =
+      categoriasTest.first; // Asumimos que hay al menos una categoría
 
   // Helper para construir el widget FormGastos
   Widget buildTestableWidget({Transaccion? transaccion}) {
-    return MaterialApp(
-      home: FormGastos(transaccion: transaccion),
-    );
+    return MaterialApp(home: FormGastos(transaccion: transaccion));
   }
 
   group('FormGastos - Renderizado de UI', () {
-    testWidgets('Renderiza correctamente el formulario vacío', (WidgetTester tester) async {
+    testWidgets('Renderiza correctamente el formulario vacío', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
@@ -36,36 +37,46 @@ void main() {
       expect(find.text('Fecha'), findsOneWidget);
       expect(find.text('Nombre'), findsOneWidget);
       expect(find.text('COP'), findsOneWidget);
-      
+
       // Verificar controles
       expect(find.byType(DropdownButtonFormField<Categoria>), findsOneWidget);
-      expect(find.byType(TextFormField), findsNWidgets(2)); // Monto y Descripción
+      expect(
+        find.byType(TextFormField),
+        findsNWidgets(2),
+      ); // Monto y Descripción
       expect(find.byIcon(Icons.calendar_today), findsOneWidget);
       expect(find.widgetWithText(ElevatedButton, 'Crear'), findsOneWidget);
       expect(find.widgetWithText(TextButton, 'Cancelar'), findsOneWidget);
     });
 
-    testWidgets('Renderiza correctamente el formulario con transacción existente', (WidgetTester tester) async {
-      final transaccionExistente = Transaccion(
-        id: '123',
-        tipo: 'egreso',
-        monto: 150.75,
-        fecha: DateTime(2024, 7, 10),
-        categoria: categoriaComida,
-        descripcion: 'Almuerzo de trabajo',
-      );
+    testWidgets(
+      'Renderiza correctamente el formulario con transacción existente',
+      (WidgetTester tester) async {
+        final transaccionExistente = Transaccion(
+          id: '123',
+          tipo: 'egreso',
+          monto: 150.75,
+          fecha: DateTime(2024, 7, 10),
+          categoria: categoriaComida,
+          descripcion: 'Almuerzo de trabajo',
+        );
 
-      await tester.pumpWidget(buildTestableWidget(transaccion: transaccionExistente));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          buildTestableWidget(transaccion: transaccionExistente),
+        );
+        await tester.pumpAndSettle();
 
-      // Verificar que los datos se cargan correctamente
-      expect(find.text('150.75'), findsOneWidget);
-      expect(find.text('Almuerzo de trabajo'), findsOneWidget);
-      expect(find.text('10 julio 2024'), findsOneWidget);
-      expect(find.text(categoriaComida.nombre), findsAtLeastNWidgets(1));
-    });
+        // Verificar que los datos se cargan correctamente
+        expect(find.text('150.75'), findsOneWidget);
+        expect(find.text('Almuerzo de trabajo'), findsOneWidget);
+        expect(find.text('10 julio 2024'), findsOneWidget);
+        expect(find.text(categoriaComida.nombre), findsAtLeastNWidgets(1));
+      },
+    );
 
-    testWidgets('Muestra la categoría con ícono en el dropdown', (WidgetTester tester) async {
+    testWidgets('Muestra la categoría con ícono en el dropdown', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
@@ -76,7 +87,9 @@ void main() {
   });
 
   group('FormGastos - Validación de Formulario', () {
-    testWidgets('Muestra errores de validación para campos vacíos', (WidgetTester tester) async {
+    testWidgets('Muestra errores de validación para campos vacíos', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
@@ -104,7 +117,9 @@ void main() {
       expect(find.text('Por favor ingresa una descripción'), findsNothing);
     });
 
-    testWidgets('Valida campo de descripción vacío', (WidgetTester tester) async {
+    testWidgets('Valida campo de descripción vacío', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
@@ -138,7 +153,9 @@ void main() {
   });
 
   group('FormGastos - Interacciones de UI', () {
-    testWidgets('Permite cambiar la categoría en el dropdown', (WidgetTester tester) async {
+    testWidgets('Permite cambiar la categoría en el dropdown', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
@@ -174,7 +191,9 @@ void main() {
       expect(find.byType(FormGastos), findsOneWidget);
     });
 
-    testWidgets('Permite ingresar datos en campos de texto', (WidgetTester tester) async {
+    testWidgets('Permite ingresar datos en campos de texto', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
@@ -189,39 +208,51 @@ void main() {
       expect(find.text('Compra de supermercado'), findsOneWidget);
     });
 
-    testWidgets('Campos de texto mantienen el foco correctamente', (WidgetTester tester) async {
+    testWidgets('Campos de texto mantienen el foco correctamente', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
       final montoField = find.byType(TextFormField).first;
-      
+
       // Hacer tap en el campo de monto
       await tester.tap(montoField);
       await tester.pump();
 
       // Verificar que el campo tiene foco
-      expect(WidgetsBinding.instance.focusManager.primaryFocus?.hasFocus, isTrue);
+      expect(
+        WidgetsBinding.instance.focusManager.primaryFocus?.hasFocus,
+        isTrue,
+      );
     });
   });
 
   group('FormGastos - Navegación y Botones', () {
-    testWidgets('Botón Cancelar cierra el formulario', (WidgetTester tester) async {
+    testWidgets('Botón Cancelar cierra el formulario', (
+      WidgetTester tester,
+    ) async {
       bool navigatorPopped = false;
-      
-      await tester.pumpWidget(MaterialApp(
-        home: Builder(
-          builder: (context) => ElevatedButton(
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => FormGastos()),
-              );
-              navigatorPopped = true;
-            },
-            child: Text('Abrir Form'),
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder:
+                (context) => ElevatedButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => FormGastos()),
+                    );
+                    navigatorPopped =
+                        result ==
+                        null; // Usar result para verificar cancelación
+                  },
+                  child: Text('Abrir Form'),
+                ),
           ),
         ),
-      ));
+      );
 
       // Abrir el formulario
       await tester.tap(find.text('Abrir Form'));
@@ -289,7 +320,9 @@ void main() {
       expect(find.text(categoriaComida.nombre), findsAtLeastNWidgets(1));
     });*/
 
-    testWidgets('Formulario de edición permite modificar datos', (WidgetTester tester) async {
+    testWidgets('Formulario de edición permite modificar datos', (
+      WidgetTester tester,
+    ) async {
       final transaccionExistente = Transaccion(
         id: 'test-id',
         tipo: 'egreso',
@@ -299,19 +332,26 @@ void main() {
         descripcion: 'Gasto antiguo',
       );
 
-      await tester.pumpWidget(buildTestableWidget(transaccion: transaccionExistente));
+      await tester.pumpWidget(
+        buildTestableWidget(transaccion: transaccionExistente),
+      );
       await tester.pumpAndSettle();
 
       // Modificar datos
       await tester.enterText(find.byType(TextFormField).first, '85.0');
-      await tester.enterText(find.byType(TextFormField).last, 'Gasto actualizado');
+      await tester.enterText(
+        find.byType(TextFormField).last,
+        'Gasto actualizado',
+      );
       await tester.pump();
 
       expect(find.text('85.0'), findsOneWidget);
       expect(find.text('Gasto actualizado'), findsOneWidget);
     });
 
-    testWidgets('Maneja categoría personalizada correctamente', (WidgetTester tester) async {
+    testWidgets('Maneja categoría personalizada correctamente', (
+      WidgetTester tester,
+    ) async {
       final categoriaPersonalizada = Categoria(
         nombre: 'CategoríaPersonalizada',
         tipo: 'egreso',
@@ -327,7 +367,9 @@ void main() {
         descripcion: 'Gasto con categoría personalizada',
       );
 
-      await tester.pumpWidget(buildTestableWidget(transaccion: transaccionConCategoriaPersonalizada));
+      await tester.pumpWidget(
+        buildTestableWidget(transaccion: transaccionConCategoriaPersonalizada),
+      );
       await tester.pumpAndSettle();
 
       // Verificar que la categoría personalizada se muestra
@@ -337,7 +379,9 @@ void main() {
   });
 
   group('FormGastos - Formato y Presentación', () {
-    testWidgets('Formato de fecha se muestra correctamente', (WidgetTester tester) async {
+    testWidgets('Formato de fecha se muestra correctamente', (
+      WidgetTester tester,
+    ) async {
       final fechaEspecifica = DateTime(2024, 12, 25); // 25 de diciembre
       final transaccion = Transaccion(
         id: 'test',
@@ -354,7 +398,9 @@ void main() {
       expect(find.text('25 diciembre 2024'), findsOneWidget);
     });
 
-    testWidgets('Muestra correctamente iconos de categorías', (WidgetTester tester) async {
+    testWidgets('Muestra correctamente iconos de categorías', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
@@ -371,7 +417,9 @@ void main() {
   });
 
   group('FormGastos - Casos Edge', () {
-    testWidgets('Maneja monto con decimales correctamente', (WidgetTester tester) async {
+    testWidgets('Maneja monto con decimales correctamente', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
@@ -383,19 +431,26 @@ void main() {
       expect(find.text('Test decimal'), findsOneWidget);
     });
 
-    testWidgets('Maneja descripción con caracteres especiales', (WidgetTester tester) async {
+    testWidgets('Maneja descripción con caracteres especiales', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextFormField).first, '50');
-      await tester.enterText(find.byType(TextFormField).last, 'Café & té - 100%');
+      await tester.enterText(
+        find.byType(TextFormField).last,
+        'Café & té - 100%',
+      );
       await tester.pump();
 
       expect(find.text('50'), findsOneWidget);
       expect(find.text('Café & té - 100%'), findsOneWidget);
     });
 
-    testWidgets('Maneja fecha límite correctamente', (WidgetTester tester) async {
+    testWidgets('Maneja fecha límite correctamente', (
+      WidgetTester tester,
+    ) async {
       final fechaLimite = DateTime(2100, 12, 31);
       final transaccion = Transaccion(
         id: 'test',
@@ -451,7 +506,9 @@ void main() {
       expect(find.byType(DropdownButtonFormField), findsOneWidget);
     });*/
 
-    testWidgets('Botones mantienen tamaño apropiado', (WidgetTester tester) async {
+    testWidgets('Botones mantienen tamaño apropiado', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestableWidget());
       await tester.pumpAndSettle();
 

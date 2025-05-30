@@ -541,7 +541,7 @@ class PrincipalPageState extends State<PrincipalPage>
               ),
             ),
             Transform.translate(
-              offset: const Offset(0, -90),
+              offset: const Offset(0, -110),
               child: Container(
                 height: 390,
                 width: MediaQuery.of(context).size.width * 0.99,
@@ -607,7 +607,7 @@ class PrincipalPageState extends State<PrincipalPage>
                         top: 18,
                         left: 16,
                         right: 16,
-                        bottom: 0,
+                        bottom: 16,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:finanse_tracker/pages/user_page.dart';
-import 'package:finanse_tracker/pages/registro_pages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'dart:io';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:finanse_tracker/pages/categorias_pages.dart';
-import 'package:finanse_tracker/pages/categoria_form.dart';
-import 'package:finanse_tracker/Modelos/categoria.dart';
-import 'package:finanse_tracker/Modelos/categoria_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -11,21 +8,18 @@ void main() {
   group('CategoriasPage Widget', () {
     setUp(() {
       // Limpia las categorías personalizadas si existen
-      if (CategoriaService.getCategorias is! Null) {
-        // Si tienes una lista personalizada, límpiala aquí
-        // CategoriaService.categoriasPersonalizadas.clear();
-      }
+      // CategoriaService.limpiarCategoriasPersonalizadas();
     });
 
     testWidgets('Renderiza la lista de categorías', (
       WidgetTester tester,
     ) async {
       // Agrega una categoría personalizada para la prueba
-      final categoria = Categoria(
-        nombre: 'TestCat',
-        tipo: 'ingreso',
-        icono: '💡',
-      );
+      // final categoria = Categoria(
+      //   nombre: 'TestCat',
+      //   tipo: 'ingreso',
+      //   icono: '💡',
+      // );
       // Si tienes una lista personalizada, agrégala ahí
       // CategoriaService.categoriasPersonalizadas.add(categoria);
 
@@ -53,11 +47,11 @@ void main() {
       'No permite editar una categoría predefinida y muestra SnackBar',
       (WidgetTester tester) async {
         // Usa una categoría predefinida
-        final categoria = Categoria(
-          nombre: 'Alimentación',
-          tipo: 'egreso',
-          icono: '🍔',
-        );
+        // final categoria = Categoria(
+        //   nombre: 'Alimentación',
+        //   tipo: 'egreso',
+        //   icono: '🍔',
+        // );
 
         await tester.pumpWidget(MaterialApp(home: CategoriasPage()));
 

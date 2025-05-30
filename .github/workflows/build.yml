@@ -129,5 +129,3 @@ jobs:
           args: >
             -Dsonar.verbose=true
             -Dsonar.qualitygate.wait=false
-
-#h

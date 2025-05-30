@@ -16,7 +16,7 @@ class Transferhistory extends StatefulWidget {
 class _TransferhistoryState extends State<Transferhistory> {
   final GestorFinanzas _gestorFinanzas = GestorFinanzas();
   String _filtroActual = 'Todas';
-  List<Transaccion> _transacciones = [];
+  //List<Transaccion> _transacciones = [];
   String _searchQuery = '';
   DateTimeRange? _selectedDateRange;
 
@@ -29,7 +29,7 @@ class _TransferhistoryState extends State<Transferhistory> {
   Future<void> _cargarTransacciones() async {
     await _gestorFinanzas.cargarTransacciones();
     setState(() {
-      _transacciones = _filtrarTransacciones();
+      
     });
   }
 
@@ -146,7 +146,7 @@ class _TransferhistoryState extends State<Transferhistory> {
       // Usa el método eliminarTransaccion del gestor para eliminar correctamente en BD y en memoria
       await _gestorFinanzas.eliminarTransaccion(transaccion.id);
       setState(() {
-        _transacciones = _filtrarTransacciones();
+        //_transacciones = _filtrarTransacciones();
       });
       // Notificar a la pantalla principal para recargar los datos
       PrincipalPage.globalKey.currentState?.cargarTransacciones();

@@ -317,7 +317,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
     );
   }
 
-  Widget _buildPieChartTotal(
+  /*Widget _buildPieChartTotal(
     Map<String, double> data,
     String label,
     Color color,
@@ -371,7 +371,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
         ),
       ),
     );
-  }
+  }*/
 
   Widget _buildCategoryIndicators(
     Map<String, double> data,
@@ -474,13 +474,13 @@ class EstadisticasPageState extends State<EstadisticasPage>
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
 
   // Helper para abreviar meses en español
-  String _mesAbreviado(int mes) {
+  /*String _mesAbreviado(int mes) {
     const meses = [
       'Ene',
       'Feb',
@@ -496,7 +496,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
       'Dic',
     ];
     return meses[mes - 1];
-  }
+  }*/
 
   double _calcularIntervaloY() {
     final maxIngreso =
@@ -527,7 +527,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
 
     _calcularTotalesBarras(filtradas);
 
-    final maxIngreso =
+    /*final maxIngreso =
         _totalesIngresos.isNotEmpty
             ? _totalesIngresos.reduce((a, b) => a > b ? a : b)
             : 0.0;
@@ -535,7 +535,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
         _totalesEgresos.isNotEmpty
             ? _totalesEgresos.reduce((a, b) => a > b ? a : b)
             : 0.0;
-    final maxY = (maxIngreso > maxEgreso ? maxIngreso : maxEgreso) * 1.2;
+    final maxY = (maxIngreso > maxEgreso ? maxIngreso : maxEgreso) * 1.2;*/
 
     return DefaultTabController(
       length: 3, // Cambia a 3 pestañas
@@ -870,7 +870,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
   }
 
   // Nuevo: Widget para filtro tipo "pill"
-  Widget _buildFiltroPill(FiltroTiempo filtro, String label) {
+  /*Widget _buildFiltroPill(FiltroTiempo filtro, String label) {
     final bool selected = _filtroSeleccionado == filtro;
     return GestureDetector(
       onTap: () {
@@ -896,7 +896,7 @@ class EstadisticasPageState extends State<EstadisticasPage>
         ),
       ),
     );
-  }
+  }*/
 
   // Nuevo: Gráfico de líneas con fondo degradado y solo una línea
   LineChartData _generarLineChartDataEstiloImagen() {
